@@ -1,0 +1,1884 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tech Note Tool | Twin Pillars</title>
+
+<style>
+/* --- Twin Pillars Branding --- */
+body {
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  margin: 20px;
+  background: #f7f9fb;
+  color: #333;
+}
+.card {
+  max-width: 900px;
+  margin: auto;
+  background: #fff;
+  padding: 30px;
+  border-radius: 8px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+  box-sizing: border-box;
+}
+
+/* Header & Logo */
+.header-logo {
+  text-align: center;
+  margin-bottom: 10px;
+}
+.header-logo img {
+  max-width: 180px;
+  height: auto;
+}
+h2 {
+  text-align: center;
+  color: #1e4b85; /* Twin Pillars Dark Blue */
+  margin-top: 0;
+  margin-bottom: 5px;
+  font-weight: bold;
+}
+#draftStatus {
+  text-align: center;
+  color: #777;
+  margin-bottom: 20px;
+}
+
+/* Form Elements */
+label {
+  font-weight: bold;
+  display: block;
+  margin-top: 18px;
+  color: #1e4b85;
+  font-size: 14px;
+}
+input, textarea, select {
+  width: 100%;
+  padding: 12px;
+  font-size: 16px;
+  margin-top: 6px;
+  box-sizing: border-box;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  background: #fafbfc;
+  font-family: inherit;
+  transition: border-color 0.2s;
+}
+input:focus, textarea:focus, select:focus {
+  outline: none;
+  border-color: #c89b53; /* Twin Pillars Gold */
+  box-shadow: 0 0 5px rgba(200, 155, 83, 0.3);
+  background: #fff;
+}
+textarea {
+  min-height: 90px;
+  white-space: pre-wrap;
+  overflow-wrap: break-word;
+  resize: vertical;
+}
+
+/* Buttons */
+button {
+  padding: 12px;
+  margin-top: 14px;
+  font-size: 16px;
+  width: 100%;
+  border: 1px solid #dcdcdc;
+  border-radius: 6px;
+  background: #f2f4f6;
+  color: #333;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.2s ease;
+}
+button:hover {
+  background: #e2e6ea;
+}
+button:active {
+  transform: scale(.98);
+}
+
+/* Mode Bar (Tabs) */
+.modebar {
+  display: flex;
+  gap: 10px;
+  margin-top: 10px;
+  flex-wrap: wrap;
+  border-bottom: 2px solid #eaeaea;
+  padding-bottom: 15px;
+  margin-bottom: 20px;
+}
+.modebar button {
+  width: auto;
+  flex: 1;
+  margin-top: 0;
+  padding: 12px 16px;
+  font-weight: bold;
+  border-color: #ccc;
+}
+.modebar button.active {
+  background: #1e4b85; /* Twin Pillars Dark Blue */
+  color: #fff;
+  border-color: #1e4b85;
+}
+
+/* Pill Bar (Quick Add Equipment) */
+.pillbar {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 10px;
+}
+.pillbar button {
+  width: auto;
+  margin-top: 0;
+  padding: 8px 12px;
+  font-size: 14px;
+  background: #fff;
+  border: 1px solid #1e4b85;
+  color: #1e4b85;
+  font-weight: bold;
+}
+.pillbar button:hover {
+  background: #f0f4f8;
+}
+
+/* Primary Action Buttons */
+#generate {
+  background: #c89b53; /* Twin Pillars Gold */
+  color: #fff;
+  border-color: #b58945;
+  font-weight: bold;
+  font-size: 1.1em;
+}
+#generate:hover { background: #b58945; }
+
+#copy {
+  background: #1e4b85;
+  color: #fff;
+  border-color: #153661;
+  font-weight: bold;
+}
+#copy:hover { background: #153661; }
+
+#clear {
+  background: #fff;
+  color: #e74c3c;
+  border-color: #e74c3c;
+  font-weight: bold;
+}
+#clear:hover { background: #fdf2f1; }
+
+.inline {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  align-items: flex-start;
+}
+.inline .grow {
+  flex: 1 1 320px;
+}
+.inline button {
+  width: auto;
+  background: #1e4b85;
+  color: #fff;
+  border: none;
+}
+
+/* Output Area */
+pre {
+  background: #fdfdfd;
+  padding: 20px;
+  white-space: pre-wrap;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  font-family: inherit;
+  font-size: 15px;
+  line-height: 1.5;
+  color: #2c3e50;
+}
+.small { font-size: 13px; opacity: .75; margin-top: 6px; }
+.hidden { display: none !important; }
+
+/* History Section */
+.history-box {
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  padding: 20px;
+  margin-top: 14px;
+  background: #fafbfc;
+}
+.history-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 10px;
+}
+.history-item {
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  background: #fff;
+  padding: 15px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.history-item:hover {
+  background: #f0f4f8;
+}
+.history-item.active {
+  border-color: #c89b53;
+  background: #fdfaf2;
+}
+.history-title {
+  font-weight: 700;
+  color: #1e4b85;
+}
+.history-sub {
+  font-size: 14px;
+  opacity: .8;
+  margin-top: 6px;
+}
+.summary-card {
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  background: #fff;
+  padding: 20px;
+  margin-top: 15px;
+}
+.summary-card h3 {
+  margin: 0 0 15px 0;
+  font-size: 18px;
+  color: #1e4b85;
+  border-bottom: 2px solid #f2f2f2;
+  padding-bottom: 10px;
+}
+.summary-row { margin-top: 10px; font-size: 15px; }
+.summary-label { font-weight: 700; color: #555; }
+hr.soft { border: none; border-top: 1px solid #e5e5e5; margin: 25px 0; }
+
+/* --- INVOICE TAB STYLING --- */
+#invoiceBuilder {
+    background: #fff; padding: 20px; border: 1px solid #eaeaea; border-radius: 8px; margin-top: 15px;
+}
+.inv-grid {
+    display: grid; grid-template-columns: 3fr 1fr; gap: 15px; align-items: center; margin-bottom: 10px;
+}
+.inv-grid input { padding: 8px; margin: 0; }
+.inv-total-row {
+    display: flex; justify-content: space-between; padding: 10px 0; font-weight: bold; border-top: 1px solid #ccc; margin-top: 15px;
+}
+
+/* Print View Formatting for Invoice */
+#printInvoiceView {
+    display: none; padding: 40px; background: #fff; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    color: #000;
+}
+.inv-header {
+    display: flex; justify-content: space-between; margin-bottom: 40px;
+}
+.inv-company h2 { margin: 0; font-size: 22px; color: #000; }
+.inv-company p { margin: 2px 0; font-size: 14px; }
+.inv-details { text-align: right; }
+.inv-title-large { font-size: 36px; color: #4a7ebb; font-weight: bold; letter-spacing: 2px; margin-bottom: 15px; }
+.inv-details p { margin: 2px 0; font-size: 14px; }
+
+.inv-addresses { display: flex; justify-content: space-between; margin-bottom: 40px; }
+.inv-bill-to h4 { margin: 0 0 5px 0; font-size: 14px; }
+.inv-bill-to p { margin: 2px 0; font-size: 14px; }
+
+.inv-table { width: 100%; border-collapse: collapse; margin-bottom: 30px; font-size: 14px; }
+.inv-table th, .inv-table td { padding: 10px; border: 1px solid #000; text-align: left; }
+.inv-table th { background: #e6eef5; color: #1e4b85; font-weight: bold; }
+.inv-table td:last-child, .inv-table th:last-child { text-align: right; width: 120px; }
+
+.inv-summary { width: 100%; display: flex; justify-content: flex-end; margin-bottom: 50px; }
+.inv-summary-box { width: 300px; }
+.inv-sum-row { display: flex; justify-content: space-between; padding: 5px 0; font-size: 14px; font-weight: bold; }
+.inv-sum-row.grand { font-size: 16px; border-top: 2px solid #000; padding-top: 10px; margin-top: 5px; }
+
+.inv-tear-off { border-top: 2px dashed #000; padding-top: 40px; margin-top: 60px; display: flex; justify-content: space-between; }
+.inv-tear-left h4 { margin: 0 0 5px 0; font-size: 18px; }
+.inv-tear-left p { margin: 2px 0; font-size: 14px; }
+
+@media print {
+    body { background: #fff; margin: 0; padding: 0; }
+    .card, .modebar, #entrySection, #historySection, #invoiceBuilder, #draftStatus, button { display: none !important; }
+    #printInvoiceView { display: block !important; width: 100%; padding: 0; }
+}
+</style>
+</head>
+
+<body>
+<div class="card">
+
+<div class="header-logo">
+  <img src="tphc_logo.png" alt="Twin Pillars Logo">
+</div>
+<h2>Field Notes Tool</h2>
+<div class="small" id="draftStatus"></div>
+
+<div class="modebar">
+  <button id="modePM" type="button" class="active">PM</button>
+  <button id="modeService" type="button">SERVICE CALL</button>
+  <button id="modeHistory" type="button">HISTORY</button>
+  <button id="modeInvoice" type="button">INVOICE</button>
+</div>
+
+<div id="entrySection">
+  <label>Location</label>
+  <input id="location" placeholder="Example: I'm at the Planet Fitness in Milwaukee on Main Street">
+
+  <div id="pmSection">
+    <label>Equipment on Site</label>
+    <textarea id="equipment" placeholder="Example: one RTU, one furnace, one unit heater, two radiant heaters"></textarea>
+
+    <div class="pillbar">
+      <button id="addRTU" type="button">+ RTU</button>
+      <button id="addF" type="button">+ Furnace</button>
+      <button id="addUH" type="button">+ Unit Heater</button>
+      <button id="addRH" type="button">+ Radiant Heater</button>
+      <button id="addEF" type="button">+ Exhaust Fan</button>
+      <button id="addMUA" type="button">+ MUA</button>
+    </div>
+
+    <label>Notes / Repairs</label>
+    <textarea id="notes" placeholder="Leave blank if everything is running good."></textarea>
+
+    <label>Parts used</label>
+    <textarea id="used" placeholder="Example: two 4l190 belts and two 20 by 24 by 2 filters"></textarea>
+
+    <label>Cost of parts</label>
+    <input id="cost" placeholder="Example: $23">
+
+    <label>Parts needed next PM</label>
+    <div class="inline">
+      <div class="grow">
+        <textarea id="next" placeholder="Tap Same if identical to Parts used"></textarea>
+      </div>
+      <button id="same" type="button">Same</button>
+    </div>
+
+    <label>Work done</label>
+    <input id="workdone">
+  </div>
+
+  <div id="serviceSection" class="hidden">
+    <label>Equipment worked on</label>
+    <textarea id="serviceEquipment" placeholder="Example: one RTU, one furnace..."></textarea>
+    
+    <div class="pillbar">
+      <button id="addServiceRTU" type="button">+ RTU</button>
+      <button id="addServiceF" type="button">+ Furnace</button>
+      <button id="addServiceUH" type="button">+ Unit Heater</button>
+      <button id="addServiceRH" type="button">+ Radiant Heater</button>
+      <button id="addServiceEF" type="button">+ Exhaust Fan</button>
+      <button id="addServiceMUA" type="button">+ MUA</button>
+    </div>
+
+    <label>Reason for call</label>
+    <textarea id="reason" placeholder="Example: No heat in lobby."></textarea>
+
+    <label>Findings / Diagnosis</label>
+    <textarea id="diagnosis" placeholder="Example: RTU1 heat exchanger is cracked."></textarea>
+
+    <label>Repairs made</label>
+    <textarea id="repairsMade" placeholder="Example: Confirmed failure and shut unit down."></textarea>
+
+    <label>Parts used</label>
+    <textarea id="serviceUsed" placeholder="Example: two 4l190 belts and one 16 by 25 by one"></textarea>
+
+    <label>Cost of parts</label>
+    <input id="serviceCost" placeholder="Example: $23">
+
+    <label>Parts needed for repair quote</label>
+    <textarea id="quoteParts" placeholder="Example: 1 GAS VALVE and 1 IGNITER"></textarea>
+
+    <label>Labor for repair quote</label>
+    <input id="quoteLabor" placeholder="Example: 3 HOURS">
+
+    <label>Recommendations / Next steps</label>
+    <textarea id="recommendations" placeholder="Example: Replace RTU1 due to cracked heat exchanger."></textarea>
+  </div>
+
+  <button id="generate" type="button">Generate Report</button>
+  <button id="copy" type="button">Copy Report</button>
+  <button id="clear" type="button">Clear Current Mode</button>
+
+  <label>Output</label>
+  <pre id="output"></pre>
+</div>
+
+<div id="historySection" class="hidden">
+  <div class="history-box">
+    <label>Customer</label>
+    <select id="historyCustomer">
+      <option value="">Select customer</option>
+    </select>
+
+    <label>Location</label>
+    <select id="historyLocation">
+      <option value="">Select location</option>
+    </select>
+
+    <div id="historyLatestWrap" class="hidden">
+      <div class="summary-card">
+        <h3>Last Time We Were On Site</h3>
+        <div id="historyLatest"></div>
+      </div>
+    </div>
+
+    <div id="historyOlderWrap" class="hidden">
+      <hr class="soft">
+      <div class="summary-card">
+        <h3>Older Visits</h3>
+        <div id="historyOlderList" class="history-list"></div>
+      </div>
+    </div>
+
+    <div id="historyFullWrap" class="hidden">
+      <hr class="soft">
+      <div class="summary-card">
+        <h3>Selected Visit</h3>
+        <pre id="historyFullReport"></pre>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="invoiceSection" class="hidden">
+    <div id="invoiceBuilder">
+        <h3 style="color:#1e4b85; margin-top:0;">Smart Invoice Generator</h3>
+        
+        <label>1. Paste Tech Notes Here</label>
+        <p style="font-size: 13px; color: #666; margin-top:2px;">Paste the exact output block from a PM or Service Call. The system will auto-read it.</p>
+        <textarea id="invPasteArea" placeholder="Paste report here..." style="min-height: 120px; background: #fffde7; border-color: #c89b53;" oninput="parsePastedNotes()"></textarea>
+
+        <hr style="border:0; border-top:1px solid #eaeaea; margin: 25px 0;">
+
+        <h4 style="margin:0 0 15px 0; color:#333;">2. Adjust Invoice Details</h4>
+
+        <div class="form-row" style="display:flex; gap:10px;">
+            <div class="input-group" style="flex:1;">
+                <label style="margin-top:0;">Invoice #</label>
+                <input type="text" id="invNum" placeholder="e.g. INV-001868">
+            </div>
+            <div class="input-group" style="flex:3;">
+                <label style="margin-top:0;">Billing Entity / Location</label>
+                <input type="text" id="invBillTo" placeholder="Auto-filled from notes above...">
+            </div>
+        </div>
+
+        <label style="margin-top: 15px; border-bottom: 2px solid #eee; padding-bottom: 5px;">Line Items & Pricing</label>
+        
+        <div class="inv-grid" style="margin-top:10px;">
+            <input type="text" id="invItem1Desc" placeholder="Work Description (Auto-filled from notes)">
+            <input type="number" id="invItem1Price" placeholder="$0.00" oninput="calcInvoice()">
+        </div>
+
+        <div class="inv-grid">
+            <input type="text" id="invItem2Desc" placeholder="Parts Used (Auto-filled from notes)">
+            <input type="number" id="invItem2Price" placeholder="$0.00" oninput="calcInvoice()">
+        </div>
+
+        <div class="inv-grid">
+            <input type="text" id="invItem3Desc" value="Labor charge (3 hours)">
+            <input type="number" id="invItem3Price" value="525.00" oninput="calcInvoice()">
+        </div>
+
+        <div class="inv-grid">
+            <input type="text" id="invItem4Desc" value="Trip charge">
+            <input type="number" id="invItem4Price" value="175.00" oninput="calcInvoice()">
+        </div>
+
+        <div class="inv-total-row">
+            <span>Subtotal:</span>
+            <span id="invSubtotalDisplay">$0.00</span>
+        </div>
+        <div class="inv-total-row" style="border-top: none; padding-top: 0; color:#555; font-size:14px;">
+            <span>Sales Tax (5.5%):</span>
+            <span id="invTaxDisplay">$0.00</span>
+        </div>
+        <div class="inv-total-row" style="color:#27ae60; font-size:18px;">
+            <span>GRAND TOTAL:</span>
+            <span id="invGrandDisplay">$0.00</span>
+        </div>
+
+        <button id="generateInvoiceBtn" style="background:#1e4b85; color:#fff; font-weight:bold; font-size:18px; margin-top:20px;" onclick="printInvoice()">Generate & Print Invoice</button>
+    </div>
+</div>
+
+</div> <div id="printInvoiceView">
+    <div class="inv-header">
+        <div class="inv-company">
+            <h2>Twin Pillars Heating & Cooling LLC</h2>
+            <p>55 Jewelers Park Drive Suite 500</p>
+            <p>Neenah, WI 54956</p>
+            <p>920-441-5916</p>
+        </div>
+        <div class="inv-details">
+            <div class="inv-title-large">INVOICE</div>
+            <p><strong>INVOICE #:</strong> <span id="pInvNum"></span></p>
+            <p><strong>DATE:</strong> <span id="pInvDate"></span></p>
+            <br>
+            <p><strong>TOTAL AMOUNT:</strong> <span id="pTotal1"></span></p>
+            <p><strong>TOTAL DUE:</strong> <span id="pTotal2"></span></p>
+        </div>
+    </div>
+
+    <div class="inv-addresses">
+        <div class="inv-bill-to">
+            <h4>BILL TO:</h4>
+            <p><strong id="pBillName"></strong></p>
+            <p id="pBillLoc"></p>
+        </div>
+        <div class="inv-bill-to">
+            <h4>SHIP TO:</h4>
+            <p><strong id="pShipName"></strong></p>
+            <p id="pShipLoc"></p>
+        </div>
+    </div>
+
+    <table class="inv-table">
+        <thead>
+            <tr>
+                <th>DESCRIPTION / MEMO</th>
+                <th>AMOUNT</th>
+            </tr>
+        </thead>
+        <tbody id="pInvTableBody">
+            </tbody>
+    </table>
+
+    <div class="inv-summary">
+        <div class="inv-summary-box">
+            <div class="inv-sum-row grand">
+                <span>TOTAL AMOUNT:</span>
+                <span id="pGrandTotal"></span>
+            </div>
+        </div>
+    </div>
+
+    <div class="inv-tear-off">
+        <div class="inv-tear-left">
+            <h4>Twin Pillars Heating & Cooling LLC</h4>
+            <p>55 Jewelers Park Drive Suite 500</p>
+            <p>Neenah, WI 54956</p>
+            <p>920-441-5916</p>
+            <br><br>
+            <p>Customer ID - Name: <span id="pBottomCust"></span></p>
+            <p>Invoice #: <span id="pBottomInv"></span></p>
+        </div>
+        <div style="width: 300px; padding-top: 20px;">
+            <div style="display:flex; justify-content:space-between; margin-bottom:15px; font-size:14px;">
+                <strong>TOTAL DUE:</strong> <span id="pBottomTotal"></span>
+            </div>
+            <div style="border-bottom: 1px solid #000; margin-bottom: 5px; height: 15px;"></div>
+            <div style="font-size:12px;">AMOUNT ENCLOSED:</div>
+        </div>
+    </div>
+</div>
+
+
+<script>
+/* ---------- basics ---------- */
+function pad2(n){
+  return String(n).padStart(2, "0");
+}
+
+function today(){
+  const d = new Date();
+  return pad2(d.getMonth() + 1) + "/" + pad2(d.getDate()) + "/" + d.getFullYear();
+}
+
+function todayDB(){
+  const d = new Date();
+  return d.getFullYear() + "-" + pad2(d.getMonth() + 1) + "-" + pad2(d.getDate());
+}
+
+const DEFAULT_PM_WORKDONE = "Changed filters/belts and verified operations of equipment";
+const DEFAULT_PM_NOTES = "All units are running good at this time.";
+const DRAFT_KEY = "hvac_note_tool_v16";
+const HISTORY_KEY = "hvac_site_history_v1";
+
+const KNOWN_FILTER_SIZES = [
+  "14X20X1",
+  "16X16X2","16X20X2","16X24X2","16X25X1","16X25X2",
+  "18X20X2","18X24X2","18X25X2",
+  "20X20X1","20X20X2","20X24X1","20X24X2","20X25X1","20X25X2","20X30X2","20X35X2",
+  "24X24X1","24X24X2","24X24X4"
+];
+
+const KNOWN_BELTS = [
+  "4L190","4L200","4L270",
+  "AX20","AX22","AX23","AX25","AX26","AX32","AX35","AX36","AX37","AX39","AX40","AX41","AX44","AX46","AX48","AX49","AX51","AX52","AX53","AX54","AX58","AX61",
+  "BX38","BX42","BX44","BX46","BX49","BX54","BX56","BX57","BX61","BX62","BX64","BX65","BX66","BX68","BX75","BX81","BX96",
+  "A20","A22","A23","A25","A26","A32","A35","A36","A37","A39","A40","A41","A44","A46","A48","A49","A51","A52","A53","A54","A58","A61",
+  "B38","B42","B44","B46","B49","B54","B56","B57","B61","B62","B64","B65","B66","B68","B75","B81","B96"
+];
+
+const NUM_MAP = {
+  zero:"0",
+  one:"1", two:"2", three:"3", four:"4", five:"5",
+  six:"6", seven:"7", eight:"8", nine:"9", ten:"10",
+  ones:"1", twos:"2", threes:"3", fours:"4", fives:"5",
+  to:"2", too:"2"
+};
+
+const EQUIP_LABELS = {
+  RTU:"Rooftop Unit",
+  F:"Furnace",
+  UH:"Unit Heater",
+  RH:"Radiant Heater",
+  EF:"Exhaust Fan",
+  MUA:"Make-Up Air Unit"
+};
+
+let currentMode = "PM";
+let currentHistoryCustomer = "";
+let currentHistoryLocation = "";
+let currentHistorySelectedIndex = 0;
+
+/* ---------- generic helpers ---------- */
+function convertNumbers(text){
+  let t = text || "";
+  Object.keys(NUM_MAP).forEach(k => {
+    const r = new RegExp("\\b" + k + "\\b", "gi");
+    t = t.replace(r, NUM_MAP[k]);
+  });
+  return t;
+}
+
+function levenshtein(a, b){
+  const m = a.length;
+  const n = b.length;
+  const dp = Array.from({length:m + 1}, () => Array(n + 1).fill(0));
+  for(let i = 0; i <= m; i++) dp[i][0] = i;
+  for(let j = 0; j <= n; j++) dp[0][j] = j;
+  for(let i = 1; i <= m; i++){
+    for(let j = 1; j <= n; j++){
+      const cost = a[i - 1] === b[j - 1] ? 0 : 1;
+      dp[i][j] = Math.min(
+        dp[i - 1][j] + 1,
+        dp[i][j - 1] + 1,
+        dp[i - 1][j - 1] + cost
+      );
+    }
+  }
+  return dp[m][n];
+}
+
+function closestMatch(value, list, maxDistance){
+  let best = value;
+  let bestScore = Infinity;
+  list.forEach(item => {
+    const d = levenshtein(value.toUpperCase(), item.toUpperCase());
+    if(d < bestScore){
+      bestScore = d;
+      best = item;
+    }
+  });
+  return bestScore <= maxDistance ? best : value;
+}
+
+function autoGrow(el){
+  if(!el) return;
+  el.style.height = "auto";
+  el.style.height = Math.max(el.scrollHeight, 90) + "px";
+}
+
+function escapeHtml(text){
+  return String(text || "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;");
+}
+
+/* ---------- location ---------- */
+function titleCaseWords(str){
+  return str
+    .split(" ")
+    .filter(Boolean)
+    .map(w => {
+      const upper = w.toUpperCase();
+      if(/^\d/.test(w)) return w;
+      if(["NW","NE","SW","SE"].includes(upper)) return upper;
+      return w.charAt(0).toUpperCase() + w.slice(1).toLowerCase();
+    })
+    .join(" ");
+}
+
+function normalizeStreetSuffix(street){
+  let s = street.trim().toLowerCase();
+  s = s.replace(/\bavenue\b/g, "Ave.");
+  s = s.replace(/\bstreet\b/g, "St.");
+  s = s.replace(/\broad\b/g, "Rd.");
+  s = s.replace(/\bdrive\b/g, "Dr.");
+  s = s.replace(/\bboulevard\b/g, "Blvd.");
+  s = s.replace(/\blane\b/g, "Ln.");
+  s = s.replace(/\bcourt\b/g, "Ct.");
+  s = s.replace(/\bplace\b/g, "Pl.");
+  s = s.replace(/\bhighway\b/g, "Hwy.");
+  return titleCaseWords(s);
+}
+
+function normalizeSiteName(name){
+  let s = (name || "").trim().toLowerCase();
+  s = s.replace(/\bthe\b/g, " ");
+  s = s.replace(/\s{2,}/g, " ").trim();
+  s = s.replace(/\btake five\b/g, "take 5");
+  s = s.replace(/\bplanet fitness\b/g, "planet fitness");
+
+  return titleCaseWords(s)
+    .replace(/\bTake 5\b/g, "Take 5")
+    .replace(/\bPlanet Fitness\b/g, "Planet Fitness");
+}
+
+function formatLocation(raw){
+  let t = (raw || "").trim().toLowerCase();
+  if(!t) return "";
+
+  t = t.replace(/[.,]/g, " ");
+  t = t.replace(/\bi am at\b/g, "");
+  t = t.replace(/\bim at\b/g, "");
+  t = t.replace(/\bi'm at\b/g, "");
+  t = t.replace(/\bwe are at\b/g, "");
+  t = t.replace(/\s{2,}/g, " ").trim();
+
+  t = t.replace(/\btake five\b/g, "take 5");
+  t = t.replace(/\bplanet fitness\b/g, "planet fitness");
+
+  let m;
+
+  m = t.match(/^(.+?)\s+in\s+(.+?)\s+on\s+(.+)$/i);
+  if(m){
+    const site = normalizeSiteName(m[1]);
+    const city = titleCaseWords(m[2].trim());
+    const street = normalizeStreetSuffix(m[3].trim());
+    return `${site} - ${city} - ${street}`;
+  }
+
+  m = t.match(/^(.+?)\s+on\s+(.+?)\s+in\s+(.+)$/i);
+  if(m){
+    const site = normalizeSiteName(m[1]);
+    const street = normalizeStreetSuffix(m[2].trim());
+    const city = titleCaseWords(m[3].trim());
+    return `${site} - ${city} - ${street}`;
+  }
+
+  m = t.match(/^(.+?)\s+in\s+(.+)$/i);
+  if(m){
+    const site = normalizeSiteName(m[1]);
+    const city = titleCaseWords(m[2].trim());
+    return `${site} - ${city}`;
+  }
+
+  return normalizeSiteName(t);
+}
+
+function getCustomerFromLocation(location){
+  const parts = String(location || "").split(" - ").map(s => s.trim()).filter(Boolean);
+  return parts.length ? parts[0] : "Unknown";
+}
+
+/* ---------- equipment parsing ---------- */
+function normalizeEquipmentSpeech(text){
+  let t = (text || "").toLowerCase();
+  t = t.replace(/\n/g, " ");
+  t = t.replace(/[–—]/g, "-");
+  t = t.replace(/\s+and\s+/g, ", ");
+  t = t.replace(/\s{2,}/g, " ").trim();
+
+  t = t.replace(/\bare\s*to\s*you\b/g, "rtu");
+  t = t.replace(/\bar\s*to\s*you\b/g, "rtu");
+  t = t.replace(/\br\s*to\s*you\b/g, "rtu");
+  t = t.replace(/\br\s*too\s*you\b/g, "rtu");
+  t = t.replace(/\br\s*two\s*you\b/g, "rtu");
+  t = t.replace(/\br\s*t\s*u\b/g, "rtu");
+  t = t.replace(/\brt\s*you\b/g, "rtu");
+  t = t.replace(/\brt\s*u\b/g, "rtu");
+  t = t.replace(/\brt\b/g, "rtu");
+  t = t.replace(/\bhour\s*to\s*you\b/g, "rtu");
+  t = t.replace(/\bone\s*hour\s*to\s*you\b/g, "1 rtu");
+  t = t.replace(/\b1\s*hour\s*to\s*you\b/g, "1 rtu");
+
+  t = t.replace(/\bfurnaces?\b/g, "furnace");
+  t = t.replace(/\bunit heaters?\b/g, "unit heater");
+  t = t.replace(/\bradiant heaters?\b/g, "radiant heater");
+  t = t.replace(/\bexhaust fans?\b/g, "exhaust fan");
+  t = t.replace(/\bmake[\s-]?up air(?: unit)?s?\b/g, "mua");
+  t = t.replace(/\brooftop units?\b/g, "rtu");
+
+  t = convertNumbers(t);
+  return t;
+}
+
+function expandEquipmentCounts(text){
+  let t = normalizeEquipmentSpeech(text);
+
+  const patterns = [
+    {re:/\b(\d+)\s*rtu\b/g, code:"RTU"},
+    {re:/\b(\d+)\s*furnace\b/g, code:"F"},
+    {re:/\b(\d+)\s*unit heater\b/g, code:"UH"},
+    {re:/\b(\d+)\s*radiant heater\b/g, code:"RH"},
+    {re:/\b(\d+)\s*exhaust fan\b/g, code:"EF"},
+    {re:/\b(\d+)\s*mua\b/g, code:"MUA"}
+  ];
+
+  const out = [];
+  patterns.forEach(p => {
+    let m;
+    while((m = p.re.exec(t)) !== null){
+      const count = parseInt(m[1], 10);
+      if(!Number.isNaN(count) && count > 0 && count < 50){
+        for(let i = 1; i <= count; i++) out.push(p.code + i);
+      }
+    }
+  });
+
+  const directMatches = [...t.matchAll(/\b(RTU|RH|UH|F|EF|MUA)\s*-?\s*(\d+)\b/gi)];
+  directMatches.forEach(m => {
+    out.push(m[1].toUpperCase() + m[2]);
+  });
+
+  const unique = [];
+  out.forEach(x => {
+    if(!unique.includes(x)) unique.push(x);
+  });
+
+  return unique.join(", ");
+}
+
+function parseEquipCodes(codeCsv){
+  return (codeCsv || "").split(",").map(s => s.trim()).filter(Boolean);
+}
+
+function expandEquipment(codeCsv){
+  const codes = parseEquipCodes(codeCsv);
+  if(!codes.length) return "Not listed";
+  return codes.map(c => {
+    const m = c.match(/^([A-Z]+)(\d+)$/);
+    if(!m) return c;
+    const label = EQUIP_LABELS[m[1]] || m[1];
+    return `${m[1]}${m[2]} (${label})`;
+  }).join("\n");
+}
+
+function firstUnitOfType(codes, type){
+  return codes.find(c => c.startsWith(type)) || null;
+}
+
+function formatEquipmentFieldValue(raw){
+  const codes = expandEquipmentCounts(raw);
+  return codes || raw;
+}
+
+/* ---------- parts parsing ---------- */
+function normalizeFilterSize(rawSize){
+  let s = (rawSize || "").toUpperCase().trim();
+  s = s.replace(/\bbuy\b/gi, "BY");
+  s = convertNumbers(s);
+  s = s.replace(/\s+BY\s+/gi, "X");
+  s = s.replace(/\s*X\s*/gi, "X");
+  s = s.replace(/\s+/g, "");
+  s = s.replace(/[^0-9X]/g, "");
+
+  const nums = s.split("X").filter(Boolean);
+  if(nums.length === 3){
+    s = `${nums[0]}X${nums[1]}X${nums[2]}`;
+  }
+
+  return closestMatch(s, KNOWN_FILTER_SIZES, 2).toUpperCase();
+}
+
+function normalizeBeltCode(rawCode){
+  let s = (rawCode || "").toUpperCase().trim();
+  s = s.replace(/\s+/g, "");
+  s = s.replace(/[-_]/g, "");
+  const m = s.match(/^(AX|BX|A|B|4L)(\d+)$/);
+  if(m){
+    const code = m[1] + m[2];
+    return closestMatch(code, KNOWN_BELTS, 1).toUpperCase();
+  }
+  return closestMatch(s, KNOWN_BELTS, 1).toUpperCase();
+}
+
+function formatPartOutput(qty, value){
+  return `${qty} - ${String(value).toUpperCase()}`;
+}
+
+function recoverConcatenatedFilter(firstNum, secondNum, thirdNum){
+  const a = String(firstNum);
+  const b = String(secondNum);
+  const c = String(thirdNum);
+
+  for(let i = 1; i < a.length; i++){
+    const qty = a.slice(0, i);
+    const firstDim = a.slice(i);
+    const candidate = `${firstDim}X${b}X${c}`;
+    const matched = closestMatch(candidate, KNOWN_FILTER_SIZES, 2);
+    if(KNOWN_FILTER_SIZES.includes(matched)){
+      return `${parseInt(qty, 10)} - ${matched}`;
+    }
+  }
+  return null;
+}
+
+function parsePartItem(item){
+  let t = item.toLowerCase().trim();
+  if(!t) return [];
+
+  t = t.replace(/\bbuy\b/g, "by");
+  t = convertNumbers(t);
+  t = t.replace(/\s{2,}/g, " ").trim();
+  t = t.replace(/\bfilters?\b/g, "").trim();
+  t = t.replace(/\bbelts?\b/g, "").trim();
+
+  let beltMatch = t.match(/^(\d+)\s+(ax|bx|a|b|4l)\s*-?\s*(\d+)$/i);
+  if(beltMatch){
+    const qty = parseInt(beltMatch[1], 10);
+    const code = normalizeBeltCode(beltMatch[2] + beltMatch[3]);
+    return [formatPartOutput(qty, code)];
+  }
+
+  beltMatch = t.match(/^(\d+)(ax|bx|a|b|4l)\s*-?\s*(\d+)$/i);
+  if(beltMatch){
+    const qty = parseInt(beltMatch[1], 10);
+    const code = normalizeBeltCode(beltMatch[2] + beltMatch[3]);
+    return [formatPartOutput(qty, code)];
+  }
+
+  beltMatch = t.match(/^(\d+)\s+(4)\s*l\s*(\d+)$/i);
+  if(beltMatch){
+    const qty = parseInt(beltMatch[1], 10);
+    const code = normalizeBeltCode(`4L${beltMatch[3]}`);
+    return [formatPartOutput(qty, code)];
+  }
+
+  let f = t;
+  f = f.replace(/\s+by\s+/g, " x ");
+  f = f.replace(/\s*x\s*/g, " x ");
+  f = f.replace(/\s{2,}/g, " ").trim();
+
+  let m = f.match(/^(\d+)\s+(\d+)\s+(\d+)\s*x\s*(\d+)$/i);
+  if(m){
+    const qty = parseInt(m[1], 10);
+    const size = normalizeFilterSize(`${m[2]}x${m[3]}x${m[4]}`);
+    return [formatPartOutput(qty, size)];
+  }
+
+  m = f.match(/^(\d+)\s+(\d+)\s*x\s*(\d+)\s*x\s*(\d+)$/i);
+  if(m){
+    const qty = parseInt(m[1], 10);
+    const size = normalizeFilterSize(`${m[2]}x${m[3]}x${m[4]}`);
+    return [formatPartOutput(qty, size)];
+  }
+
+  m = f.match(/^(\d+)x(\d+)x(\d+)x(\d+)$/i);
+  if(m){
+    const qty = parseInt(m[1], 10);
+    const size = normalizeFilterSize(`${m[2]}x${m[3]}x${m[4]}`);
+    return [formatPartOutput(qty, size)];
+  }
+
+  m = f.match(/^(\d+)\s+(\d+x\d+x\d+)$/i);
+  if(m){
+    const qty = parseInt(m[1], 10);
+    const size = normalizeFilterSize(m[2]);
+    return [formatPartOutput(qty, size)];
+  }
+
+  m = f.match(/^(\d+)\s+(\d+)\s*x\s*(\d+)$/i);
+  if(m){
+    const recovered = recoverConcatenatedFilter(m[1], m[2], m[3]);
+    if(recovered) return [recovered];
+  }
+
+  const nums = f.match(/\d+/g);
+  if(nums && nums.length === 4){
+    const qty = parseInt(nums[0], 10);
+    const size = normalizeFilterSize(`${nums[1]}x${nums[2]}x${nums[3]}`);
+    return [formatPartOutput(qty, size)];
+  }
+
+  if(nums && nums.length === 3){
+    const recovered = recoverConcatenatedFilter(nums[0], nums[1], nums[2]);
+    if(recovered) return [recovered];
+  }
+
+  const beltNums = f.match(/^(\d+)\s*(ax|bx|a|b|4l)\s*(\d+)$/i);
+  if(beltNums){
+    const qty = parseInt(beltNums[1], 10);
+    const code = normalizeBeltCode(beltNums[2] + beltNums[3]);
+    return [formatPartOutput(qty, code)];
+  }
+
+  return [item.trim().toUpperCase()];
+}
+
+function normalizeParts(text){
+  let t = (text || "").trim();
+  if(!t) return "";
+
+  t = t.replace(/\n/g, " ");
+  t = t.replace(/\s+and\s+/gi, ", ");
+  t = t.replace(/\s{2,}/g, " ").trim();
+
+  const items = t.split(/[,;]+/).map(s => s.trim()).filter(Boolean);
+  const out = [];
+
+  items.forEach(item => {
+    parsePartItem(item).forEach(x => {
+      const cleaned = String(x)
+        .replace(/\bFILTERS?\b/gi, "")
+        .replace(/\bBELTS?\b/gi, "")
+        .replace(/\s{2,}/g, " ")
+        .trim()
+        .toUpperCase();
+      if(cleaned) out.push(cleaned);
+    });
+  });
+
+  return out.join(", ");
+}
+
+/* ---------- notes ---------- */
+function normalizeNotesForParsing(text){
+  let t = (text || "").trim().toLowerCase();
+  t = t.replace(/\n/g, " ");
+  t = t.replace(/\s{2,}/g, " ").trim();
+
+  t = t.replace(/\bare\s*to\s*you\b/g,"rtu");
+  t = t.replace(/\bar\s*to\s*you\b/g,"rtu");
+  t = t.replace(/\br\s*to\s*you\b/g,"rtu");
+  t = t.replace(/\br\s*too\s*you\b/g,"rtu");
+  t = t.replace(/\br\s*two\s*you\b/g,"rtu");
+  t = t.replace(/\br\s*t\s*u\b/g,"rtu");
+  t = t.replace(/\brt\s*you\b/g,"rtu");
+  t = t.replace(/\brt\s*u\b/g,"rtu");
+  t = t.replace(/\brt\b/g,"rtu");
+  t = t.replace(/\bhour\s*to\s*you\b/g,"rtu");
+
+  t = t.replace(/\bfurnaces?\b/g,"furnace");
+  t = t.replace(/\bunit heaters?\b/g,"unit heater");
+  t = t.replace(/\bradiant heaters?\b/g,"radiant heater");
+  t = t.replace(/\bexhaust fans?\b/g,"exhaust fan");
+  t = t.replace(/\bmake[\s-]?up air(?: unit)?s?\b/g,"mua");
+  t = t.replace(/\brooftop units?\b/g,"rtu");
+
+  t = convertNumbers(t);
+  t = t.replace(/\b(rtu|rh|uh|f|ef|mua)\s*(\d+)\b/gi, (_, a, n) => `${a.toUpperCase()}${n}`);
+  return t;
+}
+
+function extractRepairsFromNotes(notesText, equipCodes){
+  const text = (notesText || "").trim();
+  if(!text) return {general:"", repairs:[]};
+
+  const pieces = text
+    .replace(/\r/g,"")
+    .split(/\n+|(?<=[.?!])\s+/)
+    .map(s => s.trim())
+    .filter(Boolean);
+
+  const repairs = [];
+  const general = [];
+
+  function looksLikeRepair(s){
+    return /\b(needs?|need|replace|replaced|failed|bad|broken|repair|recommend|suggest|not working|no heat|no cooling|leaking|motor|belt|capacitor|blower|fan|heat exchanger|cracked)\b/i.test(s);
+  }
+
+  pieces.forEach(piece => {
+    const norm = normalizeNotesForParsing(piece);
+    let unit = null;
+
+    const explicit = norm.match(/\b(RTU|RH|UH|F|EF|MUA)\d+\b/i);
+    if(explicit) unit = explicit[0].toUpperCase();
+
+    if(!unit && /\brtu\b/i.test(norm)) unit = firstUnitOfType(equipCodes, "RTU");
+    if(!unit && /\bfurnace\b|\bf\b/i.test(norm)) unit = firstUnitOfType(equipCodes, "F");
+    if(!unit && /\bunit heater\b|\buh\b/i.test(norm)) unit = firstUnitOfType(equipCodes, "UH");
+    if(!unit && /\bradiant heater\b|\brh\b/i.test(norm)) unit = firstUnitOfType(equipCodes, "RH");
+    if(!unit && /\bexhaust fan\b|\bef\b/i.test(norm)) unit = firstUnitOfType(equipCodes, "EF");
+    if(!unit && /\bmua\b|make up air/i.test(norm)) unit = firstUnitOfType(equipCodes, "MUA");
+
+    if(unit && looksLikeRepair(norm)){
+      let msg = piece.trim();
+      msg = msg.replace(/^(rtu|rt|furnace|unit heater|radiant heater|exhaust fan|make[\s-]?up air|mua|ef|rh|uh|f)\s*-?\s*(one|two|three|four|five|six|seven|eight|nine|ten|\d+)?\s*/i, "");
+      msg = msg.replace(/^\s*[:\-–]\s*/, "");
+      if(!msg) msg = "Repair needed.";
+      repairs.push(`${unit} - ${msg}`);
+    } else {
+      general.push(piece);
+    }
+  });
+
+  return {
+    general: general.join(" ").trim(),
+    repairs
+  };
+}
+
+/* ---------- history storage ---------- */
+function getHistoryData(){
+  try{
+    return JSON.parse(localStorage.getItem(HISTORY_KEY) || "{}");
+  }catch(e){
+    return {};
+  }
+}
+
+function saveHistoryData(data){
+  localStorage.setItem(HISTORY_KEY, JSON.stringify(data));
+}
+
+function buildVisitSummary(visit){
+  if(visit.mode === "PM"){
+    return {
+      date: visit.date,
+      type: "PM",
+      primary: visit.location,
+      details: visit.notesFinal || "No notes.",
+      parts: visit.partsUsed || "NONE"
+    };
+  }
+
+  return {
+    date: visit.date,
+    type: "SERVICE CALL",
+    primary: visit.location,
+    details: visit.diagnosis || "No diagnosis.",
+    parts: visit.partsUsed || "NONE"
+  };
+}
+
+function saveVisitToHistory(visit){
+  if(!visit.location) return;
+
+  const customer = getCustomerFromLocation(visit.location);
+  const data = getHistoryData();
+
+  if(!data[customer]) data[customer] = {};
+  if(!data[customer][visit.location]) data[customer][visit.location] = [];
+
+  data[customer][visit.location].unshift(visit);
+  saveHistoryData(data);
+}
+
+function populateHistoryCustomers(){
+  const select = document.getElementById("historyCustomer");
+  const data = getHistoryData();
+  const customers = Object.keys(data).sort();
+
+  select.innerHTML = `<option value="">Select customer</option>`;
+  customers.forEach(customer => {
+    const opt = document.createElement("option");
+    opt.value = customer;
+    opt.textContent = customer;
+    select.appendChild(opt);
+  });
+
+  if(customers.includes(currentHistoryCustomer)){
+    select.value = currentHistoryCustomer;
+  } else {
+    currentHistoryCustomer = "";
+  }
+
+  populateHistoryLocations();
+}
+
+function populateHistoryLocations(){
+  const locationSelect = document.getElementById("historyLocation");
+  const data = getHistoryData();
+
+  locationSelect.innerHTML = `<option value="">Select location</option>`;
+
+  if(!currentHistoryCustomer || !data[currentHistoryCustomer]){
+    currentHistoryLocation = "";
+    renderHistoryView();
+    return;
+  }
+
+  const locations = Object.keys(data[currentHistoryCustomer]).sort();
+  locations.forEach(location => {
+    const opt = document.createElement("option");
+    opt.value = location;
+    opt.textContent = location;
+    locationSelect.appendChild(opt);
+  });
+
+  if(locations.includes(currentHistoryLocation)){
+    locationSelect.value = currentHistoryLocation;
+  } else {
+    currentHistoryLocation = "";
+  }
+
+  renderHistoryView();
+}
+
+function renderHistoryView(){
+  const latestWrap = document.getElementById("historyLatestWrap");
+  const olderWrap = document.getElementById("historyOlderWrap");
+  const fullWrap = document.getElementById("historyFullWrap");
+  const latest = document.getElementById("historyLatest");
+  const olderList = document.getElementById("historyOlderList");
+  const full = document.getElementById("historyFullReport");
+  const data = getHistoryData();
+
+  latestWrap.classList.add("hidden");
+  olderWrap.classList.add("hidden");
+  fullWrap.classList.add("hidden");
+  latest.innerHTML = "";
+  olderList.innerHTML = "";
+  full.textContent = "";
+
+  if(!currentHistoryCustomer || !currentHistoryLocation) return;
+  if(!data[currentHistoryCustomer] || !data[currentHistoryCustomer][currentHistoryLocation]) return;
+
+  const visits = data[currentHistoryCustomer][currentHistoryLocation];
+  if(!visits.length) return;
+
+  const latestVisit = visits[0];
+  const s = buildVisitSummary(latestVisit);
+
+  latest.innerHTML = `
+    <div class="summary-row"><span class="summary-label">Date:</span> ${escapeHtml(s.date)}</div>
+    <div class="summary-row"><span class="summary-label">Type:</span> ${escapeHtml(s.type)}</div>
+    <div class="summary-row"><span class="summary-label">What was done last time:</span> ${escapeHtml(s.details)}</div>
+    <div class="summary-row"><span class="summary-label">Parts used:</span> ${escapeHtml(s.parts)}</div>
+  `;
+  latestWrap.classList.remove("hidden");
+
+  if(typeof currentHistorySelectedIndex !== "number" || currentHistorySelectedIndex >= visits.length){
+    currentHistorySelectedIndex = 0;
+  }
+
+  if(visits.length > 1){
+    olderWrap.classList.remove("hidden");
+    visits.forEach((visit, idx) => {
+      const box = document.createElement("div");
+      const sum = buildVisitSummary(visit);
+      box.className = "history-item" + (idx === currentHistorySelectedIndex ? " active" : "");
+      box.innerHTML = `
+        <div class="history-title">${escapeHtml(sum.date)} - ${escapeHtml(sum.type)}</div>
+        <div class="history-sub">${escapeHtml(sum.details)}</div>
+      `;
+      box.onclick = () => {
+        currentHistorySelectedIndex = idx;
+        renderHistoryView();
+      };
+      olderList.appendChild(box);
+    });
+  } else {
+    const box = document.createElement("div");
+    const sum = buildVisitSummary(latestVisit);
+    box.className = "history-item active";
+    box.innerHTML = `
+      <div class="history-title">${escapeHtml(sum.date)} - ${escapeHtml(sum.type)}</div>
+      <div class="history-sub">${escapeHtml(sum.details)}</div>
+    `;
+    box.onclick = () => {
+      currentHistorySelectedIndex = 0;
+      renderHistoryView();
+    };
+    olderList.appendChild(box);
+    olderWrap.classList.remove("hidden");
+  }
+
+  full.textContent = visits[currentHistorySelectedIndex].report || "";
+  fullWrap.classList.remove("hidden");
+}
+
+/* ---------- draft ---------- */
+function getFields(){
+  return {
+    currentMode,
+    location: document.getElementById("location").value || "",
+
+    equipment: document.getElementById("equipment").value || "",
+    notes: document.getElementById("notes").value || "",
+    used: document.getElementById("used").value || "",
+    cost: document.getElementById("cost").value || "",
+    next: document.getElementById("next").value || "",
+    workdone: document.getElementById("workdone").value || "",
+
+    serviceEquipment: document.getElementById("serviceEquipment").value || "",
+    reason: document.getElementById("reason").value || "",
+    diagnosis: document.getElementById("diagnosis").value || "",
+    repairsMade: document.getElementById("repairsMade").value || "",
+    serviceUsed: document.getElementById("serviceUsed").value || "",
+    serviceCost: document.getElementById("serviceCost").value || "",
+    quoteParts: document.getElementById("quoteParts").value || "",
+    quoteLabor: document.getElementById("quoteLabor").value || "",
+    recommendations: document.getElementById("recommendations").value || "",
+
+    historyCustomer: currentHistoryCustomer,
+    historyLocation: currentHistoryLocation,
+    historySelectedIndex: currentHistorySelectedIndex,
+
+    output: document.getElementById("output").textContent || "",
+    savedAt: new Date().toISOString()
+  };
+}
+
+function setFields(d){
+  currentMode = d.currentMode || "PM";
+  currentHistoryCustomer = d.historyCustomer || "";
+  currentHistoryLocation = d.historyLocation || "";
+  currentHistorySelectedIndex = typeof d.historySelectedIndex === "number" ? d.historySelectedIndex : 0;
+
+  applyMode();
+
+  document.getElementById("location").value = d.location || "";
+
+  document.getElementById("equipment").value = d.equipment || "";
+  document.getElementById("notes").value = d.notes || "";
+  document.getElementById("used").value = d.used || "";
+  document.getElementById("cost").value = d.cost || "";
+  document.getElementById("next").value = d.next || "";
+  document.getElementById("workdone").value = d.workdone || DEFAULT_PM_WORKDONE;
+
+  document.getElementById("serviceEquipment").value = d.serviceEquipment || "";
+  document.getElementById("reason").value = d.reason || "";
+  document.getElementById("diagnosis").value = d.diagnosis || "";
+  document.getElementById("repairsMade").value = d.repairsMade || "";
+  document.getElementById("serviceUsed").value = d.serviceUsed || "";
+  document.getElementById("serviceCost").value = d.serviceCost || "";
+  document.getElementById("quoteParts").value = d.quoteParts || "";
+  document.getElementById("quoteLabor").value = d.quoteLabor || "";
+  document.getElementById("recommendations").value = d.recommendations || "";
+
+  document.getElementById("output").textContent = d.output || "";
+
+  [
+    "equipment","notes","used","next",
+    "serviceEquipment","reason","diagnosis","repairsMade","serviceUsed","quoteParts","recommendations"
+  ].forEach(id => autoGrow(document.getElementById(id)));
+
+  populateHistoryCustomers();
+}
+
+function saveDraft(){
+  try{
+    localStorage.setItem(DRAFT_KEY, JSON.stringify(getFields()));
+    document.getElementById("draftStatus").textContent = "Draft saved.";
+  }catch(e){}
+}
+
+function loadDraft(){
+  const raw = localStorage.getItem(DRAFT_KEY);
+  if(!raw) return false;
+  try{
+    const d = JSON.parse(raw);
+    setFields(d);
+    if(d.savedAt){
+      const dt = new Date(d.savedAt);
+      document.getElementById("draftStatus").textContent = "Restored draft from " + dt.toLocaleString();
+    } else {
+      document.getElementById("draftStatus").textContent = "Restored draft.";
+    }
+    return true;
+  }catch(e){
+    return false;
+  }
+}
+
+/* ---------- immediate field formatting ---------- */
+function formatLocationField(){
+  const el = document.getElementById("location");
+  const current = el.value;
+  if(current.trim()){
+    el.value = formatLocation(current);
+    saveDraft();
+  }
+}
+
+function formatEquipmentField(){
+  const el = document.getElementById("equipment");
+  const current = el.value;
+  if(current.trim()){
+    el.value = formatEquipmentFieldValue(current);
+    autoGrow(el);
+    saveDraft();
+  }
+}
+
+function formatUsedField(){
+  const el = document.getElementById("used");
+  const current = el.value;
+  if(current.trim()){
+    el.value = normalizeParts(current);
+    autoGrow(el);
+    saveDraft();
+  }
+}
+
+function formatNextField(){
+  const el = document.getElementById("next");
+  const current = el.value;
+  if(current.trim()){
+    el.value = normalizeParts(current);
+    autoGrow(el);
+    saveDraft();
+  }
+}
+
+function formatServiceEquipmentField(){
+  const el = document.getElementById("serviceEquipment");
+  const current = el.value;
+  if(current.trim()){
+    el.value = formatEquipmentFieldValue(current);
+    autoGrow(el);
+    saveDraft();
+  }
+}
+
+function formatServiceUsedField(){
+  const el = document.getElementById("serviceUsed");
+  const current = el.value;
+  if(current.trim()){
+    el.value = normalizeParts(current);
+    autoGrow(el);
+    saveDraft();
+  }
+}
+
+function formatQuotePartsField(){
+  const el = document.getElementById("quoteParts");
+  const current = el.value;
+  if(current.trim()){
+    el.value = normalizeParts(current);
+    autoGrow(el);
+    saveDraft();
+  }
+}
+
+/* ---------- mode switching ---------- */
+function applyMode(){
+  const pmBtn = document.getElementById("modePM");
+  const serviceBtn = document.getElementById("modeService");
+  const historyBtn = document.getElementById("modeHistory");
+  const invBtn = document.getElementById("modeInvoice");
+  
+  const entrySection = document.getElementById("entrySection");
+  const historySection = document.getElementById("historySection");
+  const pmSection = document.getElementById("pmSection");
+  const serviceSection = document.getElementById("serviceSection");
+  const invoiceSection = document.getElementById("invoiceSection");
+
+  pmBtn.classList.remove("active");
+  serviceBtn.classList.remove("active");
+  historyBtn.classList.remove("active");
+  invBtn.classList.remove("active");
+  
+  entrySection.classList.add("hidden");
+  historySection.classList.add("hidden");
+  invoiceSection.classList.add("hidden");
+
+  if(currentMode === "PM"){
+    pmBtn.classList.add("active");
+    entrySection.classList.remove("hidden");
+    pmSection.classList.remove("hidden");
+    serviceSection.classList.add("hidden");
+  } else if(currentMode === "SERVICE"){
+    serviceBtn.classList.add("active");
+    entrySection.classList.remove("hidden");
+    serviceSection.classList.remove("hidden");
+    pmSection.classList.add("hidden");
+  } else if (currentMode === "HISTORY") {
+    historyBtn.classList.add("active");
+    historySection.classList.remove("hidden");
+    populateHistoryCustomers();
+  } else if (currentMode === "INVOICE") {
+    invBtn.classList.add("active");
+    invoiceSection.classList.remove("hidden");
+  }
+}
+
+document.getElementById("modePM").onclick = function(){ currentMode = "PM"; applyMode(); saveDraft(); };
+document.getElementById("modeService").onclick = function(){ currentMode = "SERVICE"; applyMode(); saveDraft(); };
+document.getElementById("modeHistory").onclick = function(){ currentMode = "HISTORY"; applyMode(); saveDraft(); };
+document.getElementById("modeInvoice").onclick = function(){ currentMode = "INVOICE"; applyMode(); saveDraft(); };
+
+/* ---------- SMART INVOICE PARSING LOGIC ---------- */
+function parsePastedNotes() {
+    const text = document.getElementById("invPasteArea").value;
+    if (!text) return;
+
+    // Helper regex to extract lines based on labels
+    const extract = (regex) => {
+        const m = text.match(regex);
+        return m && m[1] ? m[1].trim() : null;
+    };
+
+    // 1. Extract Location
+    const loc = extract(/Location:\s*\n([^\n]+)/i);
+    if (loc) {
+        document.getElementById("invBillTo").value = loc;
+    }
+
+    // 2. Extract Work Done (from PM) or Repairs Made (from Service Call)
+    const work = extract(/Work done:\s*\n([^\n]+)/i);
+    const repairs = extract(/Repairs made:\s*\n([^\n]+)/i);
+    
+    if (work) {
+        // Capitalize the first letter and make the rest lowercase for neatness
+        let formattedWork = work.charAt(0).toUpperCase() + work.slice(1).toLowerCase();
+        document.getElementById("invItem1Desc").value = "Preventative Maintenance - " + formattedWork;
+    } else if (repairs) {
+        document.getElementById("invItem1Desc").value = "Service Call - " + repairs;
+    }
+
+    // 3. Extract Parts Used
+    const parts = extract(/Parts used:\s*\n([^\n]+)/i);
+    if (parts && parts.toUpperCase() !== "NONE") {
+        document.getElementById("invItem2Desc").value = "Materials/Parts: " + parts;
+    } else if (parts && parts.toUpperCase() === "NONE") {
+        document.getElementById("invItem2Desc").value = "";
+    }
+    
+    calcInvoice();
+}
+
+function calcInvoice() {
+    const p1 = parseFloat(document.getElementById("invItem1Price").value) || 0;
+    const p2 = parseFloat(document.getElementById("invItem2Price").value) || 0;
+    const p3 = parseFloat(document.getElementById("invItem3Price").value) || 0;
+    const p4 = parseFloat(document.getElementById("invItem4Price").value) || 0;
+    
+    const sub = p1 + p2 + p3 + p4;
+    const tax = sub * 0.055;
+    const grand = sub + tax;
+    
+    document.getElementById("invSubtotalDisplay").innerText = "$" + sub.toFixed(2);
+    document.getElementById("invTaxDisplay").innerText = "$" + tax.toFixed(2);
+    document.getElementById("invGrandDisplay").innerText = "$" + grand.toFixed(2);
+}
+
+function printInvoice() {
+    calcInvoice();
+    
+    const invNum = document.getElementById("invNum").value || "INV-XXXXXX";
+    const billTo = document.getElementById("invBillTo").value || "Client Name";
+    const dateStr = today();
+    
+    // Format addresses from "Location" field logic
+    let clientName = getCustomerFromLocation(billTo);
+    let addressLine = billTo.replace(clientName, "").replace(/^- /,"").trim();
+    
+    document.getElementById("pInvNum").innerText = invNum;
+    document.getElementById("pInvDate").innerText = dateStr;
+    
+    document.getElementById("pBillName").innerText = clientName;
+    document.getElementById("pBillLoc").innerText = addressLine || "Address On File";
+    document.getElementById("pShipName").innerText = clientName;
+    document.getElementById("pShipLoc").innerText = addressLine || "Address On File";
+    
+    const d1 = document.getElementById("invItem1Desc").value; const p1 = parseFloat(document.getElementById("invItem1Price").value) || 0;
+    const d2 = document.getElementById("invItem2Desc").value; const p2 = parseFloat(document.getElementById("invItem2Price").value) || 0;
+    const d3 = document.getElementById("invItem3Desc").value; const p3 = parseFloat(document.getElementById("invItem3Price").value) || 0;
+    const d4 = document.getElementById("invItem4Desc").value; const p4 = parseFloat(document.getElementById("invItem4Price").value) || 0;
+    
+    let tableHTML = "";
+    if(p1 > 0) tableHTML += `<tr><td>${d1}</td><td>$${p1.toFixed(2)}</td></tr>`;
+    if(p2 > 0) tableHTML += `<tr><td>${d2}</td><td>$${p2.toFixed(2)}</td></tr>`;
+    if(p3 > 0) tableHTML += `<tr><td>${d3}</td><td>$${p3.toFixed(2)}</td></tr>`;
+    if(p4 > 0) tableHTML += `<tr><td>${d4}</td><td>$${p4.toFixed(2)}</td></tr>`;
+    
+    const tax = (p1+p2+p3+p4) * 0.055;
+    const grand = (p1+p2+p3+p4) + tax;
+    
+    if(tax > 0) tableHTML += `<tr><td>Sales Tax (5.5%)</td><td>$${tax.toFixed(2)}</td></tr>`;
+    
+    document.getElementById("pInvTableBody").innerHTML = tableHTML;
+    
+    const grandStr = "$" + grand.toFixed(2);
+    document.getElementById("pTotal1").innerText = grandStr;
+    document.getElementById("pTotal2").innerText = grandStr;
+    document.getElementById("pGrandTotal").innerText = grandStr;
+    document.getElementById("pBottomTotal").innerText = grandStr;
+    
+    document.getElementById("pBottomCust").innerText = clientName;
+    document.getElementById("pBottomInv").innerText = invNum;
+
+    window.print();
+}
+
+
+/* ---------- ui actions ---------- */
+document.getElementById("same").onclick = function(){
+  document.getElementById("next").value = document.getElementById("used").value;
+  autoGrow(document.getElementById("next"));
+  formatNextField();
+};
+
+document.getElementById("generate").onclick = function(){
+  formatLocationField();
+  const location = formatLocation(document.getElementById("location").value || "[Location]") || "[Location]";
+  const date = todayDB();
+
+  let report = "";
+  let visit = null;
+
+  if(currentMode === "PM"){
+    formatEquipmentField();
+    formatUsedField();
+    formatNextField();
+
+    const equipRaw = document.getElementById("equipment").value || "";
+    const equipCodes = parseEquipCodes(equipRaw);
+    const equip = expandEquipment(equipRaw);
+
+    const notesRaw = (document.getElementById("notes").value || "").trim();
+    const extracted = extractRepairsFromNotes(notesRaw, equipCodes);
+
+    let notesFinal = DEFAULT_PM_NOTES;
+    if(extracted.general){
+      notesFinal = extracted.general;
+    } else if(extracted.repairs.length){
+      notesFinal = extracted.repairs.join("\n");
+    }
+
+    const used = document.getElementById("used").value.trim() ? normalizeParts(document.getElementById("used").value) : "NONE";
+    const next = document.getElementById("next").value.trim() ? normalizeParts(document.getElementById("next").value) : "NONE";
+    const cost = document.getElementById("cost").value || "Unknown";
+    const workdone = document.getElementById("workdone").value || DEFAULT_PM_WORKDONE;
+
+    report = `PM\n\nLocation:\n${location}\n\nDate:\n${date}\n\nEquipment on Site:\n${equip}\n\nNotes / Repairs:\n${notesFinal}\n\nWork done:\n${workdone}\n\nParts used:\n${used}\n\nCost of parts (if known):\n${cost}\n\nParts needed next PM:\n${next}\n\nPictures:\nNameplate photos attached.\n`;
+
+    visit = {
+      date,
+      mode: "PM",
+      customer: getCustomerFromLocation(location),
+      location,
+      equipment: equip,
+      notesFinal,
+      workdone,
+      partsUsed: used,
+      partsNeeded: next,
+      cost,
+      report
+    };
+  } else if(currentMode === "SERVICE"){
+    formatServiceEquipmentField();
+    formatServiceUsedField();
+    formatQuotePartsField();
+
+    const serviceEquipRaw = document.getElementById("serviceEquipment").value || "";
+    const serviceEquipDisplay = parseEquipCodes(serviceEquipRaw).length
+      ? expandEquipment(serviceEquipRaw)
+      : (serviceEquipRaw || "Not listed");
+
+    const reason = document.getElementById("reason").value.trim() || "Not listed.";
+    const diagnosis = document.getElementById("diagnosis").value.trim() || "Not listed.";
+    const repairsMade = document.getElementById("repairsMade").value.trim() || "None.";
+    const used = document.getElementById("serviceUsed").value.trim() ? normalizeParts(document.getElementById("serviceUsed").value) : "NONE";
+    const cost = document.getElementById("serviceCost").value || "Unknown";
+    const quoteParts = document.getElementById("quoteParts").value.trim() ? normalizeParts(document.getElementById("quoteParts").value) : "NONE";
+    const quoteLabor = document.getElementById("quoteLabor").value.trim() || "NONE";
+    const recommendations = document.getElementById("recommendations").value.trim() || "None.";
+
+    report = `SERVICE CALL\n\nLocation:\n${location}\n\nDate:\n${date}\n\nEquipment worked on:\n${serviceEquipDisplay}\n\nReason for call:\n${reason}\n\nFindings / Diagnosis:\n${diagnosis}\n\nRepairs made:\n${repairsMade}\n\nParts used:\n${used}\n\nCost of parts (if known):\n${cost}\n\nParts needed for repair quote:\n${quoteParts}\n\nLabor for repair quote:\n${quoteLabor}\n\nRecommendations / Next steps:\n${recommendations}\n\nPictures:\nNameplate photos attached.\n`;
+
+    visit = {
+      date,
+      mode: "SERVICE CALL",
+      customer: getCustomerFromLocation(location),
+      location,
+      equipmentWorkedOn: serviceEquipDisplay,
+      reason,
+      diagnosis,
+      repairsMade,
+      partsUsed: used,
+      cost,
+      quoteParts,
+      quoteLabor,
+      recommendations,
+      report
+    };
+  }
+
+  if(report){
+    document.getElementById("output").textContent = report;
+    if(visit){
+      saveVisitToHistory(visit);
+      populateHistoryCustomers();
+    }
+    saveDraft();
+  }
+};
+
+document.getElementById("copy").onclick = function(){
+  const text = document.getElementById("output").textContent || "";
+  if(!text.trim()) return;
+  navigator.clipboard.writeText(text);
+};
+
+document.getElementById("clear").onclick = function(){
+  if(currentMode === "HISTORY"){
+    currentHistoryCustomer = "";
+    currentHistoryLocation = "";
+    currentHistorySelectedIndex = 0;
+    document.getElementById("historyCustomer").value = "";
+    document.getElementById("historyLocation").innerHTML = `<option value="">Select location</option>`;
+    renderHistoryView();
+    saveDraft();
+    return;
+  }
+  if(currentMode === "INVOICE") {
+      document.getElementById("invNum").value = "";
+      document.getElementById("invBillTo").value = "";
+      document.getElementById("invPasteArea").value = "";
+      document.getElementById("invItem2Desc").value = "";
+      document.getElementById("invItem2Price").value = "";
+      calcInvoice();
+      return;
+  }
+
+  if(!confirm("Clear current mode fields?")) return;
+
+  document.getElementById("location").value = "";
+  document.getElementById("output").textContent = "";
+
+  if(currentMode === "PM"){
+    document.getElementById("equipment").value = "";
+    document.getElementById("notes").value = "";
+    document.getElementById("used").value = "";
+    document.getElementById("cost").value = "";
+    document.getElementById("next").value = "";
+    document.getElementById("workdone").value = DEFAULT_PM_WORKDONE;
+
+    autoGrow(document.getElementById("equipment"));
+    autoGrow(document.getElementById("notes"));
+    autoGrow(document.getElementById("used"));
+    autoGrow(document.getElementById("next"));
+  } else {
+    document.getElementById("serviceEquipment").value = "";
+    document.getElementById("reason").value = "";
+    document.getElementById("diagnosis").value = "";
+    document.getElementById("repairsMade").value = "";
+    document.getElementById("serviceUsed").value = "";
+    document.getElementById("serviceCost").value = "";
+    document.getElementById("quoteParts").value = "";
+    document.getElementById("quoteLabor").value = "";
+    document.getElementById("recommendations").value = "";
+
+    autoGrow(document.getElementById("serviceEquipment"));
+    autoGrow(document.getElementById("reason"));
+    autoGrow(document.getElementById("diagnosis"));
+    autoGrow(document.getElementById("repairsMade"));
+    autoGrow(document.getElementById("serviceUsed"));
+    autoGrow(document.getElementById("quoteParts"));
+    autoGrow(document.getElementById("recommendations"));
+  }
+
+  document.getElementById("draftStatus").textContent = "Cleared.";
+  saveDraft();
+};
+
+/* Unified Add Equipment function */
+function addEquipmentCode(fieldId, prefix){
+  const el = document.getElementById(fieldId);
+  const current = (el.value || "").trim();
+  const codes = parseEquipCodes(current);
+  let max = 0;
+
+  codes.forEach(c => {
+    const m = c.match(new RegExp("^" + prefix + "(\\d+)$"));
+    if(m) max = Math.max(max, parseInt(m[1], 10));
+  });
+
+  const nextNum = max + 1;
+  const appendText = current ? current + ", " + prefix + nextNum : prefix + nextNum;
+  el.value = appendText;
+  autoGrow(el);
+  saveDraft();
+}
+
+/* PM Pill Buttons */
+document.getElementById("addRTU").onclick = () => addEquipmentCode("equipment", "RTU");
+document.getElementById("addF").onclick = () => addEquipmentCode("equipment", "F");
+document.getElementById("addUH").onclick = () => addEquipmentCode("equipment", "UH");
+document.getElementById("addRH").onclick = () => addEquipmentCode("equipment", "RH");
+document.getElementById("addEF").onclick = () => addEquipmentCode("equipment", "EF");
+document.getElementById("addMUA").onclick = () => addEquipmentCode("equipment", "MUA");
+
+/* Service Pill Buttons */
+document.getElementById("addServiceRTU").onclick = () => addEquipmentCode("serviceEquipment", "RTU");
+document.getElementById("addServiceF").onclick = () => addEquipmentCode("serviceEquipment", "F");
+document.getElementById("addServiceUH").onclick = () => addEquipmentCode("serviceEquipment", "UH");
+document.getElementById("addServiceRH").onclick = () => addEquipmentCode("serviceEquipment", "RH");
+document.getElementById("addServiceEF").onclick = () => addEquipmentCode("serviceEquipment", "EF");
+document.getElementById("addServiceMUA").onclick = () => addEquipmentCode("serviceEquipment", "MUA");
+
+function addEnterFormatter(id, formatter){
+  document.getElementById(id).addEventListener("keydown", (e) => {
+    if(
+      e.key === "Enter" &&
+      !["notes","reason","diagnosis","repairsMade","recommendations"].includes(id)
+    ){
+      e.preventDefault();
+      formatter();
+      e.target.blur();
+    }
+  });
+}
+
+function wireAutosave(){
+  [
+    "location","equipment","notes","used","cost","next","workdone",
+    "serviceEquipment","reason","diagnosis","repairsMade","serviceUsed","serviceCost","quoteParts","quoteLabor","recommendations", "invPasteArea"
+  ].forEach(id => {
+    const el = document.getElementById(id);
+    el.addEventListener("input", () => {
+      saveDraft();
+      if(el.tagName.toLowerCase() === "textarea"){
+        autoGrow(el);
+      }
+    });
+  });
+
+  document.getElementById("location").addEventListener("blur", formatLocationField);
+  document.getElementById("equipment").addEventListener("blur", formatEquipmentField);
+  document.getElementById("used").addEventListener("blur", formatUsedField);
+  document.getElementById("next").addEventListener("blur", formatNextField);
+  document.getElementById("serviceEquipment").addEventListener("blur", formatServiceEquipmentField);
+  document.getElementById("serviceUsed").addEventListener("blur", formatServiceUsedField);
+  document.getElementById("quoteParts").addEventListener("blur", formatQuotePartsField);
+
+  addEnterFormatter("location", formatLocationField);
+  addEnterFormatter("equipment", formatEquipmentField);
+  addEnterFormatter("used", formatUsedField);
+  addEnterFormatter("next", formatNextField);
+  addEnterFormatter("serviceEquipment", formatServiceEquipmentField);
+  addEnterFormatter("serviceUsed", formatServiceUsedField);
+  addEnterFormatter("quoteParts", formatQuotePartsField);
+
+  document.addEventListener("visibilitychange", () => {
+    if(document.visibilityState === "hidden") saveDraft();
+  });
+
+  window.addEventListener("pagehide", saveDraft);
+}
+
+/* ---------- init ---------- */
+(function init(){
+  document.getElementById("workdone").value = DEFAULT_PM_WORKDONE;
+  applyMode();
+
+  const restored = loadDraft();
+  if(!restored){
+    document.getElementById("draftStatus").textContent = "No saved draft yet.";
+    populateHistoryCustomers();
+  }
+
+  [
+    "equipment","notes","used","next",
+    "serviceEquipment","reason","diagnosis","repairsMade","serviceUsed","quoteParts","recommendations", "invPasteArea"
+  ].forEach(id => autoGrow(document.getElementById(id)));
+
+  wireAutosave();
+})();
+</script>
+</body>
+</html>
