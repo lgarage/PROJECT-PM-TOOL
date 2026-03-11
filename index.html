@@ -180,6 +180,8 @@ pre {
 
 /* Print View Formatting for Invoice */
 #printInvoiceView { display: none; padding: 40px; background: #fff; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #000; }
+#printInvoiceView.screen-preview { display: block; margin-top: 40px; border: 1px solid #ccc; box-shadow: 0 10px 30px rgba(0,0,0,0.15); border-radius: 8px; }
+
 .inv-header { display: flex; justify-content: space-between; margin-bottom: 40px; }
 .inv-company h2 { margin: 0; font-size: 22px; color: #000; }
 .inv-company p { margin: 2px 0; font-size: 14px; }
@@ -211,7 +213,7 @@ pre {
 @media print {
     body { background: #fff; margin: 0; padding: 0; }
     .card, .modebar, #entrySection, #historySection, #invoiceBuilder, #draftStatus, button { display: none !important; }
-    #printInvoiceView { display: block !important; width: 100%; padding: 0; }
+    #printInvoiceView { display: block !important; width: 100%; padding: 0; border: none; box-shadow: none; margin: 0; }
 }
 </style>
 </head>
@@ -404,7 +406,7 @@ pre {
                     <label style="margin:0;"></label>
                 </div>
                 </div>
-            <button type="button" class="add-part-btn" onclick="addInvoicePartRow()">+ Add Part</button>
+            <button type="button" class="add-part-btn" onclick="addInvoicePartRow('Preventative Maintenance parts')">+ Add Part</button>
         </div>
 
         <div class="form-section" style="background:#fff;">
@@ -421,7 +423,10 @@ pre {
                 <span id="invGrandDisplay">$0.00</span>
             </div>
 
-            <button id="generateInvoiceBtn" style="background:#1e4b85; color:#fff; font-weight:bold; font-size:18px; margin-top:20px;" onclick="printInvoice()">Generate & Print Invoice</button>
+            <div style="display: flex; gap: 15px; margin-top: 20px;">
+                <button type="button" style="background:#f39c12; color:#fff; font-weight:bold; font-size:18px; flex:1;" onclick="previewInvoice()">Generate Report</button>
+                <button type="button" style="background:#1e4b85; color:#fff; font-weight:bold; font-size:18px; flex:1;" onclick="printInvoice()">Save to PDF</button>
+            </div>
         </div>
     </div>
 </div>
@@ -534,6 +539,7 @@ function applyMode(){
   historyBtn.classList.remove("active"); invBtn.classList.remove("active");
   
   entrySection.classList.add("hidden"); historySection.classList.add("hidden"); invoiceSection.classList.add("hidden");
+  document.getElementById('printInvoiceView').classList.remove('screen-preview'); // Hide preview on tab switch
 
   if(currentMode === "PM"){
     pmBtn.classList.add("active"); entrySection.classList.remove("hidden");
@@ -545,7 +551,7 @@ function applyMode(){
     historyBtn.classList.add("active"); historySection.classList.remove("hidden");
   } else if (currentMode === "INVOICE") {
     invBtn.classList.add("active"); invoiceSection.classList.remove("hidden");
-    if(document.getElementById('invPartsContainer').children.length <= 1) { addInvoicePartRow(); }
+    if(document.getElementById('invPartsContainer').children.length <= 1) { addInvoicePartRow("Preventative Maintenance parts"); }
   }
 }
 
@@ -567,7 +573,7 @@ function getInvoiceMarkup(cost) {
     return 0.65;
 }
 
-function addInvoicePartRow(desc = "") {
+function addInvoicePartRow(desc = "Preventative Maintenance parts") {
     const container = document.getElementById('invPartsContainer');
     const row = document.createElement('div');
     row.className = 'parts-grid-layout part-row inv-part-line';
@@ -585,9 +591,9 @@ function parsePastedNotes() {
     const text = document.getElementById("invPasteArea").value;
     if (!text) return;
 
-    // Helper regex to extract multiline blocks based on headers
+    // Uses \n\n blocks to extract text without letting parentheses break the regex
     const extract = (header) => {
-        const regex = new RegExp(`${header}:\\s*\\n(.*?)(?=\\n[A-Z][a-zA-Z /]+:|$)`, 'is');
+        const regex = new RegExp(`${header}:\\s*\\n(.*?)(?=\\n\\n|$)`, 'is');
         const m = text.match(regex);
         return m && m[1] ? m[1].trim() : "";
     };
@@ -607,7 +613,7 @@ function parsePastedNotes() {
     const parts = extract("Parts used");
     if (parts && parts.toUpperCase() !== "NONE") {
         document.getElementById('invPartsContainer').innerHTML = `<div class="parts-grid-layout" style="font-size:12px; font-weight:bold; margin-bottom:5px;"><label style="margin:0;">QTY</label><label style="margin:0;">Part Description</label><label style="margin:0;">Our Cost $</label><label style="margin:0; color:#27ae60;">Retail $ (Auto)</label><label style="margin:0;"></label></div>`;
-        addInvoicePartRow(parts); // Dumps the raw string into description so they can break it out
+        addInvoicePartRow("Preventative Maintenance parts"); 
     }
     
     calcInvoice();
@@ -649,14 +655,13 @@ function calcInvoice() {
     document.getElementById("invGrandDisplay").innerText = "$" + grand.toFixed(2);
 }
 
-function printInvoice() {
+function generateInvoiceHTML() {
     calcInvoice();
     
     const invNum = document.getElementById("invNum").value || "INV-XXXXXX";
     const billTo = document.getElementById("invBillTo").value || "Client Name";
     const dateStr = today();
     
-    // Format addresses from "Location" field logic
     let clientName = billTo.split(" - ")[0] || "Unknown Client";
     let addressLine = billTo.replace(clientName, "").replace(/^- /,"").trim();
     
@@ -668,12 +673,17 @@ function printInvoice() {
     document.getElementById("pShipName").innerText = clientName;
     document.getElementById("pShipLoc").innerText = addressLine || "Address On File";
 
-    // Inject Tech Notes
     document.getElementById("pInvEquip").innerText = document.getElementById("invEquip").value || "N/A";
     document.getElementById("pInvNotes").innerText = document.getElementById("invNotes").value || "N/A";
     document.getElementById("pInvWork").innerText = document.getElementById("invWork").value || "N/A";
     
     let tableHTML = "";
+
+    // Add Base Work Description as first item if there are no specific parts, but there is work to charge for
+    const workDesc = document.getElementById("invWork").value;
+    if(workDesc && document.querySelectorAll('.inv-part-line').length === 0) {
+       tableHTML += `<tr><td>Preventative Maintenance - ${workDesc}</td><td></td></tr>`;
+    }
 
     // Build Parts Rows
     let partsSubtotal = 0;
@@ -685,23 +695,22 @@ function printInvoice() {
         
         if(desc !== "") {
             let descDisplay = qty > 1 ? `${qty}x ${desc}` : desc;
-            if(lineTotal > 0) descDisplay += ` (Retail: $${retailUnit.toFixed(2)}/ea)`;
             tableHTML += `<tr><td>${descDisplay}</td><td>$${lineTotal.toFixed(2)}</td></tr>`;
             partsSubtotal += lineTotal;
         }
     });
     
-    // Build Labor & Trip Rows
+    // Build Labor & Trip Rows (Hidden Math)
     const hours = parseFloat(document.getElementById("invLaborHours").value) || 0;
     const rate = parseFloat(document.getElementById("invLaborRate").value) || 0;
     const laborTotal = hours * rate;
     const trip = parseFloat(document.getElementById("invTruckCharge").value) || 0;
 
     if(laborTotal > 0) {
-        tableHTML += `<tr><td>Labor charge (${hours} hours @ $${rate.toFixed(2)}/hr)</td><td>$${laborTotal.toFixed(2)}</td></tr>`;
+        tableHTML += `<tr><td>Labor charge</td><td>$${laborTotal.toFixed(2)}</td></tr>`;
     }
     if(trip > 0) {
-        tableHTML += `<tr><td>Truck / Dispatch charge</td><td>$${trip.toFixed(2)}</td></tr>`;
+        tableHTML += `<tr><td>Trip charge</td><td>$${trip.toFixed(2)}</td></tr>`;
     }
     
     const sub = partsSubtotal + laborTotal + trip;
@@ -720,7 +729,17 @@ function printInvoice() {
     
     document.getElementById("pBottomCust").innerText = clientName;
     document.getElementById("pBottomInv").innerText = invNum;
+}
 
+function previewInvoice() {
+    generateInvoiceHTML();
+    const printView = document.getElementById('printInvoiceView');
+    printView.classList.add('screen-preview');
+    printView.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function printInvoice() {
+    generateInvoiceHTML();
     window.print();
 }
 
