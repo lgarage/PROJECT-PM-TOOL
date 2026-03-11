@@ -5,6 +5,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Tech Note Tool & Invoicing | Twin Pillars</title>
 
+<script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore-compat.js"></script>
+
+<script src="firebase-config.js"></script>
+
 <style>
 /* --- Twin Pillars Branding --- */
 body {
@@ -363,7 +368,7 @@ pre {
             <div class="form-row">
                 <div class="input-group" style="flex:1;">
                     <label style="margin-top:0;">Invoice #</label>
-                    <input type="text" id="invNum" placeholder="e.g. INV-001868">
+                    <input type="text" id="invNum" placeholder="Loading from cloud...">
                 </div>
                 <div class="input-group" style="flex:2;">
                     <label style="margin-top:0;">Bill To Address</label>
@@ -439,7 +444,7 @@ pre {
 
             <div style="display: flex; gap: 15px; margin-top: 20px;">
                 <button type="button" style="background:#f39c12; color:#fff; font-weight:bold; font-size:18px; flex:1;" onclick="previewInvoice()">Generate Report</button>
-                <button type="button" style="background:#1e4b85; color:#fff; font-weight:bold; font-size:18px; flex:1;" onclick="printInvoice()">Save to PDF</button>
+                <button type="button" style="background:#1e4b85; color:#fff; font-weight:bold; font-size:18px; flex:1;" onclick="saveAndPrintInvoice()">Save to Cloud & PDF</button>
             </div>
         </div>
     </div>
@@ -529,10 +534,9 @@ function todayDB(){ const d = new Date(); return d.getFullYear() + "-" + pad2(d.
 
 const DEFAULT_PM_WORKDONE = "Changed filters/belts and verified operations of equipment";
 const DEFAULT_PM_NOTES = "All units are running good at this time.";
-const DRAFT_KEY = "hvac_note_tool_v16";
-const HISTORY_KEY = "hvac_site_history_v1";
 
 let currentMode = "PM";
+let fetchedNextInvoice = false; // Prevents fetching over and over
 
 /* ---------- mode switching ---------- */
 function applyMode(){
@@ -551,7 +555,7 @@ function applyMode(){
   historyBtn.classList.remove("active"); invBtn.classList.remove("active");
   
   entrySection.classList.add("hidden"); historySection.classList.add("hidden"); invoiceSection.classList.add("hidden");
-  document.getElementById('printInvoiceView').classList.remove('screen-preview'); // Hide preview on tab switch
+  document.getElementById('printInvoiceView').classList.remove('screen-preview');
 
   if(currentMode === "PM"){
     pmBtn.classList.add("active"); entrySection.classList.remove("hidden");
@@ -564,6 +568,11 @@ function applyMode(){
   } else if (currentMode === "INVOICE") {
     invBtn.classList.add("active"); invoiceSection.classList.remove("hidden");
     if(document.getElementById('invPartsContainer').children.length <= 1) { addInvoicePartRow("Preventative Maintenance parts"); }
+    
+    // FETCH FIREBASE INVOICE NUMBER
+    if(!fetchedNextInvoice) {
+        fetchNextInvoiceNumber();
+    }
   }
 }
 
@@ -571,6 +580,91 @@ document.getElementById("modePM").onclick = function(){ currentMode = "PM"; appl
 document.getElementById("modeService").onclick = function(){ currentMode = "SERVICE"; applyMode(); };
 document.getElementById("modeHistory").onclick = function(){ currentMode = "HISTORY"; applyMode(); };
 document.getElementById("modeInvoice").onclick = function(){ currentMode = "INVOICE"; applyMode(); };
+
+/* ---------- FIREBASE INVOICE LOGIC ---------- */
+async function fetchNextInvoiceNumber() {
+    if (typeof db === 'undefined') {
+        document.getElementById("invNum").value = "INV-1000 (Local)";
+        return;
+    }
+    try {
+        const docRef = db.collection('metadata').doc('invoiceData');
+        const docSnap = await docRef.get();
+        let nextNum = 1000;
+        
+        if (docSnap.exists && docSnap.data().lastInvoiceNumber) {
+            nextNum = docSnap.data().lastInvoiceNumber + 1;
+        } else {
+            // If it doesn't exist yet, we initialize it
+            await docRef.set({ lastInvoiceNumber: 999 });
+        }
+        
+        document.getElementById("invNum").value = "INV-" + nextNum;
+        fetchedNextInvoice = true;
+    } catch (error) {
+        console.error("Firebase connection error:", error);
+        document.getElementById("invNum").value = "INV-XXXX";
+    }
+}
+
+async function saveAndPrintInvoice() {
+    // Generate the HTML view first
+    generateInvoiceHTML();
+    
+    if (typeof db === 'undefined') {
+        alert("Firebase is not connected. Printing locally.");
+        window.print();
+        return;
+    }
+
+    const invNumText = document.getElementById("invNum").value;
+    const billToText = document.getElementById("invBillTo").value;
+    const serviceLoc = document.getElementById("invServiceLoc").value;
+    const grandTotal = document.getElementById("invGrandDisplay").innerText;
+    const clientName = billToText.split('\n')[0] || "Unknown Client";
+
+    // Auto-Generate a dynamic CUST and LOC ID for the database
+    const custId = "CUST-" + Math.floor(1000 + Math.random() * 9000);
+    const locId = "LOC-" + Math.floor(1000 + Math.random() * 9000);
+
+    // Inject the final IDs into the print view right before printing
+    document.getElementById("pBottomCust").innerText = custId + " - " + clientName;
+
+    try {
+        // Save Invoice Data to Cloud
+        await db.collection('invoices').add({
+            invoiceNumber: invNumText,
+            date: todayDB(),
+            customerName: clientName,
+            billTo: billToText,
+            serviceLocation: serviceLoc,
+            totalAmount: grandTotal,
+            customerId: custId,
+            locationId: locId,
+            timestamp: firebase.firestore.FieldValue.serverTimestamp()
+        });
+
+        // Update Master Invoice Counter
+        const numOnly = parseInt(invNumText.replace("INV-", ""));
+        if (!isNaN(numOnly)) {
+             await db.collection('metadata').doc('invoiceData').set({
+                 lastInvoiceNumber: numOnly
+             }, { merge: true });
+        }
+        
+        // Print
+        window.print();
+        
+        // Reset fetch flag so next time tab is opened it grabs the newest number
+        fetchedNextInvoice = false;
+        
+    } catch (error) {
+        console.error("Error saving to cloud:", error);
+        alert("Warning: Could not save invoice to Firebase database. Check Firestore rules. Proceeding to print.");
+        window.print();
+    }
+}
+
 
 /* ---------- SMART INVOICE PARSING LOGIC ---------- */
 
@@ -612,7 +706,6 @@ function parsePastedNotes() {
 
     const loc = extract("Location");
     if (loc) {
-        // Smart format: Place the store name on line 1, address on line 2
         let formattedLoc = loc;
         if(loc.includes(" - ")) {
             formattedLoc = loc.replace(" - ", "\n");
@@ -696,7 +789,6 @@ function generateInvoiceHTML() {
     
     let tableHTML = "";
 
-    // Add Base Work Description as first item if there are no specific parts, but there is work to charge for
     const workDesc = document.getElementById("invWork").value;
     if(workDesc && document.querySelectorAll('.inv-part-line').length === 0) {
        tableHTML += `<tr><td>Preventative Maintenance - ${workDesc}</td><td></td></tr>`;
@@ -744,6 +836,7 @@ function generateInvoiceHTML() {
     document.getElementById("pGrandTotal").innerText = grandStr;
     document.getElementById("pBottomTotal").innerText = grandStr;
     
+    // Fallback Customer string (will get overwritten by saveAndPrintInvoice if saving to cloud)
     const clientName = billToText.split('\n')[0] || "Unknown Client";
     document.getElementById("pBottomCust").innerText = clientName;
     document.getElementById("pBottomInv").innerText = invNum;
@@ -754,11 +847,6 @@ function previewInvoice() {
     const printView = document.getElementById('printInvoiceView');
     printView.classList.add('screen-preview');
     printView.scrollIntoView({ behavior: 'smooth', block: 'start' });
-}
-
-function printInvoice() {
-    generateInvoiceHTML();
-    window.print();
 }
 
 /* ---------- init ---------- */
