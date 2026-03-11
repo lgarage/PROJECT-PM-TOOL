@@ -180,7 +180,16 @@ pre {
 
 /* Print View Formatting for Invoice */
 #printInvoiceView { display: none; padding: 40px; background: #fff; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #000; }
-#printInvoiceView.screen-preview { display: block; margin-top: 40px; border: 1px solid #ccc; box-shadow: 0 10px 30px rgba(0,0,0,0.15); border-radius: 8px; }
+
+/* This class styles the preview exactly like an 8.5x11 sheet of paper */
+#printInvoiceView.screen-preview { 
+    display: block; 
+    margin: 40px auto; 
+    max-width: 850px; 
+    border: 1px solid #ccc; 
+    box-shadow: 0 10px 30px rgba(0,0,0,0.15); 
+    border-radius: 4px; 
+}
 
 .inv-header { display: flex; justify-content: space-between; margin-bottom: 40px; }
 .inv-company h2 { margin: 0; font-size: 22px; color: #000; }
@@ -191,7 +200,7 @@ pre {
 
 .inv-addresses { display: flex; justify-content: space-between; margin-bottom: 30px; }
 .inv-bill-to h4 { margin: 0 0 5px 0; font-size: 14px; }
-.inv-bill-to p { margin: 2px 0; font-size: 14px; }
+.inv-bill-to p { margin: 2px 0; font-size: 14px; line-height: 1.4; }
 
 .inv-tech-notes { margin-bottom: 30px; padding: 15px; background: #f9f9f9; border: 1px solid #ddd; font-size: 14px; line-height: 1.5; }
 .inv-tech-notes p { margin: 5px 0; }
@@ -213,7 +222,8 @@ pre {
 @media print {
     body { background: #fff; margin: 0; padding: 0; }
     .card, .modebar, #entrySection, #historySection, #invoiceBuilder, #draftStatus, button { display: none !important; }
-    #printInvoiceView { display: block !important; width: 100%; padding: 0; border: none; box-shadow: none; margin: 0; }
+    /* Overrides the paper preview look to cleanly stretch across the real printed page */
+    #printInvoiceView { display: block !important; width: 100%; padding: 0; margin: 0; box-shadow: none; border: none; max-width: none; }
 }
 </style>
 </head>
@@ -351,13 +361,17 @@ pre {
         <div class="form-section">
             <h4 style="margin-top:0; color:#1e4b85;">2. Invoice Details & Tech Notes</h4>
             <div class="form-row">
-                <div class="input-group">
+                <div class="input-group" style="flex:1;">
                     <label style="margin-top:0;">Invoice #</label>
                     <input type="text" id="invNum" placeholder="e.g. INV-001868">
                 </div>
                 <div class="input-group" style="flex:2;">
-                    <label style="margin-top:0;">Billing Entity / Location</label>
-                    <input type="text" id="invBillTo" placeholder="Auto-filled from notes...">
+                    <label style="margin-top:0;">Bill To Address</label>
+                    <textarea id="invBillTo" style="min-height: 60px; font-size:13px;" placeholder="Company Name&#10;123 Main St..."></textarea>
+                </div>
+                <div class="input-group" style="flex:2;">
+                    <label style="margin-top:0;">Service Location (Ship To)</label>
+                    <textarea id="invServiceLoc" style="min-height: 60px; font-size:13px;" placeholder="Auto-filled from notes..."></textarea>
                 </div>
             </div>
             
@@ -452,13 +466,11 @@ pre {
     <div class="inv-addresses">
         <div class="inv-bill-to">
             <h4>BILL TO:</h4>
-            <p><strong id="pBillName"></strong></p>
-            <p id="pBillLoc"></p>
+            <p id="pBillName"></p>
         </div>
         <div class="inv-bill-to">
             <h4>SHIP TO:</h4>
-            <p><strong id="pShipName"></strong></p>
-            <p id="pShipLoc"></p>
+            <p id="pShipName"></p>
         </div>
     </div>
 
@@ -573,7 +585,7 @@ function getInvoiceMarkup(cost) {
     return 0.65;
 }
 
-function addInvoicePartRow(desc = "Preventative Maintenance parts") {
+function addInvoicePartRow(desc = "") {
     const container = document.getElementById('invPartsContainer');
     const row = document.createElement('div');
     row.className = 'parts-grid-layout part-row inv-part-line';
@@ -591,7 +603,7 @@ function parsePastedNotes() {
     const text = document.getElementById("invPasteArea").value;
     if (!text) return;
 
-    // Uses \n\n blocks to extract text without letting parentheses break the regex
+    // Smart Extraction utilizing double line breaks to isolate data safely
     const extract = (header) => {
         const regex = new RegExp(`${header}:\\s*\\n(.*?)(?=\\n\\n|$)`, 'is');
         const m = text.match(regex);
@@ -599,7 +611,15 @@ function parsePastedNotes() {
     };
 
     const loc = extract("Location");
-    if (loc) document.getElementById("invBillTo").value = loc;
+    if (loc) {
+        // Smart format: Place the store name on line 1, address on line 2
+        let formattedLoc = loc;
+        if(loc.includes(" - ")) {
+            formattedLoc = loc.replace(" - ", "\n");
+        }
+        document.getElementById("invServiceLoc").value = formattedLoc;
+        document.getElementById("invBillTo").value = formattedLoc; 
+    }
 
     const equip = extract("Equipment on Site") || extract("Equipment worked on");
     if (equip) document.getElementById("invEquip").value = equip.replace(/\n/g, ", ");
@@ -659,19 +679,16 @@ function generateInvoiceHTML() {
     calcInvoice();
     
     const invNum = document.getElementById("invNum").value || "INV-XXXXXX";
-    const billTo = document.getElementById("invBillTo").value || "Client Name";
+    const billToText = document.getElementById("invBillTo").value || "Client Name";
+    const shipToText = document.getElementById("invServiceLoc").value || "Service Location";
     const dateStr = today();
-    
-    let clientName = billTo.split(" - ")[0] || "Unknown Client";
-    let addressLine = billTo.replace(clientName, "").replace(/^- /,"").trim();
     
     document.getElementById("pInvNum").innerText = invNum;
     document.getElementById("pInvDate").innerText = dateStr;
     
-    document.getElementById("pBillName").innerText = clientName;
-    document.getElementById("pBillLoc").innerText = addressLine || "Address On File";
-    document.getElementById("pShipName").innerText = clientName;
-    document.getElementById("pShipLoc").innerText = addressLine || "Address On File";
+    // Inject multi-line addresses correctly
+    document.getElementById("pBillName").innerHTML = billToText.replace(/\n/g, "<br>");
+    document.getElementById("pShipName").innerHTML = shipToText.replace(/\n/g, "<br>");
 
     document.getElementById("pInvEquip").innerText = document.getElementById("invEquip").value || "N/A";
     document.getElementById("pInvNotes").innerText = document.getElementById("invNotes").value || "N/A";
@@ -727,6 +744,7 @@ function generateInvoiceHTML() {
     document.getElementById("pGrandTotal").innerText = grandStr;
     document.getElementById("pBottomTotal").innerText = grandStr;
     
+    const clientName = billToText.split('\n')[0] || "Unknown Client";
     document.getElementById("pBottomCust").innerText = clientName;
     document.getElementById("pBottomInv").innerText = invNum;
 }
