@@ -491,31 +491,44 @@ function formatLocation(raw){
   let t = (raw || "").trim().toLowerCase();
   if(!t) return "";
 
-  // Make the local backup smarter about filler words
+  // Aggressively strip all variations of filler words from the beginning
+  t = t.replace(/^(i am at|i'm at|im at|we are at|heading to|i am in|i'm in|im in|i am on|i'm on|im on)\s+/i, "");
   t = t.replace(/[.,]/g, " ");
-  t = t.replace(/\bi am at\b/g, "");
-  t = t.replace(/\bim at\b/g, "");
-  t = t.replace(/\bi'm at\b/g, "");
-  t = t.replace(/\bi am in\b/g, "");
-  t = t.replace(/\bim in\b/g, "");
-  t = t.replace(/\bi'm in\b/g, "");
-  t = t.replace(/\bwe are at\b/g, "");
-  t = t.replace(/\bwe are in\b/g, "");
+  t = t.replace(/\bthe\b/gi, " "); // Strip "the" to clean up "the Planet Fitness"
   t = t.replace(/\s{2,}/g, " ").trim();
 
   let m;
+  
+  // Variation: [Street] in [City] at [Business] -> "Main Street in Milwaukee at Planet Fitness"
+  m = t.match(/^(.+?)\s+in\s+(.+?)\s+at\s+(.+)$/i);
+  if(m){
+    return `${normalizeSiteName(m[3])} - ${titleCaseWords(m[2])} - ${normalizeStreetSuffix(m[1])}`;
+  }
+
+  // Variation: [City] on [Street] at [Business] -> "Milwaukee on Main Street at Planet Fitness"
+  m = t.match(/^(.+?)\s+on\s+(.+?)\s+at\s+(.+)$/i);
+  if(m){
+    return `${normalizeSiteName(m[3])} - ${titleCaseWords(m[1])} - ${normalizeStreetSuffix(m[2])}`;
+  }
+
+  // Variation: [Business] in [City] on [Street] (Original)
   m = t.match(/^(.+?)\s+in\s+(.+?)\s+on\s+(.+)$/i);
   if(m){
     return `${normalizeSiteName(m[1])} - ${titleCaseWords(m[2])} - ${normalizeStreetSuffix(m[3])}`;
   }
+
+  // Variation: [Business] on [Street] in [City] (Original)
   m = t.match(/^(.+?)\s+on\s+(.+?)\s+in\s+(.+)$/i);
   if(m){
     return `${normalizeSiteName(m[1])} - ${titleCaseWords(m[3])} - ${normalizeStreetSuffix(m[2])}`;
   }
+
+  // Variation: Just [Business] in [City]
   m = t.match(/^(.+?)\s+in\s+(.+)$/i);
   if(m){
     return `${normalizeSiteName(m[1])} - ${titleCaseWords(m[2])}`;
   }
+
   return normalizeSiteName(t);
 }
 
