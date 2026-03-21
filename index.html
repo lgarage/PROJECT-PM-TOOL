@@ -191,8 +191,11 @@ pre {
 </div>
 
 <div id="entrySection">
-  <label>Location</label>
-  <input id="location" placeholder="Example: I'm at the Planet Fitness in Milwaukee on Main Street">
+<label>Location</label>
+  <div style="display: flex; gap: 8px;">
+    <input id="location" style="flex: 1; margin-top: 0;" placeholder="Example: I'm at the Planet Fitness in Milwaukee on Main Street">
+    <button id="locMagicBtn" type="button" style="margin-top: 0; width: auto; background: #1e4b85; color: white; border: none; padding: 0 15px; font-size: 18px; border-radius: 6px;" onclick="parseLocationWithAI()" title="Auto-Format Location">✨</button>
+  </div>
 
   <div id="pmSection">
     <label>Equipment on Site</label>
