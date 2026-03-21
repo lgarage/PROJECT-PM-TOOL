@@ -123,7 +123,7 @@ button:active {
   border-color: #ccc;
 }
 .modebar button.active {
-  background: #1e4b85; /* Twin Pillars Dark Blue */
+  background: #1e4b85; 
   color: #fff;
   border-color: #1e4b85;
 }
@@ -145,63 +145,24 @@ button:active {
   color: #1e4b85;
   font-weight: bold;
 }
-.pillbar button:hover {
-  background: #f0f4f8;
-}
+.pillbar button:hover { background: #f0f4f8; }
 
 /* Primary Action Buttons */
-#generate {
-  background: #c89b53; /* Twin Pillars Gold */
-  color: #fff;
-  border-color: #b58945;
-  font-weight: bold;
-  font-size: 1.1em;
-}
+#generate { background: #c89b53; color: #fff; border-color: #b58945; font-weight: bold; font-size: 1.1em; }
 #generate:hover { background: #b58945; }
-
-#copy {
-  background: #1e4b85;
-  color: #fff;
-  border-color: #153661;
-  font-weight: bold;
-}
+#copy { background: #1e4b85; color: #fff; border-color: #153661; font-weight: bold; }
 #copy:hover { background: #153661; }
-
-#clear {
-  background: #fff;
-  color: #e74c3c;
-  border-color: #e74c3c;
-  font-weight: bold;
-}
+#clear { background: #fff; color: #e74c3c; border-color: #e74c3c; font-weight: bold; }
 #clear:hover { background: #fdf2f1; }
 
-.inline {
-  display: flex;
-  gap: 10px;
-  flex-wrap: wrap;
-  align-items: flex-start;
-}
-.inline .grow {
-  flex: 1 1 320px;
-}
-.inline button {
-  width: auto;
-  background: #1e4b85;
-  color: #fff;
-  border: none;
-}
+.inline { display: flex; gap: 10px; flex-wrap: wrap; align-items: flex-start; }
+.inline .grow { flex: 1 1 320px; }
+.inline button { width: auto; background: #1e4b85; color: #fff; border: none; }
 
 /* Output Area */
 pre {
-  background: #fdfdfd;
-  padding: 20px;
-  white-space: pre-wrap;
-  border-radius: 8px;
-  border: 1px solid #ccc;
-  font-family: inherit;
-  font-size: 15px;
-  line-height: 1.5;
-  color: #2c3e50;
+  background: #fdfdfd; padding: 20px; white-space: pre-wrap; border-radius: 8px;
+  border: 1px solid #ccc; font-family: inherit; font-size: 15px; line-height: 1.5; color: #2c3e50;
 }
 .small { font-size: 13px; opacity: .75; margin-top: 6px; }
 .hidden { display: none !important; }
@@ -494,7 +455,7 @@ let currentHistoryCustomer = "";
 let currentHistoryLocation = "";
 let currentHistorySelectedIndex = 0;
 
-/* ---------- AI AUTO-LOCATION PARSER (JSON UPGRADE) ---------- */
+/* ---------- AI AUTO-LOCATION PARSER (JSON MODE) ---------- */
 async function autoParseLocation() {
     const locInput = document.getElementById('location');
     const rawText = locInput.value.trim();
@@ -509,12 +470,25 @@ async function autoParseLocation() {
     if (btn) btn.innerText = "⏳"; 
 
     if (typeof firebaseConfig !== 'undefined' && firebaseConfig.apiKey) {
-        // The Prompt: Just ask for data. No formatting rules needed!
         const prompt = `
-        Extract the location details from the following spoken text. 
-        Ignore conversational filler like "I'm at", "heading to", "over on".
-        Return ONLY a valid JSON object with the exact keys: "business", "city", and "street".
-        If a piece of information is missing, leave the value as an empty string "".
+        You are an intelligent data extraction AI for an HVAC dispatch system.
+        Extract the Business Name, City, and Street from the technician's spoken text, regardless of the order they are spoken in.
+        
+        RULES:
+        1. IGNORE conversational filler (e.g., "I'm in", "I'm at", "we are", "heading to", "over on", "the", "at").
+        2. Map the extracted entities to a JSON object with EXACTLY these keys: "business", "city", "street".
+        3. Abbreviate street types standardly (e.g., Street -> ST, Avenue -> AVE, Road -> RD, Drive -> DR).
+        4. If a piece of information is missing, leave its value as an empty string "".
+        
+        EXAMPLES OF DIFFERENT ORDERS:
+        Text: "I'm in Milwaukee at Planet Fitness on Main Street"
+        JSON: {"business": "Planet Fitness", "city": "Milwaukee", "street": "Main ST"}
+        
+        Text: "I'm on College Ave at the Target in Appleton"
+        JSON: {"business": "Target", "city": "Appleton", "street": "College AVE"}
+
+        Text: "Planet fitness milwaukee main street"
+        JSON: {"business": "Planet Fitness", "city": "Milwaukee", "street": "Main ST"}
         
         Text: "${rawText}"
         `;
@@ -527,27 +501,21 @@ async function autoParseLocation() {
                     contents: [{ parts: [{ text: prompt }] }], 
                     generationConfig: { 
                         temperature: 0.1,
-                        responseMimeType: "application/json" // FORCES Gemini to output pure JSON
+                        responseMimeType: "application/json"
                     } 
                 })
             });
 
             const data = await response.json();
             if (data.candidates && data.candidates.length > 0) {
-                // 1. Get the JSON string from the AI
                 const aiResponseText = data.candidates[0].content.parts[0].text;
-                
-                // 2. Parse it into a real JavaScript object
                 const locationData = JSON.parse(aiResponseText);
                 
-                // 3. Extract the pieces, convert to UPPERCASE, and filter out any empty ones
                 const business = (locationData.business || "").toUpperCase().trim();
                 const city = (locationData.city || "").toUpperCase().trim();
                 const street = (locationData.street || "").toUpperCase().trim();
                 
-                // 4. Let JavaScript do the formatting! It automatically drops the dashes if a piece is missing.
-                const finalParts = [business, city, street].filter(Boolean); // filter(Boolean) removes empty strings
-                
+                const finalParts = [business, city, street].filter(Boolean);
                 locInput.value = finalParts.join(" - ");
             }
         } catch (error) { 
@@ -561,7 +529,6 @@ async function autoParseLocation() {
     if (btn) btn.innerText = "✨";
 }
 
-/* Make sure the magic button uses the upgraded function too! */
 async function parseLocationWithAI() {
     autoParseLocation();
 }
@@ -1790,7 +1757,6 @@ function wireAutosave(){
     });
   });
 
-  document.getElementById("location").addEventListener("blur", formatLocationField);
   document.getElementById("equipment").addEventListener("blur", formatEquipmentField);
   document.getElementById("used").addEventListener("blur", formatUsedField);
   document.getElementById("next").addEventListener("blur", formatNextField);
@@ -1802,7 +1768,6 @@ function wireAutosave(){
   document.getElementById("quoteEquip").addEventListener("blur", formatQuoteEquipField);
   document.getElementById("quotePartsUsed").addEventListener("blur", formatQuotePartsUsedField);
 
-  addEnterFormatter("location", formatLocationField);
   addEnterFormatter("equipment", formatEquipmentField);
   addEnterFormatter("used", formatUsedField);
   addEnterFormatter("next", formatNextField);
@@ -1841,6 +1806,8 @@ function wireAutosave(){
   // Attach the auto-parser to the location input box
   const locBox = document.getElementById('location');
   if(locBox) {
+      // NOTE: Removed the legacy formatLocationField blur override from wireAutosave and placed AI here.
+      // So it doesn't double-trigger the old logic.
       locBox.addEventListener('blur', autoParseLocation);
   }
 })();
