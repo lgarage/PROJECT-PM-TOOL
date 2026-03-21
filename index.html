@@ -248,10 +248,7 @@ hr.soft { border: none; border-top: 1px solid #e5e5e5; margin: 25px 0; }
 
 <div id="entrySection">
   <label>Location</label>
-  <div style="display: flex; gap: 8px;">
-    <input id="location" style="flex: 1; margin-top: 0;" placeholder="Example: I'm at the Planet Fitness in Milwaukee on Main Street">
-    <button id="locMagicBtn" type="button" style="margin-top: 0; width: auto; background: #1e4b85; color: white; border: none; padding: 0 15px; font-size: 18px; border-radius: 6px;" onclick="autoParseLocation()" title="Auto-Format Location">✨</button>
-  </div>
+  <input id="location" placeholder="Example: I'm at the Planet Fitness in Milwaukee on Main Street">
 
   <div id="pmSection">
     <label>Equipment on Site</label>
@@ -466,9 +463,6 @@ async function autoParseLocation() {
     const originalBg = locInput.style.backgroundColor;
     locInput.style.backgroundColor = '#e8f4fd'; 
 
-    const btn = document.getElementById('locMagicBtn');
-    if (btn) btn.innerText = "⏳"; 
-
     if (typeof firebaseConfig !== 'undefined' && firebaseConfig.apiKey) {
         const prompt = `
         You are an intelligent data extraction AI for an HVAC dispatch system.
@@ -526,11 +520,6 @@ async function autoParseLocation() {
     }
     
     locInput.style.backgroundColor = originalBg;
-    if (btn) btn.innerText = "✨";
-}
-
-async function parseLocationWithAI() {
-    autoParseLocation();
 }
 
 /* ---------- generic helpers ---------- */
@@ -1806,8 +1795,6 @@ function wireAutosave(){
   // Attach the auto-parser to the location input box
   const locBox = document.getElementById('location');
   if(locBox) {
-      // NOTE: Removed the legacy formatLocationField blur override from wireAutosave and placed AI here.
-      // So it doesn't double-trigger the old logic.
       locBox.addEventListener('blur', autoParseLocation);
   }
 })();
