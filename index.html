@@ -567,7 +567,7 @@ function applyMode(){
     historyBtn.classList.add("active"); historySection.classList.remove("hidden");
   } else if (currentMode === "INVOICE") {
     invBtn.classList.add("active"); invoiceSection.classList.remove("hidden");
-    if(document.getElementById('invPartsContainer').children.length <= 1) { addInvoicePartRow("Preventative Maintenance parts"); }
+    if(document.getElementById('invPartsContainer').children.length <= 1) { addInvoicePartRow("Repair / Maintenance parts"); }
     
     // FETCH FIREBASE INVOICE NUMBER
     if(!fetchedNextInvoice) {
