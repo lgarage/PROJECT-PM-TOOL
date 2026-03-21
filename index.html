@@ -487,7 +487,15 @@ async function parseLocationWithAI() {
 
   
 /* ---------- init ---------- */
-(function init(){ applyMode(); })();
+(function init(){ 
+    applyMode(); 
+    
+    // Attach the auto-parser to the location input box
+    const locBox = document.getElementById('location');
+    if(locBox) {
+        locBox.addEventListener('blur', autoParseLocation);
+    }
+})();
 </script>
 </body>
 </html>
