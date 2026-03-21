@@ -514,7 +514,7 @@ function formatLocation(raw){
   return normalizeSiteName(t);
 }
 
-/* ---------- AI AUTO-LOCATION PARSER (BULLETPROOF) ---------- */
+/* ---------- AI AUTO-LOCATION PARSER (BULLETPROOF RANDOM ORDER) ---------- */
 async function autoParseLocation() {
     const locInput = document.getElementById('location');
     const rawText = locInput.value.trim();
@@ -536,6 +536,7 @@ async function autoParseLocation() {
     };
 
     if (typeof firebaseConfig !== 'undefined' && firebaseConfig.apiKey) {
+        // PROMPT UPDATED WITH YOUR EXACT VARIATIONS
         const prompt = `
         You are an intelligent data extraction AI for an HVAC dispatch system.
         Your only job is to figure out which part of the text is the Business Name, which is the City, and which is the Street.
@@ -543,24 +544,24 @@ async function autoParseLocation() {
         
         RULES:
         1. Identify the Business, City, and Street, REGARDLESS of the order they are spoken.
-        2. IGNORE conversational filler (e.g., "I'm in", "I am at", "we are", "heading to", "over on", "the", "at", "and").
+        2. IGNORE conversational filler (e.g., "I'm in", "I am at", "we are", "heading to", "over on", "the", "at", "and", "on").
         3. Map the extracted entities to a JSON object with EXACTLY these keys: "business", "city", "street".
         4. Abbreviate street types standardly (e.g., Street -> ST, Avenue -> AVE, Road -> RD, Drive -> DR).
         5. If a piece of information is missing entirely, leave its value as an empty string "".
         6. Output ONLY the raw JSON format. No backticks, no markdown formatting.
         
         EXAMPLES OF EXTREME RANDOM ORDERS:
-        Text: "Milwaukee, Main Street, and Planet Fitness"
+        Text: "I'm on Main Street at the Planet Fitness in Milwaukee"
+        Output: {"business": "Planet Fitness", "city": "Milwaukee", "street": "Main ST"}
+
+        Text: "I'm in Milwaukee on Main Street at the Planet Fitness"
+        Output: {"business": "Planet Fitness", "city": "Milwaukee", "street": "Main ST"}
+
+        Text: "I am at Planet Fitness in Milwaukee on Main Street"
         Output: {"business": "Planet Fitness", "city": "Milwaukee", "street": "Main ST"}
 
         Text: "I'm on College Ave at the Target in Appleton"
         Output: {"business": "Target", "city": "Appleton", "street": "College AVE"}
-
-        Text: "Green Bay McDonald's Oneida Street"
-        Output: {"business": "McDonald's", "city": "Green Bay", "street": "Oneida ST"}
-
-        Text: "Planet fitness milwaukee main street"
-        Output: {"business": "Planet Fitness", "city": "Milwaukee", "street": "Main ST"}
         
         Text: "${rawText}"
         Output:
