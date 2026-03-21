@@ -1552,7 +1552,7 @@ document.getElementById("generate").onclick = function(){
       report
     };
     
-  } else if(currentMode === "QUOTE") {
+} else if(currentMode === "QUOTE") {
     formatQuoteEquipField();
 
     const quoteEquipRaw = document.getElementById("quoteEquip").value || "";
@@ -1562,7 +1562,10 @@ document.getElementById("generate").onclick = function(){
 
     const issue = document.getElementById("quoteIssue").value.trim() || "Not listed.";
     const repairsCompleted = document.getElementById("quoteRepairs").value.trim() || "None.";
-    const testing = document.getElementById("quoteTesting").value.trim() || "Not listed.";
+    
+    // THIS IS THE LINE THAT CHANGED:
+    const testing = document.getElementById("quoteTesting").value.trim() || "Tested and verified operations.";
+    
     const recs = document.getElementById("quoteRecs").value.trim() || "None.";
 
     report = `QUOTED REPAIR\n\nLocation:\n${location}\n\nDate:\n${date}\n\nEquipment Repaired:\n${quoteEquipDisplay}\n\nOriginal Issue Resolved:\n${issue}\n\nRepairs Completed:\n${repairsCompleted}\n\nSystem Testing & Verification:\n${testing}\n\nFurther Recommendations:\n${recs}\n\nPictures:\nRepair photos attached.\n`;
@@ -1575,7 +1578,7 @@ document.getElementById("generate").onclick = function(){
       equipmentRepaired: quoteEquipDisplay,
       originalIssue: issue,
       repairsCompleted: repairsCompleted,
-      partsUsed: "NONE",
+      partsUsed: "NONE", // Hardcoded since we removed the parts box
       testingVerification: testing,
       recommendations: recs,
       report
