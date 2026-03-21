@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Tech Note Tool & Invoicing | Twin Pillars</title>
+<title>Tech Note Tool | Twin Pillars</title>
 
 <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore-compat.js"></script>
@@ -167,68 +167,9 @@ pre {
 .small { font-size: 13px; opacity: .75; margin-top: 6px; }
 .hidden { display: none !important; }
 
-/* --- INVOICE TAB STYLING --- */
-#invoiceBuilder { background: #fff; border-radius: 8px; }
-.form-section { background: #fcfdfe; border: 1px solid #eaeaea; padding: 20px; margin-bottom: 20px; border-radius: 6px; }
-.form-row { display: flex; gap: 20px; margin-bottom: 15px; flex-wrap: wrap; }
-.input-group { display: flex; flex-direction: column; flex: 1; min-width: 200px; }
-
-/* Dynamic Parts Layout */
-.parts-grid-layout { display: grid; grid-template-columns: 60px 1fr 120px 100px 40px; gap: 10px; align-items: center; }
-.part-row { margin-bottom: 10px; }
-.part-row input { padding: 10px; margin: 0; font-size: 14px; }
-.cost-wrapper { display: flex; align-items: center; gap: 5px; font-weight: bold; }
-.add-part-btn { background-color: #3498db; color: #fff; border: none; padding: 10px 15px; margin-top: 10px; width: auto; }
-.remove-part-btn { background-color: #e74c3c; color: #fff; border: none; padding: 8px; width: 100%; margin-top:0;}
-
-.inv-total-row { display: flex; justify-content: space-between; padding: 10px 0; font-weight: bold; border-top: 1px solid #ccc; margin-top: 15px; }
-
-/* Print View Formatting for Invoice */
-#printInvoiceView { display: none; padding: 40px; background: #fff; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #000; }
-
-/* This class styles the preview exactly like an 8.5x11 sheet of paper */
-#printInvoiceView.screen-preview { 
-    display: block; 
-    margin: 40px auto; 
-    max-width: 850px; 
-    border: 1px solid #ccc; 
-    box-shadow: 0 10px 30px rgba(0,0,0,0.15); 
-    border-radius: 4px; 
-}
-
-.inv-header { display: flex; justify-content: space-between; margin-bottom: 40px; }
-.inv-company h2 { margin: 0; font-size: 22px; color: #000; }
-.inv-company p { margin: 2px 0; font-size: 14px; }
-.inv-details { text-align: right; }
-.inv-title-large { font-size: 36px; color: #4a7ebb; font-weight: bold; letter-spacing: 2px; margin-bottom: 15px; }
-.inv-details p { margin: 2px 0; font-size: 14px; }
-
-.inv-addresses { display: flex; justify-content: space-between; margin-bottom: 30px; }
-.inv-bill-to h4 { margin: 0 0 5px 0; font-size: 14px; }
-.inv-bill-to p { margin: 2px 0; font-size: 14px; line-height: 1.4; }
-
-.inv-tech-notes { margin-bottom: 30px; padding: 15px; background: #f9f9f9; border: 1px solid #ddd; font-size: 14px; line-height: 1.5; }
-.inv-tech-notes p { margin: 5px 0; }
-
-.inv-table { width: 100%; border-collapse: collapse; margin-bottom: 30px; font-size: 14px; }
-.inv-table th, .inv-table td { padding: 10px; border: 1px solid #000; text-align: left; }
-.inv-table th { background: #e6eef5; color: #1e4b85; font-weight: bold; }
-.inv-table td:last-child, .inv-table th:last-child { text-align: right; width: 120px; }
-
-.inv-summary { width: 100%; display: flex; justify-content: flex-end; margin-bottom: 50px; }
-.inv-summary-box { width: 300px; }
-.inv-sum-row { display: flex; justify-content: space-between; padding: 5px 0; font-size: 14px; font-weight: bold; }
-.inv-sum-row.grand { font-size: 16px; border-top: 2px solid #000; padding-top: 10px; margin-top: 5px; }
-
-.inv-tear-off { border-top: 2px dashed #000; padding-top: 40px; margin-top: 60px; display: flex; justify-content: space-between; }
-.inv-tear-left h4 { margin: 0 0 5px 0; font-size: 18px; }
-.inv-tear-left p { margin: 2px 0; font-size: 14px; }
-
 @media print {
     body { background: #fff; margin: 0; padding: 0; }
-    .card, .modebar, #entrySection, #historySection, #invoiceBuilder, #draftStatus, button { display: none !important; }
-    /* Overrides the paper preview look to cleanly stretch across the real printed page */
-    #printInvoiceView { display: block !important; width: 100%; padding: 0; margin: 0; box-shadow: none; border: none; max-width: none; }
+    .card, .modebar, #entrySection, #historySection, button { display: none !important; }
 }
 </style>
 </head>
@@ -245,8 +186,8 @@ pre {
 <div class="modebar">
   <button id="modePM" type="button" class="active">PM</button>
   <button id="modeService" type="button">SERVICE CALL</button>
+  <button id="modeQuote" type="button">QUOTED REPAIR</button>
   <button id="modeHistory" type="button">HISTORY</button>
-  <button id="modeInvoice" type="button">INVOICE</button>
 </div>
 
 <div id="entrySection">
@@ -325,6 +266,35 @@ pre {
     <textarea id="recommendations" placeholder="Example: Replace RTU1 due to cracked heat exchanger."></textarea>
   </div>
 
+  <div id="quoteSection" class="hidden">
+    <label>Equipment Repaired</label>
+    <textarea id="quoteEquip" placeholder="Example: RTU1 on the roof..."></textarea>
+    
+    <div class="pillbar">
+      <button id="addQuoteRTU" type="button">+ RTU</button>
+      <button id="addQuoteF" type="button">+ Furnace</button>
+      <button id="addQuoteUH" type="button">+ Unit Heater</button>
+      <button id="addQuoteRH" type="button">+ Radiant Heater</button>
+      <button id="addQuoteEF" type="button">+ Exhaust Fan</button>
+      <button id="addQuoteMUA" type="button">+ MUA</button>
+    </div>
+
+    <label>Original Issue Resolved</label>
+    <textarea id="quoteIssue" placeholder="Example: Completing quoted repair for bad inducer motor."></textarea>
+
+    <label>Repairs Completed</label>
+    <textarea id="quoteRepairs" placeholder="Example: Removed old inducer motor and installed new OEM motor. Cleaned pressure switch tubing."></textarea>
+
+    <label>Parts Installed</label>
+    <textarea id="quotePartsUsed" placeholder="Example: 1 Fasco Inducer Motor assembly"></textarea>
+
+    <label>System Testing & Verification</label>
+    <textarea id="quoteTesting" placeholder="Example: Cycled heat multiple times, verified proper draft pressure and ignition sequence. Unit is running normally."></textarea>
+
+    <label>Further Recommendations</label>
+    <textarea id="quoteRecs" placeholder="Example: No further issues found at this time."></textarea>
+  </div>
+
   <button id="generate" type="button">Generate Report</button>
   <button id="copy" type="button">Copy Report</button>
   <button id="clear" type="button">Clear Current Mode</button>
@@ -354,177 +324,7 @@ pre {
   </div>
 </div>
 
-<div id="invoiceSection" class="hidden">
-    <div id="invoiceBuilder">
-        
-        <div class="form-section">
-            <h4 style="margin-top:0; color:#1e4b85;">1. Paste Tech Notes Here</h4>
-            <p style="font-size: 13px; color: #666; margin-top:2px;">Paste the exact output block from a PM or Service Call. The system will auto-read it.</p>
-            <textarea id="invPasteArea" placeholder="Paste report here..." style="min-height: 120px; background: #fffde7; border-color: #c89b53;" oninput="parsePastedNotes()"></textarea>
-        </div>
-
-        <div class="form-section">
-            <h4 style="margin-top:0; color:#1e4b85;">2. Invoice Details & Tech Notes</h4>
-            <div class="form-row">
-                <div class="input-group" style="flex:1;">
-                    <label style="margin-top:0;">Invoice #</label>
-                    <input type="text" id="invNum" placeholder="Loading from cloud...">
-                </div>
-                <div class="input-group" style="flex:2;">
-                    <label style="margin-top:0;">Bill To Address</label>
-                    <textarea id="invBillTo" style="min-height: 60px; font-size:13px;" placeholder="Company Name&#10;123 Main St..."></textarea>
-                </div>
-                <div class="input-group" style="flex:2;">
-                    <label style="margin-top:0;">Service Location</label>
-                    <textarea id="invServiceLoc" style="min-height: 60px; font-size:13px;" placeholder="Auto-filled from notes..."></textarea>
-                </div>
-            </div>
-            
-            <div class="form-row">
-                <div class="input-group" style="flex: 1;">
-                    <label style="margin-top:0;">Equipment on Site</label>
-                    <textarea id="invEquip" style="min-height: 60px; font-size:13px;"></textarea>
-                </div>
-                <div class="input-group" style="flex: 1;">
-                    <label style="margin-top:0;">Notes / Repairs</label>
-                    <textarea id="invNotes" style="min-height: 60px; font-size:13px;"></textarea>
-                </div>
-                <div class="input-group" style="flex: 1;">
-                    <label style="margin-top:0;">Work Done</label>
-                    <textarea id="invWork" style="min-height: 60px; font-size:13px;"></textarea>
-                </div>
-            </div>
-        </div>
-
-        <div class="form-section">
-            <h4 style="margin-top:0; color:#1e4b85;">3. Labor & Truck Charges</h4>
-            <div class="form-row">
-                <div class="input-group">
-                    <label style="margin-top:0;">Repair Labor Hours</label>
-                    <input type="number" id="invLaborHours" value="1.0" step="0.1" oninput="calcInvoice()">
-                </div>
-                <div class="input-group">
-                    <label style="margin-top:0;">Labor Cost (per hour) $</label>
-                    <input type="number" id="invLaborRate" value="175.00" step="0.01" oninput="calcInvoice()">
-                </div>
-                <div class="input-group">
-                    <label style="margin-top:0;">Truck Charge $</label>
-                    <input type="number" id="invTruckCharge" value="175.00" step="0.01" oninput="calcInvoice()">
-                </div>
-            </div>
-        </div>
-
-        <div class="form-section">
-            <h4 style="margin-top:0; color:#1e4b85;">4. Parts List & Automatic Markup</h4>
-            <div id="invPartsContainer">
-                <div class="parts-grid-layout" style="font-size:12px; font-weight:bold; margin-bottom:5px;">
-                    <label style="margin:0;">QTY</label>
-                    <label style="margin:0;">Part Description</label>
-                    <label style="margin:0;">Our Cost $</label>
-                    <label style="margin:0; color:#27ae60;">Retail $ (Auto)</label>
-                    <label style="margin:0;"></label>
-                </div>
-                </div>
-            <button type="button" class="add-part-btn" onclick="addInvoicePartRow('Repair / Maintenance parts')">+ Add Part</button>
-        </div>
-
-        <div class="form-section" style="background:#fff;">
-            <div class="inv-total-row">
-                <span>Subtotal:</span>
-                <span id="invSubtotalDisplay">$0.00</span>
-            </div>
-            <div class="inv-total-row" style="border-top: none; padding-top: 0; color:#555; font-size:14px;">
-                <span>Sales Tax (5.5%):</span>
-                <span id="invTaxDisplay">$0.00</span>
-            </div>
-            <div class="inv-total-row" style="color:#27ae60; font-size:18px;">
-                <span>GRAND TOTAL:</span>
-                <span id="invGrandDisplay">$0.00</span>
-            </div>
-
-            <div style="display: flex; gap: 15px; margin-top: 20px;">
-                <button type="button" style="background:#f39c12; color:#fff; font-weight:bold; font-size:18px; flex:1;" onclick="previewInvoice()">Generate Report</button>
-                <button type="button" style="background:#1e4b85; color:#fff; font-weight:bold; font-size:18px; flex:1;" onclick="saveAndPrintInvoice()">Save to Cloud & PDF</button>
-            </div>
-        </div>
-    </div>
-</div>
-
-</div> <div id="printInvoiceView">
-    <div class="inv-header">
-        <div class="inv-company">
-            <h2>Twin Pillars Heating & Cooling LLC</h2>
-            <p>55 Jewelers Park Drive Suite 500</p>
-            <p>Neenah, WI 54956</p>
-            <p>920-441-5916</p>
-        </div>
-        <div class="inv-details">
-            <div class="inv-title-large">INVOICE</div>
-            <p><strong>INVOICE #:</strong> <span id="pInvNum"></span></p>
-            <p><strong>DATE:</strong> <span id="pInvDate"></span></p>
-            <br>
-            <p><strong>TOTAL AMOUNT:</strong> <span id="pTotal1"></span></p>
-            <p><strong>TOTAL DUE:</strong> <span id="pTotal2"></span></p>
-        </div>
-    </div>
-
-    <div class="inv-addresses">
-        <div class="inv-bill-to">
-            <h4>BILL TO:</h4>
-            <p id="pBillName"></p>
-        </div>
-        <div class="inv-bill-to">
-            <h4>SERVICE LOCATION:</h4>
-            <p id="pShipName"></p>
-        </div>
-    </div>
-
-    <div class="inv-tech-notes">
-        <p><strong>Equipment on Site:</strong> <span id="pInvEquip"></span></p>
-        <p><strong>Notes / Repairs:</strong> <span id="pInvNotes"></span></p>
-        <p><strong>Work Done:</strong> <span id="pInvWork"></span></p>
-    </div>
-
-    <table class="inv-table">
-        <thead>
-            <tr>
-                <th>DESCRIPTION / MEMO</th>
-                <th>AMOUNT</th>
-            </tr>
-        </thead>
-        <tbody id="pInvTableBody">
-            </tbody>
-    </table>
-
-    <div class="inv-summary">
-        <div class="inv-summary-box">
-            <div class="inv-sum-row grand">
-                <span>TOTAL AMOUNT:</span>
-                <span id="pGrandTotal"></span>
-            </div>
-        </div>
-    </div>
-
-    <div class="inv-tear-off">
-        <div class="inv-tear-left">
-            <h4>Twin Pillars Heating & Cooling LLC</h4>
-            <p>55 Jewelers Park Drive Suite 500</p>
-            <p>Neenah, WI 54956</p>
-            <p>920-441-5916</p>
-            <br><br>
-            <p>Customer ID - Name: <span id="pBottomCust"></span></p>
-            <p>Invoice #: <span id="pBottomInv"></span></p>
-        </div>
-        <div style="width: 300px; padding-top: 20px;">
-            <div style="display:flex; justify-content:space-between; margin-bottom:15px; font-size:14px;">
-                <strong>TOTAL DUE:</strong> <span id="pBottomTotal"></span>
-            </div>
-            <div style="border-bottom: 1px solid #000; margin-bottom: 5px; height: 15px;"></div>
-            <div style="font-size:12px;">AMOUNT ENCLOSED:</div>
-        </div>
-    </div>
-</div>
-
+</div> 
 
 <script>
 /* ---------- basics ---------- */
@@ -536,318 +336,54 @@ const DEFAULT_PM_WORKDONE = "Changed filters/belts and verified operations of eq
 const DEFAULT_PM_NOTES = "All units are running good at this time.";
 
 let currentMode = "PM";
-let fetchedNextInvoice = false; // Prevents fetching over and over
 
 /* ---------- mode switching ---------- */
 function applyMode(){
   const pmBtn = document.getElementById("modePM");
   const serviceBtn = document.getElementById("modeService");
+  const quoteBtn = document.getElementById("modeQuote");
   const historyBtn = document.getElementById("modeHistory");
-  const invBtn = document.getElementById("modeInvoice");
   
   const entrySection = document.getElementById("entrySection");
   const historySection = document.getElementById("historySection");
   const pmSection = document.getElementById("pmSection");
   const serviceSection = document.getElementById("serviceSection");
-  const invoiceSection = document.getElementById("invoiceSection");
+  const quoteSection = document.getElementById("quoteSection");
 
-  pmBtn.classList.remove("active"); serviceBtn.classList.remove("active");
-  historyBtn.classList.remove("active"); invBtn.classList.remove("active");
+  pmBtn.classList.remove("active"); 
+  serviceBtn.classList.remove("active");
+  quoteBtn.classList.remove("active");
+  historyBtn.classList.remove("active");
   
-  entrySection.classList.add("hidden"); historySection.classList.add("hidden"); invoiceSection.classList.add("hidden");
-  document.getElementById('printInvoiceView').classList.remove('screen-preview');
+  entrySection.classList.add("hidden"); 
+  historySection.classList.add("hidden"); 
+  pmSection.classList.add("hidden");
+  serviceSection.classList.add("hidden");
+  quoteSection.classList.add("hidden");
 
   if(currentMode === "PM"){
-    pmBtn.classList.add("active"); entrySection.classList.remove("hidden");
-    pmSection.classList.remove("hidden"); serviceSection.classList.add("hidden");
+    pmBtn.classList.add("active"); 
+    entrySection.classList.remove("hidden");
+    pmSection.classList.remove("hidden"); 
   } else if(currentMode === "SERVICE"){
-    serviceBtn.classList.add("active"); entrySection.classList.remove("hidden");
-    serviceSection.classList.remove("hidden"); pmSection.classList.add("hidden");
+    serviceBtn.classList.add("active"); 
+    entrySection.classList.remove("hidden");
+    serviceSection.classList.remove("hidden"); 
+  } else if (currentMode === "QUOTE") {
+    quoteBtn.classList.add("active"); 
+    entrySection.classList.remove("hidden");
+    quoteSection.classList.remove("hidden");
   } else if (currentMode === "HISTORY") {
-    historyBtn.classList.add("active"); historySection.classList.remove("hidden");
-  } else if (currentMode === "INVOICE") {
-    invBtn.classList.add("active"); invoiceSection.classList.remove("hidden");
-    if(document.getElementById('invPartsContainer').children.length <= 1) { addInvoicePartRow("Repair / Maintenance parts"); }
-    
-    // FETCH FIREBASE INVOICE NUMBER
-    if(!fetchedNextInvoice) {
-        fetchNextInvoiceNumber();
-    }
+    historyBtn.classList.add("active"); 
+    historySection.classList.remove("hidden");
   }
 }
 
 document.getElementById("modePM").onclick = function(){ currentMode = "PM"; applyMode(); };
 document.getElementById("modeService").onclick = function(){ currentMode = "SERVICE"; applyMode(); };
+document.getElementById("modeQuote").onclick = function(){ currentMode = "QUOTE"; applyMode(); };
 document.getElementById("modeHistory").onclick = function(){ currentMode = "HISTORY"; applyMode(); };
-document.getElementById("modeInvoice").onclick = function(){ currentMode = "INVOICE"; applyMode(); };
 
-/* ---------- FIREBASE INVOICE LOGIC ---------- */
-async function fetchNextInvoiceNumber() {
-    if (typeof db === 'undefined') {
-        document.getElementById("invNum").value = "INV-1000 (Local)";
-        return;
-    }
-    try {
-        const docRef = db.collection('metadata').doc('invoiceData');
-        const docSnap = await docRef.get();
-        let nextNum = 1000;
-        
-        if (docSnap.exists && docSnap.data().lastInvoiceNumber) {
-            nextNum = docSnap.data().lastInvoiceNumber + 1;
-        } else {
-            // If it doesn't exist yet, we initialize it
-            await docRef.set({ lastInvoiceNumber: 999 });
-        }
-        
-        document.getElementById("invNum").value = "INV-" + nextNum;
-        fetchedNextInvoice = true;
-    } catch (error) {
-        console.error("Firebase connection error:", error);
-        document.getElementById("invNum").value = "INV-XXXX";
-    }
-}
-
-async function saveAndPrintInvoice() {
-    // Generate the HTML view first
-    generateInvoiceHTML();
-    
-    if (typeof db === 'undefined') {
-        alert("Firebase is not connected. Printing locally.");
-        window.print();
-        return;
-    }
-
-    const invNumText = document.getElementById("invNum").value;
-    const billToText = document.getElementById("invBillTo").value;
-    const serviceLoc = document.getElementById("invServiceLoc").value;
-    const grandTotal = document.getElementById("invGrandDisplay").innerText;
-    const clientName = billToText.split('\n')[0] || "Unknown Client";
-
-    // Auto-Generate a dynamic CUST and LOC ID for the database
-    const custId = "CUST-" + Math.floor(1000 + Math.random() * 9000);
-    const locId = "LOC-" + Math.floor(1000 + Math.random() * 9000);
-
-    // Inject the final IDs into the print view right before printing
-    document.getElementById("pBottomCust").innerText = custId + " - " + clientName;
-
-    try {
-        // Save Invoice Data to Cloud
-        await db.collection('invoices').add({
-            invoiceNumber: invNumText,
-            date: todayDB(),
-            customerName: clientName,
-            billTo: billToText,
-            serviceLocation: serviceLoc,
-            totalAmount: grandTotal,
-            customerId: custId,
-            locationId: locId,
-            timestamp: firebase.firestore.FieldValue.serverTimestamp()
-        });
-
-        // Update Master Invoice Counter
-        const numOnly = parseInt(invNumText.replace("INV-", ""));
-        if (!isNaN(numOnly)) {
-             await db.collection('metadata').doc('invoiceData').set({
-                 lastInvoiceNumber: numOnly
-             }, { merge: true });
-        }
-        
-        // Print
-        window.print();
-        
-        // Reset fetch flag so next time tab is opened it grabs the newest number
-        fetchedNextInvoice = false;
-        
-    } catch (error) {
-        console.error("Error saving to cloud:", error);
-        alert("Warning: Could not save invoice to Firebase database. Check Firestore rules. Proceeding to print.");
-        window.print();
-    }
-}
-
-
-/* ---------- SMART INVOICE PARSING LOGIC ---------- */
-
-function getInvoiceMarkup(cost) {
-    if (cost <= 5) return 4.00;
-    if (cost <= 10) return 3.00;
-    if (cost <= 15) return 2.00;
-    if (cost <= 100) return 1.50;
-    if (cost <= 500) return 1.00;
-    if (cost <= 1000) return 0.85;
-    if (cost <= 1500) return 0.75;
-    return 0.65;
-}
-
-function addInvoicePartRow(desc = "") {
-    const container = document.getElementById('invPartsContainer');
-    const row = document.createElement('div');
-    row.className = 'parts-grid-layout part-row inv-part-line';
-    row.innerHTML = `
-        <input type="number" class="p-qty" value="1" min="1" oninput="calcInvoice()">
-        <input type="text" class="p-desc" value="${desc}" placeholder="Part Description">
-        <div class="cost-wrapper"><span>$</span><input type="number" class="p-cost" placeholder="0.00" step="0.01" min="0" oninput="calcInvoice()"></div>
-        <div class="cost-wrapper" style="color:#27ae60;"><span>$</span><input type="text" class="p-retail" value="0.00" readonly style="background:transparent; border:none; font-weight:bold; width:100%; outline:none;"></div>
-        <div style="text-align: right;"><button type="button" class="remove-part-btn" onclick="this.parentElement.parentElement.remove(); calcInvoice();">X</button></div>
-    `;
-    container.appendChild(row);
-}
-
-function parsePastedNotes() {
-    const text = document.getElementById("invPasteArea").value;
-    if (!text) return;
-
-    // Smart Extraction utilizing double line breaks to isolate data safely
-    const extract = (header) => {
-        const regex = new RegExp(`${header}:\\s*\\n(.*?)(?=\\n\\n|$)`, 'is');
-        const m = text.match(regex);
-        return m && m[1] ? m[1].trim() : "";
-    };
-
-    const loc = extract("Location");
-    if (loc) {
-        let formattedLoc = loc;
-        if(loc.includes(" - ")) {
-            formattedLoc = loc.replace(" - ", "\n");
-        }
-        document.getElementById("invServiceLoc").value = formattedLoc;
-        document.getElementById("invBillTo").value = formattedLoc; 
-    }
-
-    const equip = extract("Equipment on Site") || extract("Equipment worked on");
-    if (equip) document.getElementById("invEquip").value = equip.replace(/\n/g, ", ");
-
-    const notes = extract("Notes / Repairs") || extract("Findings / Diagnosis");
-    if (notes) document.getElementById("invNotes").value = notes;
-
-    const work = extract("Work done") || extract("Repairs made");
-    if (work) document.getElementById("invWork").value = work;
-
-    const parts = extract("Parts used");
-    if (parts && parts.toUpperCase() !== "NONE") {
-        document.getElementById('invPartsContainer').innerHTML = `<div class="parts-grid-layout" style="font-size:12px; font-weight:bold; margin-bottom:5px;"><label style="margin:0;">QTY</label><label style="margin:0;">Part Description</label><label style="margin:0;">Our Cost $</label><label style="margin:0; color:#27ae60;">Retail $ (Auto)</label><label style="margin:0;"></label></div>`;
-        addInvoicePartRow("Preventative Maintenance parts"); 
-    }
-    
-    calcInvoice();
-}
-
-function calcInvoice() {
-    let partsRetailTotal = 0;
-    
-    document.querySelectorAll('.inv-part-line').forEach(row => {
-        const qty = parseInt(row.querySelector('.p-qty').value) || 1;
-        const cost = parseFloat(row.querySelector('.p-cost').value) || 0;
-        
-        let retailUnit = 0;
-        if(cost > 0) {
-            const markup = getInvoiceMarkup(cost);
-            retailUnit = cost + (cost * markup);
-        }
-        
-        const lineRetailTotal = retailUnit * qty;
-        row.querySelector('.p-retail').value = retailUnit.toFixed(2);
-        
-        if(row.querySelector('.p-desc').value.trim() !== "") {
-            partsRetailTotal += lineRetailTotal;
-        }
-    });
-
-    const hours = parseFloat(document.getElementById("invLaborHours").value) || 0;
-    const rate = parseFloat(document.getElementById("invLaborRate").value) || 0;
-    const laborTotal = hours * rate;
-    
-    const trip = parseFloat(document.getElementById("invTruckCharge").value) || 0;
-    
-    const sub = partsRetailTotal + laborTotal + trip;
-    const tax = sub * 0.055;
-    const grand = sub + tax;
-    
-    document.getElementById("invSubtotalDisplay").innerText = "$" + sub.toFixed(2);
-    document.getElementById("invTaxDisplay").innerText = "$" + tax.toFixed(2);
-    document.getElementById("invGrandDisplay").innerText = "$" + grand.toFixed(2);
-}
-
-function generateInvoiceHTML() {
-    calcInvoice();
-    
-    const invNum = document.getElementById("invNum").value || "INV-XXXXXX";
-    const billToText = document.getElementById("invBillTo").value || "Client Name";
-    const shipToText = document.getElementById("invServiceLoc").value || "Service Location";
-    const dateStr = today();
-    
-    document.getElementById("pInvNum").innerText = invNum;
-    document.getElementById("pInvDate").innerText = dateStr;
-    
-    // Inject multi-line addresses correctly
-    document.getElementById("pBillName").innerHTML = billToText.replace(/\n/g, "<br>");
-    document.getElementById("pShipName").innerHTML = shipToText.replace(/\n/g, "<br>");
-
-    document.getElementById("pInvEquip").innerText = document.getElementById("invEquip").value || "N/A";
-    document.getElementById("pInvNotes").innerText = document.getElementById("invNotes").value || "N/A";
-    document.getElementById("pInvWork").innerText = document.getElementById("invWork").value || "N/A";
-    
-    let tableHTML = "";
-
-    const workDesc = document.getElementById("invWork").value;
-    if(workDesc && document.querySelectorAll('.inv-part-line').length === 0) {
-       tableHTML += `<tr><td>Preventative Maintenance - ${workDesc}</td><td></td></tr>`;
-    }
-
-    // Build Parts Rows
-    let partsSubtotal = 0;
-    document.querySelectorAll('.inv-part-line').forEach(row => {
-        const qty = parseInt(row.querySelector('.p-qty').value) || 1;
-        const desc = row.querySelector('.p-desc').value.trim();
-        const retailUnit = parseFloat(row.querySelector('.p-retail').value) || 0;
-        const lineTotal = retailUnit * qty;
-        
-        if(desc !== "") {
-            let descDisplay = qty > 1 ? `${qty}x ${desc}` : desc;
-            tableHTML += `<tr><td>${descDisplay}</td><td>$${lineTotal.toFixed(2)}</td></tr>`;
-            partsSubtotal += lineTotal;
-        }
-    });
-    
-    // Build Labor & Trip Rows (Hidden Math)
-    const hours = parseFloat(document.getElementById("invLaborHours").value) || 0;
-    const rate = parseFloat(document.getElementById("invLaborRate").value) || 0;
-    const laborTotal = hours * rate;
-    const trip = parseFloat(document.getElementById("invTruckCharge").value) || 0;
-
-    if(laborTotal > 0) {
-        tableHTML += `<tr><td>Labor charge</td><td>$${laborTotal.toFixed(2)}</td></tr>`;
-    }
-    if(trip > 0) {
-        tableHTML += `<tr><td>Trip charge</td><td>$${trip.toFixed(2)}</td></tr>`;
-    }
-    
-    const sub = partsSubtotal + laborTotal + trip;
-    const tax = sub * 0.055;
-    const grand = sub + tax;
-    
-    if(tax > 0) tableHTML += `<tr><td>Sales Tax (5.5%)</td><td>$${tax.toFixed(2)}</td></tr>`;
-    
-    document.getElementById("pInvTableBody").innerHTML = tableHTML;
-    
-    const grandStr = "$" + grand.toFixed(2);
-    document.getElementById("pTotal1").innerText = grandStr;
-    document.getElementById("pTotal2").innerText = grandStr;
-    document.getElementById("pGrandTotal").innerText = grandStr;
-    document.getElementById("pBottomTotal").innerText = grandStr;
-    
-    // Fallback Customer string (will get overwritten by saveAndPrintInvoice if saving to cloud)
-    const clientName = billToText.split('\n')[0] || "Unknown Client";
-    document.getElementById("pBottomCust").innerText = clientName;
-    document.getElementById("pBottomInv").innerText = invNum;
-}
-
-function previewInvoice() {
-    generateInvoiceHTML();
-    const printView = document.getElementById('printInvoiceView');
-    printView.classList.add('screen-preview');
-    printView.scrollIntoView({ behavior: 'smooth', block: 'start' });
-}
 
 /* ---------- init ---------- */
 (function init(){ applyMode(); })();
