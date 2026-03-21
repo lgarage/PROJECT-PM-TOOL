@@ -558,10 +558,21 @@ async function autoParseLocation() {
         RULES:
         1. ONLY use the information provided in the input text. DO NOT invent cities or names.
         2. Identify the Business, City, and Street, REGARDLESS of the order they are spoken.
-        3. IGNORE conversational filler (e.g., "I'm in", "I am at", "we are", "heading to", "over on", "the", "at", "and", "on").
-        4. Map the extracted entities to a JSON object with EXACTLY these keys: "business", "city", "street".
-        5. Abbreviate street types standardly (e.g., Street -> ST, Avenue -> AVE, Road -> RD, Drive -> DR).
-        6. If a piece of information is missing entirely, leave its value as an empty string "".
+        3. IGNORE conversational filler (e.g., "I'm in", "I am at", "we are", "heading to", "over on", "the", "a", "an", "at", "and", "on").
+        4. STRIP leading articles like "A", "AN", or "THE" from the Business Name (e.g., "A Take 5" -> "Take 5").
+        5. Map the extracted entities to a JSON object with EXACTLY these keys: "business", "city", "street".
+        6. Abbreviate street types standardly (e.g., Street -> ST, Avenue -> AVE, Road -> RD, Drive -> DR).
+        7. If a piece of information is missing entirely, leave its value as an empty string "".
+        
+        EXAMPLES:
+        Text: "I'm on Main Street in Milwaukee at a Take 5"
+        Output: {"business": "Take 5", "city": "Milwaukee", "street": "Main ST"}
+        
+        Text: "I am in Madison on Main Street at the Planet Fitness"
+        Output: {"business": "Planet Fitness", "city": "Madison", "street": "Main ST"}
+
+        Text: "Green Bay McDonald's Oneida Street"
+        Output: {"business": "McDonald's", "city": "Green Bay", "street": "Oneida ST"}
         
         Text: "${rawText}"
         Output:
