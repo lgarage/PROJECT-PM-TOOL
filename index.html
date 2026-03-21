@@ -479,7 +479,8 @@ function normalizeStreetSuffix(street){
 
 function normalizeSiteName(name){
   let s = (name || "").trim().toLowerCase();
-  s = s.replace(/\bthe\b/g, " ");
+  // Strip leading "the", "a", or "an" from the business name
+  s = s.replace(/^(the|a|an)\s+/i, ""); 
   s = s.replace(/\s{2,}/g, " ").trim();
   return titleCaseWords(s);
 }
