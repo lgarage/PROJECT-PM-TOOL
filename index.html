@@ -452,25 +452,102 @@ let currentHistoryCustomer = "";
 let currentHistoryLocation = "";
 let currentHistorySelectedIndex = 0;
 
-/* ---------- AI AUTO-LOCATION PARSER (JSON MODE - BULLETPROOF) ---------- */
+/* ---------- location local formatting fallback ---------- */
+function titleCaseWords(str){
+  return str
+    .split(" ")
+    .filter(Boolean)
+    .map(w => {
+      const upper = w.toUpperCase();
+      if(/^\d/.test(w)) return w;
+      if(["NW","NE","SW","SE"].includes(upper)) return upper;
+      return w.charAt(0).toUpperCase() + w.slice(1).toLowerCase();
+    })
+    .join(" ");
+}
+
+function normalizeStreetSuffix(street){
+  let s = street.trim().toLowerCase();
+  s = s.replace(/\bavenue\b/g, "Ave.");
+  s = s.replace(/\bstreet\b/g, "St.");
+  s = s.replace(/\broad\b/g, "Rd.");
+  s = s.replace(/\bdrive\b/g, "Dr.");
+  s = s.replace(/\bboulevard\b/g, "Blvd.");
+  s = s.replace(/\blane\b/g, "Ln.");
+  s = s.replace(/\bcourt\b/g, "Ct.");
+  s = s.replace(/\bplace\b/g, "Pl.");
+  s = s.replace(/\bhighway\b/g, "Hwy.");
+  return titleCaseWords(s);
+}
+
+function normalizeSiteName(name){
+  let s = (name || "").trim().toLowerCase();
+  s = s.replace(/\bthe\b/g, " ");
+  s = s.replace(/\s{2,}/g, " ").trim();
+  return titleCaseWords(s);
+}
+
+function formatLocation(raw){
+  let t = (raw || "").trim().toLowerCase();
+  if(!t) return "";
+
+  t = t.replace(/[.,]/g, " ");
+  t = t.replace(/\bi am at\b/g, "");
+  t = t.replace(/\bim at\b/g, "");
+  t = t.replace(/\bi'm at\b/g, "");
+  t = t.replace(/\bwe are at\b/g, "");
+  t = t.replace(/\s{2,}/g, " ").trim();
+
+  let m;
+  m = t.match(/^(.+?)\s+in\s+(.+?)\s+on\s+(.+)$/i);
+  if(m){
+    return `${normalizeSiteName(m[1])} - ${titleCaseWords(m[2])} - ${normalizeStreetSuffix(m[3])}`;
+  }
+  m = t.match(/^(.+?)\s+on\s+(.+?)\s+in\s+(.+)$/i);
+  if(m){
+    return `${normalizeSiteName(m[1])} - ${titleCaseWords(m[3])} - ${normalizeStreetSuffix(m[2])}`;
+  }
+  m = t.match(/^(.+?)\s+in\s+(.+)$/i);
+  if(m){
+    return `${normalizeSiteName(m[1])} - ${titleCaseWords(m[2])}`;
+  }
+  return normalizeSiteName(t);
+}
+
+/* ---------- AI AUTO-LOCATION PARSER (BULLETPROOF) ---------- */
 async function autoParseLocation() {
     const locInput = document.getElementById('location');
     const rawText = locInput.value.trim();
 
+    // 1. Skip if empty or already properly formatted
     if (!rawText) return;
     if (rawText === rawText.toUpperCase() && rawText.includes(' - ')) return;
 
+    // Visual cue
     const originalBg = locInput.style.backgroundColor;
     locInput.style.backgroundColor = '#e8f4fd'; 
 
+    // FALLBACK: If the AI fails or gets blocked, use this local logic immediately.
+    const applyFallback = () => {
+        let fallbackText = formatLocation(rawText);
+        if (!fallbackText.includes(' - ')) {
+            // If local regex fails, just force uppercase so they aren't stuck with messy text
+            fallbackText = rawText;
+        }
+        locInput.value = fallbackText.toUpperCase();
+        saveDraft(); // Save the fixed text
+    };
+
     if (typeof firebaseConfig !== 'undefined' && firebaseConfig.apiKey) {
         const prompt = `
-        Extract the location details from the technician's spoken text.
-        IGNORE conversational filler (e.g., "I am at", "I'm in", "heading to", "over on", "the").
-        Return a JSON object with EXACTLY these keys: "business", "city", "street".
-        Abbreviate street types standardly (e.g., Street -> ST, Avenue -> AVE, Road -> RD, Drive -> DR).
-        If a piece of information is missing, leave its value as an empty string "".
-        Output NOTHING BUT THE RAW JSON OBJECT. No markdown formatting, no backticks.
+        Extract the location details from the technician's spoken text, regardless of the order they are spoken in.
+        
+        RULES:
+        1. IGNORE conversational filler (e.g., "I'm in", "I am at", "we are", "heading to", "over on", "the", "at").
+        2. Map the extracted entities to a JSON object with EXACTLY these keys: "business", "city", "street".
+        3. Abbreviate street types standardly (e.g., Street -> ST, Avenue -> AVE, Road -> RD, Drive -> DR).
+        4. If a piece of information is missing, leave its value as an empty string "".
+        5. Output ONLY the raw JSON format. No backticks, no markdown.
         
         Text: "${rawText}"
         `;
@@ -492,9 +569,8 @@ async function autoParseLocation() {
             if (data.candidates && data.candidates.length > 0) {
                 let aiResponseText = data.candidates[0].content.parts[0].text;
                 
-                // THE FIX: Strip out the hidden Markdown backticks the AI tries to sneak in
+                // Strip Markdown artifacts just in case
                 aiResponseText = aiResponseText.replace(/```json/gi, '').replace(/```/g, '').trim();
-                
                 const locationData = JSON.parse(aiResponseText);
                 
                 const business = (locationData.business || "").toUpperCase().trim();
@@ -503,14 +579,17 @@ async function autoParseLocation() {
                 
                 const finalParts = [business, city, street].filter(Boolean);
                 locInput.value = finalParts.join(" - ");
+                saveDraft(); // Save the fixed text
+            } else {
+                applyFallback();
             }
         } catch (error) { 
-            console.error("AI JSON Parsing Failed:", error); 
-            // Fallback: If it fails, just capitalize the raw text so the tech isn't stuck
-            locInput.value = rawText.toUpperCase();
+            console.warn("AI JSON Parsing Failed, applying local fallback...", error); 
+            applyFallback();
         }
     } else {
-        console.warn("Firebase API Key is missing. AI parsing aborted.");
+        console.warn("Firebase API Key missing. Applying local fallback...");
+        applyFallback();
     }
     
     locInput.style.backgroundColor = originalBg;
@@ -569,88 +648,6 @@ function escapeHtml(text){
     .replace(/&/g, "&amp;")
     .replace(/</g, "&lt;")
     .replace(/>/g, "&gt;");
-}
-
-/* ---------- location ---------- */
-function titleCaseWords(str){
-  return str
-    .split(" ")
-    .filter(Boolean)
-    .map(w => {
-      const upper = w.toUpperCase();
-      if(/^\d/.test(w)) return w;
-      if(["NW","NE","SW","SE"].includes(upper)) return upper;
-      return w.charAt(0).toUpperCase() + w.slice(1).toLowerCase();
-    })
-    .join(" ");
-}
-
-function normalizeStreetSuffix(street){
-  let s = street.trim().toLowerCase();
-  s = s.replace(/\bavenue\b/g, "Ave.");
-  s = s.replace(/\bstreet\b/g, "St.");
-  s = s.replace(/\broad\b/g, "Rd.");
-  s = s.replace(/\bdrive\b/g, "Dr.");
-  s = s.replace(/\bboulevard\b/g, "Blvd.");
-  s = s.replace(/\blane\b/g, "Ln.");
-  s = s.replace(/\bcourt\b/g, "Ct.");
-  s = s.replace(/\bplace\b/g, "Pl.");
-  s = s.replace(/\bhighway\b/g, "Hwy.");
-  return titleCaseWords(s);
-}
-
-function normalizeSiteName(name){
-  let s = (name || "").trim().toLowerCase();
-  s = s.replace(/\bthe\b/g, " ");
-  s = s.replace(/\s{2,}/g, " ").trim();
-  s = s.replace(/\btake five\b/g, "take 5");
-  s = s.replace(/\bplanet fitness\b/g, "planet fitness");
-
-  return titleCaseWords(s)
-    .replace(/\bTake 5\b/g, "Take 5")
-    .replace(/\bPlanet Fitness\b/g, "Planet Fitness");
-}
-
-function formatLocation(raw){
-  let t = (raw || "").trim().toLowerCase();
-  if(!t) return "";
-
-  t = t.replace(/[.,]/g, " ");
-  t = t.replace(/\bi am at\b/g, "");
-  t = t.replace(/\bim at\b/g, "");
-  t = t.replace(/\bi'm at\b/g, "");
-  t = t.replace(/\bwe are at\b/g, "");
-  t = t.replace(/\s{2,}/g, " ").trim();
-
-  t = t.replace(/\btake five\b/g, "take 5");
-  t = t.replace(/\bplanet fitness\b/g, "planet fitness");
-
-  let m;
-
-  m = t.match(/^(.+?)\s+in\s+(.+?)\s+on\s+(.+)$/i);
-  if(m){
-    const site = normalizeSiteName(m[1]);
-    const city = titleCaseWords(m[2].trim());
-    const street = normalizeStreetSuffix(m[3].trim());
-    return `${site} - ${city} - ${street}`;
-  }
-
-  m = t.match(/^(.+?)\s+on\s+(.+?)\s+in\s+(.+)$/i);
-  if(m){
-    const site = normalizeSiteName(m[1]);
-    const street = normalizeStreetSuffix(m[2].trim());
-    const city = titleCaseWords(m[3].trim());
-    return `${site} - ${city} - ${street}`;
-  }
-
-  m = t.match(/^(.+?)\s+in\s+(.+)$/i);
-  if(m){
-    const site = normalizeSiteName(m[1]);
-    const city = titleCaseWords(m[2].trim());
-    return `${site} - ${city}`;
-  }
-
-  return normalizeSiteName(t);
 }
 
 function getCustomerFromLocation(location){
@@ -1284,15 +1281,6 @@ function loadDraft(){
 }
 
 /* ---------- immediate field formatting ---------- */
-function formatLocationField(){
-  const el = document.getElementById("location");
-  const current = el.value;
-  if(current.trim()){
-    el.value = formatLocation(current);
-    saveDraft();
-  }
-}
-
 function formatEquipmentField(){
   const el = document.getElementById("equipment");
   const current = el.value;
@@ -1464,7 +1452,8 @@ document.getElementById("same").onclick = function(){
 };
 
 document.getElementById("generate").onclick = function(){
-  formatLocationField();
+  // Force a format just in case they click generate without tabbing out
+  autoParseLocation();
   const location = document.getElementById("location").value || "[Location]";
   const date = today();
 
@@ -1740,6 +1729,9 @@ function wireAutosave(){
     });
   });
 
+  // Attach the auto-parser to the location input box blur event
+  document.getElementById("location").addEventListener("blur", autoParseLocation);
+
   document.getElementById("equipment").addEventListener("blur", formatEquipmentField);
   document.getElementById("used").addEventListener("blur", formatUsedField);
   document.getElementById("next").addEventListener("blur", formatNextField);
@@ -1751,6 +1743,7 @@ function wireAutosave(){
   document.getElementById("quoteEquip").addEventListener("blur", formatQuoteEquipField);
   document.getElementById("quotePartsUsed").addEventListener("blur", formatQuotePartsUsedField);
 
+  addEnterFormatter("location", autoParseLocation);
   addEnterFormatter("equipment", formatEquipmentField);
   addEnterFormatter("used", formatUsedField);
   addEnterFormatter("next", formatNextField);
@@ -1785,12 +1778,6 @@ function wireAutosave(){
   ].forEach(id => autoGrow(document.getElementById(id)));
 
   wireAutosave();
-  
-  // Attach the auto-parser to the location input box
-  const locBox = document.getElementById('location');
-  if(locBox) {
-      locBox.addEventListener('blur', autoParseLocation);
-  }
 })();
 </script>
 </body>
