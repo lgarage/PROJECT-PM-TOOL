@@ -479,6 +479,7 @@ function normalizeStreetSuffix(street){
 
 function normalizeSiteName(name){
   let s = (name || "").trim().toLowerCase();
+  // Strip leading "the", "a", or "an" from the business name
   s = s.replace(/^(the|a|an)\s+/i, ""); 
   s = s.replace(/\s{2,}/g, " ").trim();
   return titleCaseWords(s);
@@ -488,33 +489,39 @@ function formatLocation(raw){
   let t = (raw || "").trim().toLowerCase();
   if(!t) return "";
 
+  // Aggressively strip all variations of filler words from the beginning
   t = t.replace(/^(i am at|i'm at|im at|we are at|heading to|i am in|i'm in|im in|i am on|i'm on|im on)\s+/i, "");
   t = t.replace(/[.,]/g, " ");
-  t = t.replace(/\bthe\b/gi, " ");
+  t = t.replace(/\bthe\b/gi, " "); // Strip "the" to clean up "the Planet Fitness"
   t = t.replace(/\s{2,}/g, " ").trim();
 
   let m;
   
+  // Variation: [Street] in [City] at [Business] -> "Main Street in Milwaukee at Planet Fitness"
   m = t.match(/^(.+?)\s+in\s+(.+?)\s+at\s+(.+)$/i);
   if(m){
     return `${normalizeSiteName(m[3])} - ${titleCaseWords(m[2])} - ${normalizeStreetSuffix(m[1])}`;
   }
 
+  // Variation: [City] on [Street] at [Business] -> "Milwaukee on Main Street at Planet Fitness"
   m = t.match(/^(.+?)\s+on\s+(.+?)\s+at\s+(.+)$/i);
   if(m){
     return `${normalizeSiteName(m[3])} - ${titleCaseWords(m[1])} - ${normalizeStreetSuffix(m[2])}`;
   }
 
+  // Variation: [Business] in [City] on [Street] (Original)
   m = t.match(/^(.+?)\s+in\s+(.+?)\s+on\s+(.+)$/i);
   if(m){
     return `${normalizeSiteName(m[1])} - ${titleCaseWords(m[2])} - ${normalizeStreetSuffix(m[3])}`;
   }
 
+  // Variation: [Business] on [Street] in [City] (Original)
   m = t.match(/^(.+?)\s+on\s+(.+?)\s+in\s+(.+)$/i);
   if(m){
     return `${normalizeSiteName(m[1])} - ${titleCaseWords(m[3])} - ${normalizeStreetSuffix(m[2])}`;
   }
 
+  // Variation: Just [Business] in [City]
   m = t.match(/^(.+?)\s+in\s+(.+)$/i);
   if(m){
     return `${normalizeSiteName(m[1])} - ${titleCaseWords(m[2])}`;
@@ -831,13 +838,10 @@ function recoverConcatenatedFilter(firstNum, secondNum, thirdNum){
 
 function parsePartItem(item){
   let t = item.toLowerCase().trim();
-  
-  t = t.replace(/^[-•*]\s*/, ""); 
-  
   if(!t) return [];
 
   t = t.replace(/\bbuy\b/g, "by");
-  t = convertNumbers(t); 
+  t = convertNumbers(t);
   t = t.replace(/\s{2,}/g, " ").trim();
   t = t.replace(/\bfilters?\b/g, "").trim();
   t = t.replace(/\bbelts?\b/g, "").trim();
@@ -928,10 +932,11 @@ function normalizeParts(text){
   let t = (text || "").trim();
   if(!t) return "";
 
+  t = t.replace(/\n/g, " ");
   t = t.replace(/\s+and\s+/gi, ", ");
   t = t.replace(/\s{2,}/g, " ").trim();
 
-  const items = t.split(/[,;\n]+/).map(s => s.trim()).filter(Boolean);
+  const items = t.split(/[,;]+/).map(s => s.trim()).filter(Boolean);
   const out = [];
 
   items.forEach(item => {
@@ -1204,96 +1209,111 @@ function renderHistoryView(){
   fullWrap.classList.remove("hidden");
 }
 
-/* ---------- AI PARTS PARSER ---------- */
-async function autoParseParts(fieldId) {
-    const el = document.getElementById(fieldId);
-    if (!el) return;
-    const rawText = el.value.trim();
-    
-    if (!rawText) return;
+/* ---------- draft ---------- */
+function getFields(){
+  return {
+    currentMode,
+    location: document.getElementById("location").value || "",
 
-    if (rawText.includes(' - ') && rawText.includes(',')) {
-        el.value = normalizeParts(rawText);
-        autoGrow(el);
-        saveDraft();
-        return;
-    }
+    equipment: document.getElementById("equipment").value || "",
+    notes: document.getElementById("notes").value || "",
+    used: document.getElementById("used").value || "",
+    cost: document.getElementById("cost").value || "",
+    next: document.getElementById("next").value || "",
+    workdone: document.getElementById("workdone").value || "",
 
-    const originalBg = el.style.backgroundColor;
-    el.style.backgroundColor = '#e8f4fd'; 
+    serviceEquipment: document.getElementById("serviceEquipment").value || "",
+    reason: document.getElementById("reason").value || "",
+    diagnosis: document.getElementById("diagnosis").value || "",
+    repairsMade: document.getElementById("repairsMade").value || "",
+    serviceUsed: document.getElementById("serviceUsed").value || "",
+    serviceCost: document.getElementById("serviceCost").value || "",
+    quoteParts: document.getElementById("quoteParts").value || "",
+    quoteLabor: document.getElementById("quoteLabor").value || "",
+    recommendations: document.getElementById("recommendations").value || "",
 
-    const applyFallback = () => {
-        el.value = normalizeParts(rawText);
-        autoGrow(el);
-        saveDraft();
-    };
+    quoteEquip: document.getElementById("quoteEquip").value || "",
+    quoteIssue: document.getElementById("quoteIssue").value || "",
+    quoteRepairs: document.getElementById("quoteRepairs").value || "",
+    quoteTesting: document.getElementById("quoteTesting").value || "",
+    quoteRecs: document.getElementById("quoteRecs").value || "",
 
-    if (typeof firebaseConfig !== 'undefined' && firebaseConfig.apiKey) {
-        const prompt = `
-        You are a strict data extraction AI for an HVAC dispatch system.
-        The technician dictated a list of HVAC parts into their phone, resulting in a run-on sentence without commas.
-        Your job is to identify each distinct part and its quantity, and output them as a JSON array of strings.
-        
-        RULES:
-        1. Convert spelled-out numbers ("one", "two", "to", "six") into digits (1, 2, 6).
-        2. Format filter sizes as NumXNumXNum (e.g., "20 by 20 by one" -> "20X20X1").
-        3. Format belt sizes with NO spaces (e.g., "BX 37" -> "BX37", "4 l 230" -> "4L230", "ax 37" -> "AX37").
-        4. Remove the words "filter", "filters", "belt", and "belts" from the output string.
-        5. Each string in the JSON array must follow the exact format: "QTY - PART_NAME" (e.g., "2 - 14X20X2").
-        6. Output ONLY the raw JSON array format. No backticks, no markdown.
-        
-        EXAMPLE:
-        Text: "One 20 by 20 by one filter two 14 by 20 by two filter 6 16 x 20 x 1 filter one BX 37 belt to ax 37 belt 1 4 l 230 belt"
-        Output: ["1 - 20X20X1", "2 - 14X20X2", "6 - 16X20X1", "1 - BX37", "2 - AX37", "1 - 4L230"]
-        
-        Text: "${rawText}"
-        Output:
-        `;
+    historyCustomer: currentHistoryCustomer,
+    historyLocation: currentHistoryLocation,
+    historySelectedIndex: currentHistorySelectedIndex,
 
-        try {
-            const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${firebaseConfig.apiKey}`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ 
-                    contents: [{ parts: [{ text: prompt }] }], 
-                    generationConfig: { 
-                        temperature: 0.0, 
-                        responseMimeType: "application/json"
-                    } 
-                })
-            });
+    output: document.getElementById("output").textContent || "",
+    savedAt: new Date().toISOString()
+  };
+}
 
-            if (!response.ok) {
-                applyFallback();
-                el.style.backgroundColor = originalBg;
-                return;
-            }
+function setFields(d){
+  currentMode = d.currentMode || "PM";
+  currentHistoryCustomer = d.historyCustomer || "";
+  currentHistoryLocation = d.historyLocation || "";
+  currentHistorySelectedIndex = typeof d.historySelectedIndex === "number" ? d.historySelectedIndex : 0;
 
-            const data = await response.json();
-            if (data.candidates && data.candidates.length > 0) {
-                let aiResponseText = data.candidates[0].content.parts[0].text;
-                aiResponseText = aiResponseText.replace(/```json/gi, '').replace(/```/g, '').trim();
-                
-                const partsArray = JSON.parse(aiResponseText);
-                if (Array.isArray(partsArray) && partsArray.length > 0) {
-                    el.value = partsArray.join(", ");
-                    autoGrow(el);
-                    saveDraft();
-                } else {
-                    applyFallback();
-                }
-            } else {
-                applyFallback();
-            }
-        } catch (error) { 
-            console.error("AI Parts Parsing Failed", error);
-            applyFallback();
-        }
+  applyMode();
+
+  document.getElementById("location").value = d.location || "";
+
+  document.getElementById("equipment").value = d.equipment || "";
+  document.getElementById("notes").value = d.notes || "";
+  document.getElementById("used").value = d.used || "";
+  document.getElementById("cost").value = d.cost || "";
+  document.getElementById("next").value = d.next || "";
+  document.getElementById("workdone").value = d.workdone || DEFAULT_PM_WORKDONE;
+
+  document.getElementById("serviceEquipment").value = d.serviceEquipment || "";
+  document.getElementById("reason").value = d.reason || "";
+  document.getElementById("diagnosis").value = d.diagnosis || "";
+  document.getElementById("repairsMade").value = d.repairsMade || "";
+  document.getElementById("serviceUsed").value = d.serviceUsed || "";
+  document.getElementById("serviceCost").value = d.serviceCost || "";
+  document.getElementById("quoteParts").value = d.quoteParts || "";
+  document.getElementById("quoteLabor").value = d.quoteLabor || "";
+  document.getElementById("recommendations").value = d.recommendations || "";
+
+  document.getElementById("quoteEquip").value = d.quoteEquip || "";
+  document.getElementById("quoteIssue").value = d.quoteIssue || "";
+  document.getElementById("quoteRepairs").value = d.quoteRepairs || "";
+  document.getElementById("quoteTesting").value = d.quoteTesting || "";
+  document.getElementById("quoteRecs").value = d.quoteRecs || "";
+
+  document.getElementById("output").textContent = d.output || "";
+
+  [
+    "equipment","notes","used","next",
+    "serviceEquipment","reason","diagnosis","repairsMade","serviceUsed","quoteParts","recommendations",
+    "quoteEquip","quoteIssue","quoteRepairs","quoteTesting","quoteRecs"
+  ].forEach(id => autoGrow(document.getElementById(id)));
+
+  populateHistoryCustomers();
+}
+
+function saveDraft(){
+  try{
+    localStorage.setItem(DRAFT_KEY, JSON.stringify(getFields()));
+    document.getElementById("draftStatus").textContent = "Draft saved.";
+  }catch(e){}
+}
+
+function loadDraft(){
+  const raw = localStorage.getItem(DRAFT_KEY);
+  if(!raw) return false;
+  try{
+    const d = JSON.parse(raw);
+    setFields(d);
+    if(d.savedAt){
+      const dt = new Date(d.savedAt);
+      document.getElementById("draftStatus").textContent = "Restored draft from " + dt.toLocaleString();
     } else {
-        applyFallback();
+      document.getElementById("draftStatus").textContent = "Restored draft.";
     }
-    
-    el.style.backgroundColor = originalBg;
+    return true;
+  }catch(e){
+    return false;
+  }
 }
 
 /* ---------- immediate field formatting ---------- */
@@ -1307,8 +1327,25 @@ function formatEquipmentField(){
   }
 }
 
-function formatUsedField(){ autoParseParts("used"); }
-function formatNextField(){ autoParseParts("next"); }
+function formatUsedField(){
+  const el = document.getElementById("used");
+  const current = el.value;
+  if(current.trim()){
+    el.value = normalizeParts(current);
+    autoGrow(el);
+    saveDraft();
+  }
+}
+
+function formatNextField(){
+  const el = document.getElementById("next");
+  const current = el.value;
+  if(current.trim()){
+    el.value = normalizeParts(current);
+    autoGrow(el);
+    saveDraft();
+  }
+}
 
 function formatServiceEquipmentField(){
   const el = document.getElementById("serviceEquipment");
@@ -1320,8 +1357,25 @@ function formatServiceEquipmentField(){
   }
 }
 
-function formatServiceUsedField(){ autoParseParts("serviceUsed"); }
-function formatQuotePartsField(){ autoParseParts("quoteParts"); }
+function formatServiceUsedField(){
+  const el = document.getElementById("serviceUsed");
+  const current = el.value;
+  if(current.trim()){
+    el.value = normalizeParts(current);
+    autoGrow(el);
+    saveDraft();
+  }
+}
+
+function formatQuotePartsField(){
+  const el = document.getElementById("quoteParts");
+  const current = el.value;
+  if(current.trim()){
+    el.value = normalizeParts(current);
+    autoGrow(el);
+    saveDraft();
+  }
+}
 
 function formatQuoteEquipField(){
   const el = document.getElementById("quoteEquip");
@@ -1424,6 +1478,7 @@ document.getElementById("same").onclick = function(){
 };
 
 document.getElementById("generate").onclick = function(){
+  // Force a format just in case they click generate without tabbing out
   autoParseLocation();
   const location = document.getElementById("location").value || "[Location]";
   const date = today();
@@ -1520,6 +1575,7 @@ document.getElementById("generate").onclick = function(){
     const issue = document.getElementById("quoteIssue").value.trim() || "Not listed.";
     const repairsCompleted = document.getElementById("quoteRepairs").value.trim() || "None.";
     
+    // THIS IS THE LINE THAT CHANGED:
     const testing = document.getElementById("quoteTesting").value.trim() || "Tested and verified operations.";
     
     const recs = document.getElementById("quoteRecs").value.trim() || "None.";
@@ -1534,7 +1590,7 @@ document.getElementById("generate").onclick = function(){
       equipmentRepaired: quoteEquipDisplay,
       originalIssue: issue,
       repairsCompleted: repairsCompleted,
-      partsUsed: "NONE", 
+      partsUsed: "NONE", // Hardcoded since we removed the parts box
       testingVerification: testing,
       recommendations: recs,
       report
