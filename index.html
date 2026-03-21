@@ -1785,23 +1785,38 @@ function wireAutosave(){
 
 /* ---------- init ---------- */
 (function init(){
+  // 1. Set the default value for the PM tab
   document.getElementById("workdone").value = DEFAULT_PM_WORKDONE;
   applyMode();
 
-  const restored = loadDraft();
-  if(!restored){
-    document.getElementById("draftStatus").textContent = "No saved draft yet.";
-    populateHistoryCustomers();
-  }
+  // 2. Wipe the location box and output block clean
+  document.getElementById("location").value = "";
+  document.getElementById("output").textContent = "";
 
-  [
-    "equipment","notes","used","next",
-    "serviceEquipment","reason","diagnosis","repairsMade","serviceUsed","quoteParts","recommendations",
-    "quoteEquip", "quoteIssue", "quoteRepairs", "quoteTesting", "quoteRecs"
-  ].forEach(id => autoGrow(document.getElementById(id)));
+  // 3. Silently clear all fields for all three tabs
+  const fieldsToClear = [
+    "equipment","notes","used","cost","next",
+    "serviceEquipment","reason","diagnosis","repairsMade","serviceUsed","serviceCost","quoteParts","quoteLabor","recommendations",
+    "quoteEquip","quoteIssue","quoteRepairs","quoteTesting","quoteRecs"
+  ];
+  
+  fieldsToClear.forEach(id => {
+      const el = document.getElementById(id);
+      if(el) {
+          el.value = "";
+          autoGrow(el); // Reset the height of textareas
+      }
+  });
+
+  // 4. Overwrite the saved draft memory with this new, empty state
+  saveDraft();
+  
+  document.getElementById("draftStatus").textContent = "New blank form ready.";
+  populateHistoryCustomers();
 
   wireAutosave();
 })();
+  
 </script>
 </body>
 </html>
