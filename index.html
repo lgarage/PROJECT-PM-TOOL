@@ -452,7 +452,7 @@ let currentHistoryCustomer = "";
 let currentHistoryLocation = "";
 let currentHistorySelectedIndex = 0;
 
-/* ---------- AI AUTO-LOCATION PARSER (JSON MODE) ---------- */
+/* ---------- AI AUTO-LOCATION PARSER (JSON MODE - BULLETPROOF) ---------- */
 async function autoParseLocation() {
     const locInput = document.getElementById('location');
     const rawText = locInput.value.trim();
@@ -465,24 +465,12 @@ async function autoParseLocation() {
 
     if (typeof firebaseConfig !== 'undefined' && firebaseConfig.apiKey) {
         const prompt = `
-        You are an intelligent data extraction AI for an HVAC dispatch system.
-        Extract the Business Name, City, and Street from the technician's spoken text, regardless of the order they are spoken in.
-        
-        RULES:
-        1. IGNORE conversational filler (e.g., "I'm in", "I'm at", "we are", "heading to", "over on", "the", "at").
-        2. Map the extracted entities to a JSON object with EXACTLY these keys: "business", "city", "street".
-        3. Abbreviate street types standardly (e.g., Street -> ST, Avenue -> AVE, Road -> RD, Drive -> DR).
-        4. If a piece of information is missing, leave its value as an empty string "".
-        
-        EXAMPLES OF DIFFERENT ORDERS:
-        Text: "I'm in Milwaukee at Planet Fitness on Main Street"
-        JSON: {"business": "Planet Fitness", "city": "Milwaukee", "street": "Main ST"}
-        
-        Text: "I'm on College Ave at the Target in Appleton"
-        JSON: {"business": "Target", "city": "Appleton", "street": "College AVE"}
-
-        Text: "Planet fitness milwaukee main street"
-        JSON: {"business": "Planet Fitness", "city": "Milwaukee", "street": "Main ST"}
+        Extract the location details from the technician's spoken text.
+        IGNORE conversational filler (e.g., "I am at", "I'm in", "heading to", "over on", "the").
+        Return a JSON object with EXACTLY these keys: "business", "city", "street".
+        Abbreviate street types standardly (e.g., Street -> ST, Avenue -> AVE, Road -> RD, Drive -> DR).
+        If a piece of information is missing, leave its value as an empty string "".
+        Output NOTHING BUT THE RAW JSON OBJECT. No markdown formatting, no backticks.
         
         Text: "${rawText}"
         `;
@@ -502,7 +490,11 @@ async function autoParseLocation() {
 
             const data = await response.json();
             if (data.candidates && data.candidates.length > 0) {
-                const aiResponseText = data.candidates[0].content.parts[0].text;
+                let aiResponseText = data.candidates[0].content.parts[0].text;
+                
+                // THE FIX: Strip out the hidden Markdown backticks the AI tries to sneak in
+                aiResponseText = aiResponseText.replace(/```json/gi, '').replace(/```/g, '').trim();
+                
                 const locationData = JSON.parse(aiResponseText);
                 
                 const business = (locationData.business || "").toUpperCase().trim();
@@ -514,6 +506,8 @@ async function autoParseLocation() {
             }
         } catch (error) { 
             console.error("AI JSON Parsing Failed:", error); 
+            // Fallback: If it fails, just capitalize the raw text so the tech isn't stuck
+            locInput.value = rawText.toUpperCase();
         }
     } else {
         console.warn("Firebase API Key is missing. AI parsing aborted.");
