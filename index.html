@@ -697,22 +697,30 @@ async function autoParseParts(fieldId) {
     };
 
     if (typeof firebaseConfig !== 'undefined' && firebaseConfig.apiKey) {
+        // PROMPT UPDATED: Injected your exact inventory lists to "Ground" the AI
         const prompt = `
         You are a strict data extraction AI for an HVAC dispatch system.
         The technician dictated a list of HVAC parts into their phone, resulting in a run-on sentence without commas.
         Your job is to identify each distinct part and its quantity, and output them as a JSON array of strings.
         
+        KNOWN INVENTORY:
+        Valid Filters: ${KNOWN_FILTER_SIZES.join(", ")}
+        Valid Belts: ${KNOWN_BELTS.join(", ")}
+        
         RULES:
         1. Convert spelled-out numbers ("one", "two", "to", "six") into digits (1, 2, 6).
-        2. Format filter sizes as NumXNumXNum (e.g., "20 by 20 by one" -> "20X20X1").
-        3. Format belt sizes with NO spaces (e.g., "BX 37" -> "BX37", "4 l 230" -> "4L230", "ax 37" -> "AX37").
+        2. Format filter sizes as NumXNumXNum. If the dictation is slightly garbled, snap it to the closest match in the Valid Filters list.
+        3. Format belt sizes with NO spaces. Snap to the closest match in the Valid Belts list.
         4. Remove the words "filter", "filters", "belt", and "belts" from the output string.
         5. Each string in the JSON array must follow the exact format: "QTY - PART_NAME" (e.g., "2 - 14X20X2").
         6. Output ONLY the raw JSON array format. No backticks, no markdown.
         
-        EXAMPLE:
+        EXAMPLES:
         Text: "One 20 by 20 by one filter two 14 by 20 by two filter 6 16 x 20 x 1 filter one BX 37 belt to ax 37 belt 1 4 l 230 belt"
         Output: ["1 - 20X20X1", "2 - 14X20X2", "6 - 16X20X1", "1 - BX37", "2 - AX37", "1 - 4L230"]
+
+        Text: "I have two 16 x 20 x 2 3 16 x 20 by one and four 24 x 24 x 2 filters"
+        Output: ["2 - 16X20X2", "3 - 16X20X1", "4 - 24X24X2"]
         
         Text: "${rawText}"
         Output:
