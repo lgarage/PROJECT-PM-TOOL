@@ -1774,7 +1774,7 @@ document.getElementById("generate").onclick = async function(){ // Added async
     
     const recs = document.getElementById("quoteRecs").value.trim() || "None.";
 
-    report = `QUOTED REPAIR\n\nLocation:\n${location}\n\nDate:\n${date}\n\nEquipment Repaired:\n${quoteEquipDisplay}\n\nOriginal Issue Resolved:\n${issue}\n\nRepairs Completed:\n${repairsCompleted}\n\nSystem Testing & Verification:\n${testing}\n\nFurther Recommendations:\n${recs}\n\nPictures:\nRepair photos attached.\n`;
+    report = `QUOTED REPAIR\n\nLocation:\n${finalLocationDisplay}\n\nDate:\n${date}\n\nEquipment Repaired:\n${quoteEquipDisplay}\n\nOriginal Issue Resolved:\n${issue}\n\nRepairs Completed:\n${repairsCompleted}\n\nSystem Testing & Verification:\n${testing}\n\nFurther Recommendations:\n${recs}\n\nPictures:\nRepair photos attached.\n`;
 
     visit = {
       date,
