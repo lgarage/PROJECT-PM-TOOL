@@ -1660,10 +1660,21 @@ document.getElementById("same").onclick = function(){
   formatNextField();
 };
 
-document.getElementById("generate").onclick = function(){
-  autoParseLocation();
+document.getElementById("generate").onclick = async function(){ // Added async
+  await autoParseLocation();
   const location = document.getElementById("location").value || "[Location]";
   const date = today();
+
+  // --- NEW: Check Firebase for a Parent Company ---
+  document.getElementById("draftStatus").textContent = "Checking database for parent company...";
+  const parentCompany = await getParentCompany(location);
+  
+  const finalLocationDisplay = parentCompany 
+    ? `${parentCompany}\n${location}` 
+    : location;
+  
+  document.getElementById("draftStatus").textContent = "Report Generated.";
+  // -------------------------------------------------
 
   let report = "";
   let visit = null;
@@ -1692,7 +1703,8 @@ document.getElementById("generate").onclick = function(){
     const cost = document.getElementById("cost").value || "Unknown";
     const workdone = document.getElementById("workdone").value || DEFAULT_PM_WORKDONE;
 
-    report = `PM\n\nLocation:\n${location}\n\nDate:\n${date}\n\nEquipment on Site:\n${equip}\n\nNotes / Repairs:\n${notesFinal}\n\nWork done:\n${workdone}\n\nParts used:\n${used}\n\nCost of parts (if known):\n${cost}\n\nParts needed next PM:\n${next}\n\nPictures:\nNeeded photos are attached.\n`;
+    // CHANGED ${location} to ${finalLocationDisplay} right below here
+    report = `PM\n\nLocation:\n${finalLocationDisplay}\n\nDate:\n${date}\n\nEquipment on Site:\n${equip}\n\nNotes / Repairs:\n${notesFinal}\n\nWork done:\n${workdone}\n\nParts used:\n${used}\n\nCost of parts (if known):\n${cost}\n\nParts needed next PM:\n${next}\n\nPictures:\nNeeded photos are attached.\n`;
 
     visit = {
       date,
@@ -1727,7 +1739,8 @@ document.getElementById("generate").onclick = function(){
     const quoteLabor = document.getElementById("quoteLabor").value.trim() || "NONE";
     const recommendations = document.getElementById("recommendations").value.trim() || "None.";
 
-    report = `SERVICE CALL\n\nLocation:\n${location}\n\nDate:\n${date}\n\nEquipment worked on:\n${serviceEquipDisplay}\n\nReason for call:\n${reason}\n\nFindings / Diagnosis:\n${diagnosis}\n\nRepairs made:\n${repairsMade}\n\nParts used:\n${used}\n\nCost of parts (if known):\n${cost}\n\nParts needed for repair quote:\n${quoteParts}\n\nLabor for repair quote:\n${quoteLabor}\n\nRecommendations / Next steps:\n${recommendations}\n\nPictures:\nRepair photos attached.\n`;
+    // CHANGED ${location} to ${finalLocationDisplay} right below here
+    report = `SERVICE CALL\n\nLocation:\n${finalLocationDisplay}\n\nDate:\n${date}\n\nEquipment worked on:\n${serviceEquipDisplay}\n\nReason for call:\n${reason}\n\nFindings / Diagnosis:\n${diagnosis}\n\nRepairs made:\n${repairsMade}\n\nParts used:\n${used}\n\nCost of parts (if known):\n${cost}\n\nParts needed for repair quote:\n${quoteParts}\n\nLabor for repair quote:\n${quoteLabor}\n\nRecommendations / Next steps:\n${recommendations}\n\nPictures:\nRepair photos attached.\n`;
 
     visit = {
       date,
