@@ -754,7 +754,8 @@ async function autoParseParts(fieldId) {
                 
                 const partsArray = JSON.parse(aiResponseText);
                 if (Array.isArray(partsArray) && partsArray.length > 0) {
-                    el.value = partsArray.join(", ");
+                    // Pass the AI output into our Javascript Custom Sorter before displaying!
+                    el.value = sortPartsArray(partsArray).join("\n");
                     autoGrow(el);
                     saveDraft();
                 } else {
@@ -1069,15 +1070,49 @@ function parsePartItem(item){
   return [item.trim().toUpperCase()];
 }
 
+// ---------------------------------------------------------
+// NEW: CUSTOM JAVASCRIPT SORTING ENGINE
+// This guarantees perfect sorting without relying on the AI
+// ---------------------------------------------------------
+function sortPartsArray(parts) {
+  const filters = [];
+  const belts = [];
+
+  // 1. Separate into two groups
+  parts.forEach(p => {
+    if (p.includes('X')) filters.push(p);
+    else belts.push(p);
+  });
+
+  // 2. Mathematically sort filters from smallest to largest
+  filters.sort((a, b) => {
+    const [a1, a2, a3] = (a.match(/\d+/g) || [0,0,0]).slice(-3).map(Number);
+    const [b1, b2, b3] = (b.match(/\d+/g) || [0,0,0]).slice(-3).map(Number);
+    if (a1 !== b1) return a1 - b1;
+    if (a2 !== b2) return a2 - b2;
+    return a3 - b3;
+  });
+
+  // 3. Alphabetically sort belts
+  belts.sort((a, b) => {
+    const beltA = a.split('-')[1] || a;
+    const beltB = b.split('-')[1] || b;
+    return beltA.trim().localeCompare(beltB.trim(), undefined, {numeric: true});
+  });
+
+  // 4. Combine them back together!
+  return [...filters, ...belts];
+}
+
 function normalizeParts(text){
   let t = (text || "").trim();
   if(!t) return "";
 
-  t = t.replace(/\n/g, " ");
   t = t.replace(/\s+and\s+/gi, ", ");
   t = t.replace(/\s{2,}/g, " ").trim();
 
-  const items = t.split(/[,;]+/).map(s => s.trim()).filter(Boolean);
+  // Split the sentence by commas, semicolons, OR existing newlines
+  const items = t.split(/[,;\n]+/).map(s => s.trim()).filter(Boolean);
   const out = [];
 
   items.forEach(item => {
@@ -1092,7 +1127,8 @@ function normalizeParts(text){
     });
   });
 
-  return out.join(", ");
+  // Automatically pass everything through the Custom Sorter and join vertically!
+  return sortPartsArray(out).join("\n");
 }
 
 /* ---------- notes ---------- */
