@@ -1620,7 +1620,19 @@ document.getElementById("same").onclick = function(){
   formatNextField();
 };
 
+function validateBeforeGenerate(){
+  const locationEl = document.getElementById("location");
+  const location = (locationEl.value || "").trim();
+  if(!location){
+    alert("Please enter the location before generating the report.");
+    locationEl.focus();
+    return false;
+  }
+  return true;
+}
+
 document.getElementById("generate").onclick = function(){
+  if(!validateBeforeGenerate()) return;
   autoParseLocation();
   const location = document.getElementById("location").value || "[Location]";
   const date = today();
