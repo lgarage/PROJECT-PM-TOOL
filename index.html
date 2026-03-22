@@ -1740,7 +1740,7 @@ document.getElementById("generate").onclick = async function(){ // Added async
     const recommendations = document.getElementById("recommendations").value.trim() || "None.";
 
     // CHANGED ${location} to ${finalLocationDisplay} right below here
-    report = `SERVICE CALL\n\nLocation:\n${finalLocationDisplay}\n\nDate:\n${date}\n\nEquipment worked on:\n${serviceEquipDisplay}\n\nReason for call:\n${reason}\n\nFindings / Diagnosis:\n${diagnosis}\n\nRepairs made:\n${repairsMade}\n\nParts used:\n${used}\n\nCost of parts (if known):\n${cost}\n\nParts needed for repair quote:\n${quoteParts}\n\nLabor for repair quote:\n${quoteLabor}\n\nRecommendations / Next steps:\n${recommendations}\n\nPictures:\nRepair photos attached.\n`;
+ report = `SERVICE CALL\n\nLocation:\n${finalLocationDisplay}\n\nDate:\n${date}\n\nEquipment worked on:\n${serviceEquipDisplay}\n\nReason for call:\n${reason}\n\nFindings / Diagnosis:\n${diagnosis}\n\nRepairs made:\n${repairsMade}\n\nParts used:\n${used}\n\nCost of parts (if known):\n${cost}\n\nParts needed for repair quote:\n${quoteParts}\n\nLabor for repair quote:\n${quoteLabor}\n\nRecommendations / Next steps:\n${recommendations}\n\nPictures:\nRepair photos attached.\n`;
 
     visit = {
       date,
