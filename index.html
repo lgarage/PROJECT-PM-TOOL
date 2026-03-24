@@ -1778,7 +1778,7 @@ document.getElementById("historyLocation").addEventListener("change", (e) => {
   saveDraft();
 });
 
- /* ---------- NEW: BACKGROUND CLOUD SYNC ---------- */
+/* ---------- NEW: BACKGROUND CLOUD SYNC ---------- */
 function uploadReportToCloud(visitData, fullReportText) {
     if (typeof firebase === 'undefined' || !firebase.apps.length) return;
     
@@ -1795,27 +1795,36 @@ function uploadReportToCloud(visitData, fullReportText) {
         fullReportText: fullReportText,
         techName: techName,
         linkedTicketId: ticketId || "None",
-        status: finalStatus, // Log the status in the report history
+        status: finalStatus, 
         timestamp: firebase.firestore.FieldValue.serverTimestamp(),
         deviceSavedAt: new Date().toISOString() 
     };
 
-    // 2. Fire & Forget: Add to the 'completed_reports' collection
+    const statusDisplay = document.getElementById("draftStatus");
+
+    // 2. INSTANT UI FEEDBACK: Check if they have a signal right now
+    if (navigator.onLine) {
+        statusDisplay.innerHTML = `<span style="color:#3498db; font-weight:bold;">⬆ Uploading report to cloud...</span>`;
+    } else {
+        statusDisplay.innerHTML = `<span style="color:#f39c12; font-weight:bold;">⏳ No signal. Saved to device queue. Will auto-upload when signal returns.</span>`;
+    }
+
+    // 3. Fire & Forget: Add to the 'completed_reports' collection
     db.collection('completed_reports').add(payload)
-      .then(() => console.log("Report synced to cloud!"))
+      .then(() => {
+          // This .then() ONLY runs when the Firebase Server actually receives the data!
+          statusDisplay.innerHTML = `<span style="color:#27ae60; font-weight:bold;">✓ Success! Report uploaded to cloud. Status updated to: ${finalStatus}</span>`;
+      })
       .catch(e => console.error("Sync queued for when online."));
 
-    // 3. Auto-Update the Ticket on the Dispatch Board!
+    // 4. Auto-Update the Ticket on the Dispatch Board!
     if (ticketId) {
         db.collection('service_calls').doc(ticketId).set({
-            status: finalStatus, // <--- NOW IT UPDATES TO THE CORRECT STATUS
+            status: finalStatus, 
             techNotes: fullReportText
         }, { merge: true })
         .catch(e => console.error("Ticket update queued for when online."));
     }
-
-    // 4. Update the UI
-    document.getElementById("draftStatus").innerHTML = `<span style="color:#27ae60; font-weight:bold;">✓ Report Saved! Status updated to: ${finalStatus}</span>`;
 }
 
 /* ---------- ui actions ---------- */
