@@ -108,9 +108,10 @@ textarea { min-height: 80px; resize: vertical; }
 .nav-item {
   flex: 1; text-align: center; padding: 12px 0; color: #95a5a6; font-size: 11px;
   font-weight: 700; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 4px;
+  transition: color 0.2s;
 }
 .nav-item.active { color: #1e4b85; }
-.nav-icon { font-size: 22px; }
+.nav-item svg { width: 24px; height: 24px; fill: currentColor; }
 
 /* --- STATUS ALERTS --- */
 .alert-card { background: #e8f8f5; border: 1px solid #2ecc71; border-radius: 10px; padding: 15px; margin-bottom: 20px; text-align: center; display: none; }
@@ -354,15 +355,15 @@ pre { background: #fff; padding: 15px; white-space: pre-wrap; border-radius: 8px
 
 <nav class="bottom-nav">
   <div class="nav-item active" id="nav-schedule" onclick="switchScreen('schedule')">
-    <span class="nav-icon">📋</span>
+    <svg viewBox="0 0 24 24"><path d="M19 3h-4.18C14.4 1.84 13.3 1 12 1c-1.3 0-2.4.84-2.82 2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 0c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zm2 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/></svg>
     <span>Schedule</span>
   </div>
   <div class="nav-item" id="nav-history" onclick="switchScreen('history')">
-    <span class="nav-icon">🕰️</span>
+    <svg viewBox="0 0 24 24"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/></svg>
     <span>History</span>
   </div>
   <div class="nav-item" id="nav-profile" onclick="switchScreen('profile')">
-    <span class="nav-icon">👤</span>
+    <svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
     <span>Profile</span>
   </div>
 </nav>
@@ -1427,7 +1428,6 @@ window.onload = function(){
   saveDraft();
   populateHistoryCustomers();
   
-  // Prompt for profile & load schedule screen
   loadUserProfile();
   switchScreen('schedule');
   
