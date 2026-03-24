@@ -369,15 +369,12 @@ pre { background: #fff; padding: 15px; white-space: pre-wrap; border-radius: 8px
 </nav>
 
 <script>
-// --- ENABLE FIREBASE OFFLINE QUEUE (Modern Standard) ---
+// --- ENABLE FIREBASE OFFLINE QUEUE ---
 if (typeof firebase !== 'undefined' && firebase.apps.length) {
-    try {
-        firebase.firestore().settings({
-            localCache: firebase.firestore.persistentLocalCache()
-        });
-    } catch (err) {
-        console.warn("Offline persistence issue or already configured: ", err);
-    }
+    firebase.firestore().enablePersistence()
+      .catch(function(err) {
+          console.warn("Offline persistence issue: ", err.code);
+      });
 }
 
 /* ---------- constants & arrays ---------- */
