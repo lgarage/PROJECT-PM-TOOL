@@ -5,9 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Tech Note Tool | Twin Pillars</title>
 
-<script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore-compat.js"></script>
-
+<script src="[https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js](https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js)"></script>
+<script src="[https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore-compat.js](https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore-compat.js)"></script>
 <script src="firebase-config.js"></script>
 
 <style>
@@ -39,7 +38,7 @@ body {
 }
 h2 {
   text-align: center;
-  color: #1e4b85; /* Twin Pillars Dark Blue */
+  color: #1e4b85; 
   margin-top: 0;
   margin-bottom: 5px;
   font-weight: bold;
@@ -72,7 +71,7 @@ input, textarea, select {
 }
 input:focus, textarea:focus, select:focus {
   outline: none;
-  border-color: #c89b53; /* Twin Pillars Gold */
+  border-color: #c89b53; 
   box-shadow: 0 0 5px rgba(200, 155, 83, 0.3);
   background: #fff;
 }
@@ -97,12 +96,8 @@ button {
   font-family: inherit;
   transition: all 0.2s ease;
 }
-button:hover {
-  background: #e2e6ea;
-}
-button:active {
-  transform: scale(.98);
-}
+button:hover { background: #e2e6ea; }
+button:active { transform: scale(.98); }
 
 /* Mode Bar (Tabs) */
 .modebar {
@@ -148,10 +143,6 @@ button:active {
 .pillbar button:hover { background: #f0f4f8; }
 
 /* Primary Action Buttons */
-#generate { background: #c89b53; color: #fff; border-color: #b58945; font-weight: bold; font-size: 1.1em; }
-#generate:hover { background: #b58945; }
-#copy { background: #1e4b85; color: #fff; border-color: #153661; font-weight: bold; }
-#copy:hover { background: #153661; }
 #clear { background: #fff; color: #e74c3c; border-color: #e74c3c; font-weight: bold; }
 #clear:hover { background: #fdf2f1; }
 
@@ -159,11 +150,6 @@ button:active {
 .inline .grow { flex: 1 1 320px; }
 .inline button { width: auto; background: #1e4b85; color: #fff; border: none; }
 
-/* Output Area */
-pre {
-  background: #fdfdfd; padding: 20px; white-space: pre-wrap; border-radius: 8px;
-  border: 1px solid #ccc; font-family: inherit; font-size: 15px; line-height: 1.5; color: #2c3e50;
-}
 .small { font-size: 13px; opacity: .75; margin-top: 6px; }
 .hidden { display: none !important; }
 
@@ -189,22 +175,10 @@ pre {
   cursor: pointer;
   transition: all 0.2s;
 }
-.history-item:hover {
-  background: #f0f4f8;
-}
-.history-item.active {
-  border-color: #c89b53;
-  background: #fdfaf2;
-}
-.history-title {
-  font-weight: 700;
-  color: #1e4b85;
-}
-.history-sub {
-  font-size: 14px;
-  opacity: .8;
-  margin-top: 6px;
-}
+.history-item:hover { background: #f0f4f8; }
+.history-item.active { border-color: #c89b53; background: #fdfaf2; }
+.history-title { font-weight: 700; color: #1e4b85; }
+.history-sub { font-size: 14px; opacity: .8; margin-top: 6px; }
 .summary-card {
   border: 1px solid #ddd;
   border-radius: 10px;
@@ -233,20 +207,20 @@ hr.soft { border: none; border-top: 1px solid #e5e5e5; margin: 25px 0; }
 <body>
 <div class="card">
 
-<div class="header-logo">
-  <img src="tphc_logo.png" alt="Twin Pillars Logo">
-</div>
-<h2>Field Notes Tool</h2>
-<div class="small" id="draftStatus"></div>
+  <div class="header-logo">
+    <img src="tphc_logo.png" alt="Twin Pillars Logo">
+  </div>
+  <h2>Field Notes Tool</h2>
+  <div class="small" id="draftStatus"></div>
 
-<div class="modebar">
-  <button id="modePM" type="button" class="active">PM</button>
-  <button id="modeService" type="button">SERVICE CALL</button>
-  <button id="modeQuote" type="button">QUOTED REPAIR</button>
-  <button id="modeHistory" type="button">HISTORY</button>
-</div>
+  <div class="modebar">
+    <button id="modePM" type="button" class="active">PM</button>
+    <button id="modeService" type="button">SERVICE CALL</button>
+    <button id="modeQuote" type="button">QUOTED REPAIR</button>
+    <button id="modeHistory" type="button">HISTORY</button>
+  </div>
 
- <div id="techPanel" style="background: #eaf2f8; padding: 15px; border-radius: 6px; margin-bottom: 20px; border: 1px solid #b9d5ec;">
+  <div id="techPanel" style="background: #eaf2f8; padding: 15px; border-radius: 6px; margin-bottom: 20px; border: 1px solid #b9d5ec;">
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
       <div style="font-weight: bold; color: #1e4b85;" id="loggedInTechDisplay">Loading user...</div>
       <button onclick="switchUser()" style="width: auto; margin: 0; padding: 4px 8px; font-size: 11px; background: #fff; border: 1px solid #ccc; color: #555;">Switch User</button>
@@ -378,51 +352,47 @@ hr.soft { border: none; border-top: 1px solid #e5e5e5; margin: 25px 0; }
       <p style="color: #555; font-size: 15px; margin-bottom: 0;">The office has received your report and the dispatch board has been updated.</p>
     </div>
 
-  </div> ```
+  </div> <div id="historySection" class="hidden">
+    <div class="history-box">
+      <label>Customer</label>
+      <select id="historyCustomer">
+        <option value="">Select customer</option>
+      </select>
 
-Make sure you follow up with the JavaScript changes from my previous message so the buttons and success cards actually work!
+      <label>Location</label>
+      <select id="historyLocation">
+        <option value="">Select location</option>
+      </select>
 
-<div id="historySection" class="hidden">
-  <div class="history-box">
-    <label>Customer</label>
-    <select id="historyCustomer">
-      <option value="">Select customer</option>
-    </select>
-
-    <label>Location</label>
-    <select id="historyLocation">
-      <option value="">Select location</option>
-    </select>
-
-    <div id="historyLatestWrap" class="hidden">
-      <div class="summary-card">
-        <h3>Last Time We Were On Site</h3>
-        <div id="historyLatest"></div>
+      <div id="historyLatestWrap" class="hidden">
+        <div class="summary-card">
+          <h3>Last Time We Were On Site</h3>
+          <div id="historyLatest"></div>
+        </div>
       </div>
-    </div>
 
-    <div id="historyOlderWrap" class="hidden">
-      <hr class="soft">
-      <div class="summary-card">
-        <h3>Older Visits</h3>
-        <div id="historyOlderList" class="history-list"></div>
+      <div id="historyOlderWrap" class="hidden">
+        <hr class="soft">
+        <div class="summary-card">
+          <h3>Older Visits</h3>
+          <div id="historyOlderList" class="history-list"></div>
+        </div>
       </div>
-    </div>
 
-    <div id="historyFullWrap" class="hidden">
-      <hr class="soft">
-      <div class="summary-card">
-        <h3>Selected Visit</h3>
-        <pre id="historyFullReport"></pre>
+      <div id="historyFullWrap" class="hidden">
+        <hr class="soft">
+        <div class="summary-card">
+          <h3>Selected Visit</h3>
+          <pre id="historyFullReport"></pre>
+        </div>
       </div>
     </div>
   </div>
-</div>
 
 </div>
 
 <script>
-  // --- NEW: ENABLE FIREBASE OFFLINE QUEUE ---
+// --- ENABLE FIREBASE OFFLINE QUEUE ---
 if (typeof firebase !== 'undefined' && firebase.apps.length) {
     firebase.firestore().enablePersistence()
       .catch(function(err) {
@@ -433,16 +403,10 @@ if (typeof firebase !== 'undefined' && firebase.apps.length) {
           }
       });
 }
-  
-/* ---------- basics ---------- */
-function pad2(n){
-  return String(n).padStart(2, "0");
-}
 
-function today(){
-  const d = new Date();
-  return d.getFullYear() + "-" + pad2(d.getMonth() + 1) + "-" + pad2(d.getDate());
-}
+/* ---------- basics ---------- */
+function pad2(n){ return String(n).padStart(2, "0"); }
+function today(){ const d = new Date(); return d.getFullYear() + "-" + pad2(d.getMonth() + 1) + "-" + pad2(d.getDate()); }
 
 const DEFAULT_PM_WORKDONE = "Changed filters/belts and verified operations of equipment";
 const DEFAULT_PM_NOTES = "All units are running good at this time.";
@@ -450,23 +414,17 @@ const DRAFT_KEY = "hvac_note_tool_v16";
 const HISTORY_KEY = "hvac_site_history_v1";
 
 const KNOWN_FILTER_SIZES = [
-  "14X20X1",
-  "16X16X2","16X20X2","16X24X2","16X25X1","16X25X2",
-  "18X20X2","18X24X2","18X25X2",
-  "20X20X1","20X20X2","20X24X1","20X24X2","20X25X1","20X25X2","20X30X2","20X35X2",
-  "24X24X1","24X24X2","24X24X4"
+  "14X20X1", "16X16X2","16X20X2","16X24X2","16X25X1","16X25X2", "18X20X2","18X24X2","18X25X2",
+  "20X20X1","20X20X2","20X24X1","20X24X2","20X25X1","20X25X2","20X30X2","20X35X2", "24X24X1","24X24X2","24X24X4"
 ];
 
 const KNOWN_BELTS = [
-  // --- 3L Belts (11.0" to 75.0") ---
   "3L110", "3L120", "3L130", "3L140", "3L150", "3L160", "3L170", "3L180", "3L190", "3L200", "3L210", "3L220",
   "3L230", "3L240", "3L250", "3L260", "3L270", "3L280", "3L290", "3L300", "3L310", "3L320", "3L330", "3L340",
   "3L350", "3L360", "3L370", "3L380", "3L390", "3L400", "3L410", "3L420", "3L430", "3L440", "3L450", "3L460",
   "3L470", "3L480", "3L490", "3L500", "3L510", "3L520", "3L530", "3L540", "3L550", "3L560", "3L570", "3L580",
   "3L590", "3L600", "3L610", "3L620", "3L630", "3L640", "3L650", "3L660", "3L670", "3L680", "3L690", "3L700",
   "3L710", "3L720", "3L730", "3L740", "3L750",
-
-  // --- 4L Belts (19.0" to 100.0") ---
   "4L190", "4L200", "4L210", "4L220", "4L230", "4L240", "4L250", "4L260", "4L270", "4L280", "4L290", "4L300",
   "4L310", "4L320", "4L330", "4L340", "4L350", "4L360", "4L370", "4L380", "4L390", "4L400", "4L410", "4L420",
   "4L430", "4L440", "4L450", "4L460", "4L470", "4L480", "4L490", "4L500", "4L510", "4L520", "4L530", "4L540",
@@ -474,16 +432,12 @@ const KNOWN_BELTS = [
   "4L670", "4L680", "4L690", "4L700", "4L710", "4L720", "4L730", "4L740", "4L750", "4L760", "4L770", "4L780",
   "4L790", "4L800", "4L810", "4L820", "4L830", "4L840", "4L850", "4L860", "4L870", "4L880", "4L890", "4L900",
   "4L910", "4L920", "4L930", "4L940", "4L950", "4L960", "4L970", "4L980", "4L990", "4L1000",
-
-  // --- A Belts (A20 to A120) ---
   "A20", "A21", "A22", "A23", "A24", "A25", "A26", "A27", "A28", "A29", "A30", "A31", "A32", "A33", "A34",
   "A35", "A36", "A37", "A38", "A39", "A40", "A41", "A42", "A43", "A44", "A45", "A46", "A47", "A48", "A49",
   "A50", "A51", "A52", "A53", "A54", "A55", "A56", "A57", "A58", "A59", "A60", "A61", "A62", "A63", "A64",
   "A65", "A66", "A67", "A68", "A69", "A70", "A71", "A72", "A73", "A74", "A75", "A76", "A77", "A78", "A79",
   "A80", "A81", "A82", "A83", "A84", "A85", "A86", "A87", "A88", "A89", "A90", "A91", "A92", "A93", "A94",
   "A95", "A96", "A97", "A98", "A99", "A100", "A105", "A110", "A112", "A120",
-
-  // --- AX Belts (AX20 to AX120) ---
   "AX20", "AX21", "AX22", "AX23", "AX24", "AX25", "AX26", "AX27", "AX28", "AX29", "AX30", "AX31", "AX32",
   "AX33", "AX34", "AX35", "AX36", "AX37", "AX38", "AX39", "AX40", "AX41", "AX42", "AX43", "AX44", "AX45",
   "AX46", "AX47", "AX48", "AX49", "AX50", "AX51", "AX52", "AX53", "AX54", "AX55", "AX56", "AX57", "AX58",
@@ -491,16 +445,12 @@ const KNOWN_BELTS = [
   "AX72", "AX73", "AX74", "AX75", "AX76", "AX77", "AX78", "AX79", "AX80", "AX81", "AX82", "AX83", "AX84",
   "AX85", "AX86", "AX87", "AX88", "AX89", "AX90", "AX91", "AX92", "AX93", "AX94", "AX95", "AX96", "AX97",
   "AX98", "AX99", "AX100", "AX105", "AX110", "AX112", "AX120",
-
-  // --- B Belts (B21 to B130) ---
   "B21", "B22", "B23", "B24", "B25", "B26", "B27", "B28", "B29", "B30", "B31", "B32", "B33", "B34", "B35",
   "B36", "B37", "B38", "B39", "B40", "B41", "B42", "B43", "B44", "B45", "B46", "B47", "B48", "B49", "B50",
   "B51", "B52", "B53", "B54", "B55", "B56", "B57", "B58", "B59", "B60", "B61", "B62", "B63", "B64", "B65",
   "B66", "B67", "B68", "B69", "B70", "B71", "B72", "B73", "B74", "B75", "B76", "B77", "B78", "B79", "B80",
   "B81", "B82", "B83", "B84", "B85", "B86", "B87", "B88", "B89", "B90", "B91", "B92", "B93", "B94", "B95",
   "B96", "B97", "B98", "B99", "B100", "B103", "B105", "B108", "B112", "B120", "B124", "B130",
-
-  // --- BX Belts (BX21 to BX130) ---
   "BX21", "BX22", "BX23", "BX24", "BX25", "BX26", "BX27", "BX28", "BX29", "BX30", "BX31", "BX32", "BX33",
   "BX34", "BX35", "BX36", "BX37", "BX38", "BX39", "BX40", "BX41", "BX42", "BX43", "BX44", "BX45", "BX46",
   "BX47", "BX48", "BX49", "BX50", "BX51", "BX52", "BX53", "BX54", "BX55", "BX56", "BX57", "BX58", "BX59",
@@ -510,22 +460,8 @@ const KNOWN_BELTS = [
   "BX99", "BX100", "BX103", "BX105", "BX108", "BX112", "BX120", "BX124", "BX130"
 ];
 
-const NUM_MAP = {
-  zero:"0",
-  one:"1", two:"2", three:"3", four:"4", five:"5",
-  six:"6", seven:"7", eight:"8", nine:"9", ten:"10",
-  ones:"1", twos:"2", threes:"3", fours:"4", fives:"5",
-  to:"2", too:"2"
-};
-
-const EQUIP_LABELS = {
-  RTU:"Rooftop Unit",
-  F:"Furnace",
-  UH:"Unit Heater",
-  RH:"Radiant Heater",
-  EF:"Exhaust Fan",
-  MUA:"Make-Up Air Unit"
-};
+const NUM_MAP = { zero:"0", one:"1", two:"2", three:"3", four:"4", five:"5", six:"6", seven:"7", eight:"8", nine:"9", ten:"10", ones:"1", twos:"2", threes:"3", fours:"4", fives:"5", to:"2", too:"2" };
+const EQUIP_LABELS = { RTU:"Rooftop Unit", F:"Furnace", UH:"Unit Heater", RH:"Radiant Heater", EF:"Exhaust Fan", MUA:"Make-Up Air Unit" };
 
 let currentMode = "PM";
 let currentHistoryCustomer = "";
@@ -534,16 +470,12 @@ let currentHistorySelectedIndex = 0;
 
 /* ---------- location local formatting fallback ---------- */
 function titleCaseWords(str){
-  return str
-    .split(" ")
-    .filter(Boolean)
-    .map(w => {
+  return str.split(" ").filter(Boolean).map(w => {
       const upper = w.toUpperCase();
       if(/^\d/.test(w)) return w;
       if(["NW","NE","SW","SE"].includes(upper)) return upper;
       return w.charAt(0).toUpperCase() + w.slice(1).toLowerCase();
-    })
-    .join(" ");
+  }).join(" ");
 }
 
 function normalizeStreetSuffix(street){
@@ -576,32 +508,20 @@ function formatLocation(raw){
   t = t.replace(/\bthe\b/gi, " ");
   t = t.replace(/\s{2,}/g, " ").trim();
 
-  let m;
-  
-  m = t.match(/^(.+?)\s+in\s+(.+?)\s+at\s+(.+)$/i);
-  if(m){
-    return `${normalizeSiteName(m[3])} - ${titleCaseWords(m[2])} - ${normalizeStreetSuffix(m[1])}`;
-  }
+  let m = t.match(/^(.+?)\s+in\s+(.+?)\s+at\s+(.+)$/i);
+  if(m) return `${normalizeSiteName(m[3])} - ${titleCaseWords(m[2])} - ${normalizeStreetSuffix(m[1])}`;
 
   m = t.match(/^(.+?)\s+on\s+(.+?)\s+at\s+(.+)$/i);
-  if(m){
-    return `${normalizeSiteName(m[3])} - ${titleCaseWords(m[1])} - ${normalizeStreetSuffix(m[2])}`;
-  }
+  if(m) return `${normalizeSiteName(m[3])} - ${titleCaseWords(m[1])} - ${normalizeStreetSuffix(m[2])}`;
 
   m = t.match(/^(.+?)\s+in\s+(.+?)\s+on\s+(.+)$/i);
-  if(m){
-    return `${normalizeSiteName(m[1])} - ${titleCaseWords(m[2])} - ${normalizeStreetSuffix(m[3])}`;
-  }
+  if(m) return `${normalizeSiteName(m[1])} - ${titleCaseWords(m[2])} - ${normalizeStreetSuffix(m[3])}`;
 
   m = t.match(/^(.+?)\s+on\s+(.+?)\s+in\s+(.+)$/i);
-  if(m){
-    return `${normalizeSiteName(m[1])} - ${titleCaseWords(m[3])} - ${normalizeStreetSuffix(m[2])}`;
-  }
+  if(m) return `${normalizeSiteName(m[1])} - ${titleCaseWords(m[3])} - ${normalizeStreetSuffix(m[2])}`;
 
   m = t.match(/^(.+?)\s+in\s+(.+)$/i);
-  if(m){
-    return `${normalizeSiteName(m[1])} - ${titleCaseWords(m[2])}`;
-  }
+  if(m) return `${normalizeSiteName(m[1])} - ${titleCaseWords(m[2])}`;
 
   return normalizeSiteName(t);
 }
@@ -619,9 +539,7 @@ async function autoParseLocation() {
 
     const applyFallback = () => {
         let fallbackText = formatLocation(rawText);
-        if (!fallbackText.includes(' - ')) {
-            fallbackText = rawText; 
-        }
+        if (!fallbackText.includes(' - ')) fallbackText = rawText; 
         locInput.value = fallbackText.toUpperCase();
         saveDraft();
     };
@@ -634,21 +552,11 @@ async function autoParseLocation() {
         RULES:
         1. ONLY use the information provided in the input text. DO NOT invent cities or names.
         2. Identify the Business, City, and Street, REGARDLESS of the order they are spoken.
-        3. IGNORE conversational filler (e.g., "I'm in", "I am at", "we are", "heading to", "over on", "the", "a", "an", "at", "and", "on").
-        4. STRIP leading articles like "A", "AN", or "THE" from the Business Name (e.g., "A Take 5" -> "Take 5").
+        3. IGNORE conversational filler.
+        4. STRIP leading articles like "A", "AN", or "THE" from the Business Name.
         5. Map the extracted entities to a JSON object with EXACTLY these keys: "business", "city", "street".
-        6. Abbreviate street types standardly (e.g., Street -> ST, Avenue -> AVE, Road -> RD, Drive -> DR).
+        6. Abbreviate street types standardly.
         7. If a piece of information is missing entirely, leave its value as an empty string "".
-        
-        EXAMPLES:
-        Text: "I'm on Main Street in Milwaukee at a Take 5"
-        Output: {"business": "Take 5", "city": "Milwaukee", "street": "Main ST"}
-        
-        Text: "I am in Madison on Main Street at the Planet Fitness"
-        Output: {"business": "Planet Fitness", "city": "Madison", "street": "Main ST"}
-
-        Text: "Green Bay McDonald's Oneida Street"
-        Output: {"business": "McDonald's", "city": "Green Bay", "street": "Oneida ST"}
         
         Text: "${rawText}"
         Output:
@@ -660,16 +568,11 @@ async function autoParseLocation() {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ 
                     contents: [{ parts: [{ text: prompt }] }], 
-                    generationConfig: { 
-                        temperature: 0.0,
-                        responseMimeType: "application/json"
-                    } 
+                    generationConfig: { temperature: 0.0, responseMimeType: "application/json" } 
                 })
             });
 
             if (!response.ok) {
-                const errText = await response.text();
-                console.error("🚨 GEMINI API ERROR:", response.status, errText);
                 applyFallback();
                 locInput.style.backgroundColor = originalBg;
                 return;
@@ -678,7 +581,6 @@ async function autoParseLocation() {
             const data = await response.json();
             if (data.candidates && data.candidates.length > 0) {
                 let aiResponseText = data.candidates[0].content.parts[0].text;
-                
                 aiResponseText = aiResponseText.replace(/```json/gi, '').replace(/```/g, '').trim();
                 const locationData = JSON.parse(aiResponseText);
                 
@@ -687,7 +589,6 @@ async function autoParseLocation() {
                 const street = (locationData.street || "").toUpperCase().trim();
                 
                 const finalParts = [business, city, street].filter(Boolean);
-                
                 if (finalParts.length > 0) {
                     locInput.value = finalParts.join(" - ");
                     saveDraft(); 
@@ -698,11 +599,9 @@ async function autoParseLocation() {
                 applyFallback();
             }
         } catch (error) { 
-            console.error("🚨 NETWORK ERROR (GitHub might be blocking it):", error); 
             applyFallback();
         }
     } else {
-        console.warn("Firebase API Key missing. Applying local fallback...");
         applyFallback();
     }
     
@@ -717,7 +616,6 @@ async function autoParseParts(fieldId) {
     
     if (!rawText) return;
 
-    // Fast path: If it looks perfectly formatted (digits followed by dash), skip the AI
     if (/^\d+\s*-/.test(rawText) && !rawText.toLowerCase().includes('filter') && !rawText.toLowerCase().includes('belt')) {
         el.value = normalizeParts(rawText);
         autoGrow(el);
@@ -735,7 +633,6 @@ async function autoParseParts(fieldId) {
     };
 
     if (typeof firebaseConfig !== 'undefined' && firebaseConfig.apiKey) {
-        // PROMPT UPDATED: Injected your exact inventory lists to "Ground" the AI
         const prompt = `
         You are a strict data extraction AI for an HVAC dispatch system.
         The technician dictated a list of HVAC parts into their phone, resulting in a run-on sentence without commas.
@@ -753,13 +650,6 @@ async function autoParseParts(fieldId) {
         5. Each string in the JSON array must follow the exact format: "QTY - PART_NAME" (e.g., "2 - 14X20X2").
         6. Output ONLY the raw JSON array format. No backticks, no markdown.
         
-        EXAMPLES:
-        Text: "One 20 by 20 by one filter two 14 by 20 by two filter 6 16 x 20 x 1 filter one BX 37 belt to ax 37 belt 1 4 l 230 belt"
-        Output: ["1 - 20X20X1", "2 - 14X20X2", "6 - 16X20X1", "1 - BX37", "2 - AX37", "1 - 4L230"]
-
-        Text: "I have two 16 x 20 x 2 3 16 x 20 by one and four 24 x 24 x 2 filters"
-        Output: ["2 - 16X20X2", "3 - 16X20X1", "4 - 24X24X2"]
-        
         Text: "${rawText}"
         Output:
         `;
@@ -770,16 +660,11 @@ async function autoParseParts(fieldId) {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ 
                     contents: [{ parts: [{ text: prompt }] }], 
-                    generationConfig: { 
-                        temperature: 0.0, 
-                        responseMimeType: "application/json"
-                    } 
+                    generationConfig: { temperature: 0.0, responseMimeType: "application/json" } 
                 })
             });
 
             if (!response.ok) {
-                const errText = await response.text();
-                console.error("🚨 GEMINI API ERROR (PARTS):", response.status, errText);
                 applyFallback();
                 el.style.backgroundColor = originalBg;
                 return;
@@ -792,7 +677,6 @@ async function autoParseParts(fieldId) {
                 
                 const partsArray = JSON.parse(aiResponseText);
                 if (Array.isArray(partsArray) && partsArray.length > 0) {
-                    // Pass the AI output into our Javascript Custom Sorter before displaying!
                     el.value = sortPartsArray(partsArray).join("\n");
                     autoGrow(el);
                     saveDraft();
@@ -803,7 +687,6 @@ async function autoParseParts(fieldId) {
                 applyFallback();
             }
         } catch (error) { 
-            console.error("🚨 NETWORK ERROR:", error);
             applyFallback();
         }
     } else {
@@ -832,11 +715,7 @@ function levenshtein(a, b){
   for(let i = 1; i <= m; i++){
     for(let j = 1; j <= n; j++){
       const cost = a[i - 1] === b[j - 1] ? 0 : 1;
-      dp[i][j] = Math.min(
-        dp[i - 1][j] + 1,
-        dp[i][j - 1] + 1,
-        dp[i - 1][j - 1] + cost
-      );
+      dp[i][j] = Math.min( dp[i - 1][j] + 1, dp[i][j - 1] + 1, dp[i - 1][j - 1] + cost );
     }
   }
   return dp[m][n];
@@ -847,10 +726,7 @@ function closestMatch(value, list, maxDistance){
   let bestScore = Infinity;
   list.forEach(item => {
     const d = levenshtein(value.toUpperCase(), item.toUpperCase());
-    if(d < bestScore){
-      bestScore = d;
-      best = item;
-    }
+    if(d < bestScore){ bestScore = d; best = item; }
   });
   return bestScore <= maxDistance ? best : value;
 }
@@ -862,10 +738,7 @@ function autoGrow(el){
 }
 
 function escapeHtml(text){
-  return String(text || "")
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;");
+  return String(text || "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 }
 
 function getCustomerFromLocation(location){
@@ -929,21 +802,14 @@ function expandEquipmentCounts(text){
   });
 
   const directMatches = [...t.matchAll(/\b(RTU|RH|UH|F|EF|MUA)\s*-?\s*(\d+)\b/gi)];
-  directMatches.forEach(m => {
-    out.push(m[1].toUpperCase() + m[2]);
-  });
+  directMatches.forEach(m => out.push(m[1].toUpperCase() + m[2]));
 
   const unique = [];
-  out.forEach(x => {
-    if(!unique.includes(x)) unique.push(x);
-  });
-
+  out.forEach(x => { if(!unique.includes(x)) unique.push(x); });
   return unique.join(", ");
 }
 
-function parseEquipCodes(codeCsv){
-  return (codeCsv || "").split(",").map(s => s.trim()).filter(Boolean);
-}
+function parseEquipCodes(codeCsv){ return (codeCsv || "").split(",").map(s => s.trim()).filter(Boolean); }
 
 function expandEquipment(codeCsv){
   const codes = parseEquipCodes(codeCsv);
@@ -956,9 +822,7 @@ function expandEquipment(codeCsv){
   }).join("\n");
 }
 
-function firstUnitOfType(codes, type){
-  return codes.find(c => c.startsWith(type)) || null;
-}
+function firstUnitOfType(codes, type){ return codes.find(c => c.startsWith(type)) || null; }
 
 function formatEquipmentFieldValue(raw){
   const codes = expandEquipmentCounts(raw);
@@ -976,10 +840,7 @@ function normalizeFilterSize(rawSize){
   s = s.replace(/[^0-9X]/g, "");
 
   const nums = s.split("X").filter(Boolean);
-  if(nums.length === 3){
-    s = `${nums[0]}X${nums[1]}X${nums[2]}`;
-  }
-
+  if(nums.length === 3) s = `${nums[0]}X${nums[1]}X${nums[2]}`;
   return closestMatch(s, KNOWN_FILTER_SIZES, 2).toUpperCase();
 }
 
@@ -995,23 +856,16 @@ function normalizeBeltCode(rawCode){
   return closestMatch(s, KNOWN_BELTS, 1).toUpperCase();
 }
 
-function formatPartOutput(qty, value){
-  return `${qty} - ${String(value).toUpperCase()}`;
-}
+function formatPartOutput(qty, value){ return `${qty} - ${String(value).toUpperCase()}`; }
 
 function recoverConcatenatedFilter(firstNum, secondNum, thirdNum){
-  const a = String(firstNum);
-  const b = String(secondNum);
-  const c = String(thirdNum);
-
+  const a = String(firstNum); const b = String(secondNum); const c = String(thirdNum);
   for(let i = 1; i < a.length; i++){
     const qty = a.slice(0, i);
     const firstDim = a.slice(i);
     const candidate = `${firstDim}X${b}X${c}`;
     const matched = closestMatch(candidate, KNOWN_FILTER_SIZES, 2);
-    if(KNOWN_FILTER_SIZES.includes(matched)){
-      return `${parseInt(qty, 10)} - ${matched}`;
-    }
+    if(KNOWN_FILTER_SIZES.includes(matched)) return `${parseInt(qty, 10)} - ${matched}`;
   }
   return null;
 }
@@ -1027,25 +881,13 @@ function parsePartItem(item){
   t = t.replace(/\bbelts?\b/g, "").trim();
 
   let beltMatch = t.match(/^(\d+)\s+(ax|bx|a|b|4l)\s*-?\s*(\d+)$/i);
-  if(beltMatch){
-    const qty = parseInt(beltMatch[1], 10);
-    const code = normalizeBeltCode(beltMatch[2] + beltMatch[3]);
-    return [formatPartOutput(qty, code)];
-  }
+  if(beltMatch) return [formatPartOutput(parseInt(beltMatch[1], 10), normalizeBeltCode(beltMatch[2] + beltMatch[3]))];
 
   beltMatch = t.match(/^(\d+)(ax|bx|a|b|4l)\s*-?\s*(\d+)$/i);
-  if(beltMatch){
-    const qty = parseInt(beltMatch[1], 10);
-    const code = normalizeBeltCode(beltMatch[2] + beltMatch[3]);
-    return [formatPartOutput(qty, code)];
-  }
+  if(beltMatch) return [formatPartOutput(parseInt(beltMatch[1], 10), normalizeBeltCode(beltMatch[2] + beltMatch[3]))];
 
   beltMatch = t.match(/^(\d+)\s+(4)\s*l\s*(\d+)$/i);
-  if(beltMatch){
-    const qty = parseInt(beltMatch[1], 10);
-    const code = normalizeBeltCode(`4L${beltMatch[3]}`);
-    return [formatPartOutput(qty, code)];
-  }
+  if(beltMatch) return [formatPartOutput(parseInt(beltMatch[1], 10), normalizeBeltCode(`4L${beltMatch[3]}`))];
 
   let f = t;
   f = f.replace(/\s+by\s+/g, " x ");
@@ -1053,32 +895,16 @@ function parsePartItem(item){
   f = f.replace(/\s{2,}/g, " ").trim();
 
   let m = f.match(/^(\d+)\s+(\d+)\s+(\d+)\s*x\s*(\d+)$/i);
-  if(m){
-    const qty = parseInt(m[1], 10);
-    const size = normalizeFilterSize(`${m[2]}x${m[3]}x${m[4]}`);
-    return [formatPartOutput(qty, size)];
-  }
+  if(m) return [formatPartOutput(parseInt(m[1], 10), normalizeFilterSize(`${m[2]}x${m[3]}x${m[4]}`))];
 
   m = f.match(/^(\d+)\s+(\d+)\s*x\s*(\d+)\s*x\s*(\d+)$/i);
-  if(m){
-    const qty = parseInt(m[1], 10);
-    const size = normalizeFilterSize(`${m[2]}x${m[3]}x${m[4]}`);
-    return [formatPartOutput(qty, size)];
-  }
+  if(m) return [formatPartOutput(parseInt(m[1], 10), normalizeFilterSize(`${m[2]}x${m[3]}x${m[4]}`))];
 
   m = f.match(/^(\d+)x(\d+)x(\d+)x(\d+)$/i);
-  if(m){
-    const qty = parseInt(m[1], 10);
-    const size = normalizeFilterSize(`${m[2]}x${m[3]}x${m[4]}`);
-    return [formatPartOutput(qty, size)];
-  }
+  if(m) return [formatPartOutput(parseInt(m[1], 10), normalizeFilterSize(`${m[2]}x${m[3]}x${m[4]}`))];
 
   m = f.match(/^(\d+)\s+(\d+x\d+x\d+)$/i);
-  if(m){
-    const qty = parseInt(m[1], 10);
-    const size = normalizeFilterSize(m[2]);
-    return [formatPartOutput(qty, size)];
-  }
+  if(m) return [formatPartOutput(parseInt(m[1], 10), normalizeFilterSize(m[2]))];
 
   m = f.match(/^(\d+)\s+(\d+)\s*x\s*(\d+)$/i);
   if(m){
@@ -1087,11 +913,7 @@ function parsePartItem(item){
   }
 
   const nums = f.match(/\d+/g);
-  if(nums && nums.length === 4){
-    const qty = parseInt(nums[0], 10);
-    const size = normalizeFilterSize(`${nums[1]}x${nums[2]}x${nums[3]}`);
-    return [formatPartOutput(qty, size)];
-  }
+  if(nums && nums.length === 4) return [formatPartOutput(parseInt(nums[0], 10), normalizeFilterSize(`${nums[1]}x${nums[2]}x${nums[3]}`))];
 
   if(nums && nums.length === 3){
     const recovered = recoverConcatenatedFilter(nums[0], nums[1], nums[2]);
@@ -1099,38 +921,46 @@ function parsePartItem(item){
   }
 
   const beltNums = f.match(/^(\d+)\s*(ax|bx|a|b|4l)\s*(\d+)$/i);
-  if(beltNums){
-    const qty = parseInt(beltNums[1], 10);
-    const code = normalizeBeltCode(beltNums[2] + beltNums[3]);
-    return [formatPartOutput(qty, code)];
-  }
+  if(beltNums) return [formatPartOutput(parseInt(beltNums[1], 10), normalizeBeltCode(beltNums[2] + beltNums[3]))];
 
   return [item.trim().toUpperCase()];
 }
 
-  /* ---------- NEW: CLOUD TICKET FETCHING ---------- */
+/* ---------- NEW: CLOUD TICKET FETCHING & USER PROFILE ---------- */
 let myTickets = [];
+let currentTechProfile = "";
+
+function loadUserProfile() {
+  currentTechProfile = localStorage.getItem('tp_saved_tech');
+  if (!currentTechProfile) {
+      currentTechProfile = prompt("DEVICE SETUP\nPlease enter your Tech Name (e.g., 'Dave (Tech 1)') exactly as it appears on the dispatch board:");
+      if (!currentTechProfile) currentTechProfile = "Unknown Tech";
+      localStorage.setItem('tp_saved_tech', currentTechProfile);
+  }
+  document.getElementById('loggedInTechDisplay').innerText = "👤 " + currentTechProfile;
+  fetchMyTickets();
+}
+
+function switchUser() {
+  localStorage.removeItem('tp_saved_tech');
+  loadUserProfile();
+}
 
 async function fetchMyTickets() {
-  const tech = document.getElementById('techSelector').value;
   const ticketDropdown = document.getElementById('ticketSelector');
   ticketDropdown.innerHTML = '<option value="">Select a ticket to auto-fill...</option>';
   myTickets = [];
 
-  // Save tech preference so they don't have to pick their name every time
-  localStorage.setItem('tp_saved_tech', tech);
-
-  if (!tech || typeof firebase === 'undefined' || !firebase.apps.length) return;
+  if (!currentTechProfile || typeof firebase === 'undefined' || !firebase.apps.length) return;
 
   try {
     const db = firebase.firestore();
-    const todayStr = new Date().toISOString().split('T')[0]; // "YYYY-MM-DD"
+    const todayStr = new Date().toISOString().split('T')[0]; 
 
     ticketDropdown.innerHTML = '<option value="">Fetching cloud tickets...</option>';
 
-    // Query Firebase for tickets assigned to this tech TODAY
     const snapshot = await db.collection('service_calls')
-      .where('assignedTech', '==', tech)
+      .where('assignedTech', '==', currentTechProfile)
       .where('date', '==', todayStr)
       .get();
 
@@ -1138,7 +968,6 @@ async function fetchMyTickets() {
 
     snapshot.forEach(doc => {
       let data = doc.data();
-      // Skip completed or canceled jobs
       if (data.status === 'Completed' || data.status === 'Canceled') return; 
       
       data.id = doc.id;
@@ -1166,11 +995,9 @@ function loadTicketData() {
   const ticket = myTickets.find(t => t.id === ticketId);
   if (!ticket) return;
 
-  // 1. Build location string and populate
   const locString = `${ticket.customerName} - ${ticket.locationAddress}`;
   document.getElementById('location').value = locString;
 
-  // 2. Auto-switch mode based on dispatcher's job type
   if (ticket.jobType === 'Preventative Maintenance') {
     document.getElementById('modePM').click();
   } else if (ticket.jobType === 'Quoted Repair') {
@@ -1181,32 +1008,25 @@ function loadTicketData() {
     document.getElementById('reason').value = ticket.issue;
   }
 
-  // 3. Auto-fill equipment if the dispatcher noted it
   if (ticket.equip && ticket.equip !== 'N/A') {
     if (currentMode === 'PM') document.getElementById('equipment').value = ticket.equip;
     if (currentMode === 'SERVICE') document.getElementById('serviceEquipment').value = ticket.equip;
     if (currentMode === 'QUOTE') document.getElementById('quoteEquip').value = ticket.equip;
   }
-
   saveDraft();
 }
 
 /* ---------- firebase parent lookup (FIXED) ---------- */
 async function getParentCompany(locationText) {
   if (typeof firebase === 'undefined' || !firebase.apps.length) return null;
-
   try {
     const db = firebase.firestore();
     const pieces = locationText.split(" - ");
-    
-    // We need at least SubCompany and Street
     if (pieces.length < 2) return null;
 
     const subCompany = pieces[0].trim();
-    // The second piece might be a street or city. We'll grab the street based on our auto-fill formatting
     const street = pieces[pieces.length - 1].trim(); 
 
-    // Search the correct "MappedLocations" collection
     const locSnapshot = await db.collection("MappedLocations")
       .where("Sub_Company", "==", subCompany)
       .where("Street", "==", street)
@@ -1214,16 +1034,10 @@ async function getParentCompany(locationText) {
 
     if (locSnapshot.empty) return null;
 
-    // Grab the Parent ID
     const parentId = locSnapshot.docs[0].data().Parent_ID;
-
-    // Look up the actual parent company name in "ParentCompanies"
     const parentDoc = await db.collection("ParentCompanies").doc(parentId).get();
 
-    if (parentDoc.exists) {
-      return parentDoc.data().Name; 
-    }
-    
+    if (parentDoc.exists) return parentDoc.data().Name; 
     return null;
   } catch (error) {
     console.error("Firebase Lookup Error:", error);
@@ -1233,19 +1047,11 @@ async function getParentCompany(locationText) {
 
 // ---------------------------------------------------------
 // NEW: CUSTOM JAVASCRIPT SORTING ENGINE
-// This guarantees perfect sorting without relying on the AI
 // ---------------------------------------------------------
 function sortPartsArray(parts) {
-  const filters = [];
-  const belts = [];
+  const filters = []; const belts = [];
+  parts.forEach(p => { if (p.includes('X')) filters.push(p); else belts.push(p); });
 
-  // 1. Separate into two groups
-  parts.forEach(p => {
-    if (p.includes('X')) filters.push(p);
-    else belts.push(p);
-  });
-
-  // 2. Mathematically sort filters from smallest to largest
   filters.sort((a, b) => {
     const [a1, a2, a3] = (a.match(/\d+/g) || [0,0,0]).slice(-3).map(Number);
     const [b1, b2, b3] = (b.match(/\d+/g) || [0,0,0]).slice(-3).map(Number);
@@ -1254,14 +1060,12 @@ function sortPartsArray(parts) {
     return a3 - b3;
   });
 
-  // 3. Alphabetically sort belts
   belts.sort((a, b) => {
     const beltA = a.split('-')[1] || a;
     const beltB = b.split('-')[1] || b;
     return beltA.trim().localeCompare(beltB.trim(), undefined, {numeric: true});
   });
 
-  // 4. Combine them back together!
   return [...filters, ...belts];
 }
 
@@ -1272,7 +1076,6 @@ function normalizeParts(text){
   t = t.replace(/\s+and\s+/gi, ", ");
   t = t.replace(/\s{2,}/g, " ").trim();
 
-  // Split the sentence by commas, semicolons, OR existing newlines
   const items = t.split(/[,;\n]+/).map(s => s.trim()).filter(Boolean);
   const out = [];
 
@@ -1282,13 +1085,11 @@ function normalizeParts(text){
         .replace(/\bFILTERS?\b/gi, "")
         .replace(/\bBELTS?\b/gi, "")
         .replace(/\s{2,}/g, " ")
-        .trim()
-        .toUpperCase();
+        .trim().toUpperCase();
       if(cleaned) out.push(cleaned);
     });
   });
 
-  // Automatically pass everything through the Custom Sorter and join vertically!
   return sortPartsArray(out).join("\n");
 }
 
@@ -1325,11 +1126,7 @@ function extractRepairsFromNotes(notesText, equipCodes){
   const text = (notesText || "").trim();
   if(!text) return {general:"", repairs:[]};
 
-  const pieces = text
-    .replace(/\r/g,"")
-    .split(/\n+|(?<=[.?!])\s+/)
-    .map(s => s.trim())
-    .filter(Boolean);
+  const pieces = text.replace(/\r/g,"").split(/\n+|(?<=[.?!])\s+/).map(s => s.trim()).filter(Boolean);
 
   const repairs = [];
   const general = [];
@@ -1363,56 +1160,27 @@ function extractRepairsFromNotes(notesText, equipCodes){
     }
   });
 
-  return {
-    general: general.join(" ").trim(),
-    repairs
-  };
+  return { general: general.join(" ").trim(), repairs };
 }
 
 /* ---------- history storage ---------- */
 function getHistoryData(){
-  try{
-    return JSON.parse(localStorage.getItem(HISTORY_KEY) || "{}");
-  }catch(e){
-    return {};
-  }
+  try{ return JSON.parse(localStorage.getItem(HISTORY_KEY) || "{}"); }catch(e){ return {}; }
 }
 
-function saveHistoryData(data){
-  localStorage.setItem(HISTORY_KEY, JSON.stringify(data));
-}
+function saveHistoryData(data){ localStorage.setItem(HISTORY_KEY, JSON.stringify(data)); }
 
 function buildVisitSummary(visit){
   if(visit.mode === "PM"){
-    return {
-      date: visit.date,
-      type: "PM",
-      primary: visit.location,
-      details: visit.notesFinal || "No notes.",
-      parts: visit.partsUsed || "NONE"
-    };
+    return { date: visit.date, type: "PM", primary: visit.location, details: visit.notesFinal || "No notes.", parts: visit.partsUsed || "NONE" };
   } else if(visit.mode === "QUOTED REPAIR"){
-    return {
-      date: visit.date,
-      type: "QUOTED REPAIR",
-      primary: visit.location,
-      details: visit.repairsCompleted || "No repairs recorded.",
-      parts: visit.partsUsed || "NONE"
-    };
+    return { date: visit.date, type: "QUOTED REPAIR", primary: visit.location, details: visit.repairsCompleted || "No repairs recorded.", parts: visit.partsUsed || "NONE" };
   }
-
-  return {
-    date: visit.date,
-    type: "SERVICE CALL",
-    primary: visit.location,
-    details: visit.diagnosis || "No diagnosis.",
-    parts: visit.partsUsed || "NONE"
-  };
+  return { date: visit.date, type: "SERVICE CALL", primary: visit.location, details: visit.diagnosis || "No diagnosis.", parts: visit.partsUsed || "NONE" };
 }
 
 function saveVisitToHistory(visit){
   if(!visit.location) return;
-
   const customer = getCustomerFromLocation(visit.location);
   const data = getHistoryData();
 
@@ -1431,17 +1199,11 @@ function populateHistoryCustomers(){
   select.innerHTML = `<option value="">Select customer</option>`;
   customers.forEach(customer => {
     const opt = document.createElement("option");
-    opt.value = customer;
-    opt.textContent = customer;
+    opt.value = customer; opt.textContent = customer;
     select.appendChild(opt);
   });
 
-  if(customers.includes(currentHistoryCustomer)){
-    select.value = currentHistoryCustomer;
-  } else {
-    currentHistoryCustomer = "";
-  }
-
+  if(customers.includes(currentHistoryCustomer)){ select.value = currentHistoryCustomer; } else { currentHistoryCustomer = ""; }
   populateHistoryLocations();
 }
 
@@ -1452,25 +1214,17 @@ function populateHistoryLocations(){
   locationSelect.innerHTML = `<option value="">Select location</option>`;
 
   if(!currentHistoryCustomer || !data[currentHistoryCustomer]){
-    currentHistoryLocation = "";
-    renderHistoryView();
-    return;
+    currentHistoryLocation = ""; renderHistoryView(); return;
   }
 
   const locations = Object.keys(data[currentHistoryCustomer]).sort();
   locations.forEach(location => {
     const opt = document.createElement("option");
-    opt.value = location;
-    opt.textContent = location;
+    opt.value = location; opt.textContent = location;
     locationSelect.appendChild(opt);
   });
 
-  if(locations.includes(currentHistoryLocation)){
-    locationSelect.value = currentHistoryLocation;
-  } else {
-    currentHistoryLocation = "";
-  }
-
+  if(locations.includes(currentHistoryLocation)){ locationSelect.value = currentHistoryLocation; } else { currentHistoryLocation = ""; }
   renderHistoryView();
 }
 
@@ -1483,12 +1237,8 @@ function renderHistoryView(){
   const full = document.getElementById("historyFullReport");
   const data = getHistoryData();
 
-  latestWrap.classList.add("hidden");
-  olderWrap.classList.add("hidden");
-  fullWrap.classList.add("hidden");
-  latest.innerHTML = "";
-  olderList.innerHTML = "";
-  full.textContent = "";
+  latestWrap.classList.add("hidden"); olderWrap.classList.add("hidden"); fullWrap.classList.add("hidden");
+  latest.innerHTML = ""; olderList.innerHTML = ""; full.textContent = "";
 
   if(!currentHistoryCustomer || !currentHistoryLocation) return;
   if(!data[currentHistoryCustomer] || !data[currentHistoryCustomer][currentHistoryLocation]) return;
@@ -1507,9 +1257,7 @@ function renderHistoryView(){
   `;
   latestWrap.classList.remove("hidden");
 
-  if(typeof currentHistorySelectedIndex !== "number" || currentHistorySelectedIndex >= visits.length){
-    currentHistorySelectedIndex = 0;
-  }
+  if(typeof currentHistorySelectedIndex !== "number" || currentHistorySelectedIndex >= visits.length){ currentHistorySelectedIndex = 0; }
 
   if(visits.length > 1){
     olderWrap.classList.remove("hidden");
@@ -1517,28 +1265,16 @@ function renderHistoryView(){
       const box = document.createElement("div");
       const sum = buildVisitSummary(visit);
       box.className = "history-item" + (idx === currentHistorySelectedIndex ? " active" : "");
-      box.innerHTML = `
-        <div class="history-title">${escapeHtml(sum.date)} - ${escapeHtml(sum.type)}</div>
-        <div class="history-sub">${escapeHtml(sum.details)}</div>
-      `;
-      box.onclick = () => {
-        currentHistorySelectedIndex = idx;
-        renderHistoryView();
-      };
+      box.innerHTML = `<div class="history-title">${escapeHtml(sum.date)} - ${escapeHtml(sum.type)}</div><div class="history-sub">${escapeHtml(sum.details)}</div>`;
+      box.onclick = () => { currentHistorySelectedIndex = idx; renderHistoryView(); };
       olderList.appendChild(box);
     });
   } else {
     const box = document.createElement("div");
     const sum = buildVisitSummary(latestVisit);
     box.className = "history-item active";
-    box.innerHTML = `
-      <div class="history-title">${escapeHtml(sum.date)} - ${escapeHtml(sum.type)}</div>
-      <div class="history-sub">${escapeHtml(sum.details)}</div>
-    `;
-    box.onclick = () => {
-      currentHistorySelectedIndex = 0;
-      renderHistoryView();
-    };
+    box.innerHTML = `<div class="history-title">${escapeHtml(sum.date)} - ${escapeHtml(sum.type)}</div><div class="history-sub">${escapeHtml(sum.details)}</div>`;
+    box.onclick = () => { currentHistorySelectedIndex = 0; renderHistoryView(); };
     olderList.appendChild(box);
     olderWrap.classList.remove("hidden");
   }
@@ -1552,7 +1288,6 @@ function getFields(){
   return {
     currentMode,
     location: document.getElementById("location").value || "",
-
     equipment: document.getElementById("equipment").value || "",
     notes: document.getElementById("notes").value || "",
     used: document.getElementById("used").value || "",
@@ -1579,8 +1314,6 @@ function getFields(){
     historyCustomer: currentHistoryCustomer,
     historyLocation: currentHistoryLocation,
     historySelectedIndex: currentHistorySelectedIndex,
-
-    output: document.getElementById("output").textContent || "",
     savedAt: new Date().toISOString()
   };
 }
@@ -1594,7 +1327,6 @@ function setFields(d){
   applyMode();
 
   document.getElementById("location").value = d.location || "";
-
   document.getElementById("equipment").value = d.equipment || "";
   document.getElementById("notes").value = d.notes || "";
   document.getElementById("used").value = d.used || "";
@@ -1618,23 +1350,13 @@ function setFields(d){
   document.getElementById("quoteTesting").value = d.quoteTesting || "";
   document.getElementById("quoteRecs").value = d.quoteRecs || "";
 
-  document.getElementById("output").textContent = d.output || "";
-
-  [
-    "equipment","notes","used","next",
-    "serviceEquipment","reason","diagnosis","repairsMade","serviceUsed","quoteParts","recommendations",
-    "quoteEquip","quoteIssue","quoteRepairs","quoteTesting","quoteRecs"
+  [ "equipment","notes","used","next", "serviceEquipment","reason","diagnosis","repairsMade","serviceUsed","quoteParts","recommendations", "quoteEquip","quoteIssue","quoteRepairs","quoteTesting","quoteRecs"
   ].forEach(id => autoGrow(document.getElementById(id)));
 
   populateHistoryCustomers();
 }
 
-function saveDraft(){
-  try{
-    localStorage.setItem(DRAFT_KEY, JSON.stringify(getFields()));
-    document.getElementById("draftStatus").textContent = "Draft saved.";
-  }catch(e){}
-}
+function saveDraft(){ try{ localStorage.setItem(DRAFT_KEY, JSON.stringify(getFields())); }catch(e){} }
 
 function loadDraft(){
   const raw = localStorage.getItem(DRAFT_KEY);
@@ -1642,53 +1364,28 @@ function loadDraft(){
   try{
     const d = JSON.parse(raw);
     setFields(d);
-    if(d.savedAt){
-      const dt = new Date(d.savedAt);
-      document.getElementById("draftStatus").textContent = "Restored draft from " + dt.toLocaleString();
-    } else {
-      document.getElementById("draftStatus").textContent = "Restored draft.";
-    }
     return true;
-  }catch(e){
-    return false;
-  }
+  }catch(e){ return false; }
 }
 
 /* ---------- immediate field formatting ---------- */
 function formatEquipmentField(){
   const el = document.getElementById("equipment");
-  const current = el.value;
-  if(current.trim()){
-    el.value = formatEquipmentFieldValue(current);
-    autoGrow(el);
-    saveDraft();
-  }
+  if(el.value.trim()){ el.value = formatEquipmentFieldValue(el.value); autoGrow(el); saveDraft(); }
 }
-
 function formatUsedField(){ autoParseParts("used"); }
 function formatNextField(){ autoParseParts("next"); }
 
 function formatServiceEquipmentField(){
   const el = document.getElementById("serviceEquipment");
-  const current = el.value;
-  if(current.trim()){
-    el.value = formatEquipmentFieldValue(current);
-    autoGrow(el);
-    saveDraft();
-  }
+  if(el.value.trim()){ el.value = formatEquipmentFieldValue(el.value); autoGrow(el); saveDraft(); }
 }
-
 function formatServiceUsedField(){ autoParseParts("serviceUsed"); }
 function formatQuotePartsField(){ autoParseParts("quoteParts"); }
 
 function formatQuoteEquipField(){
   const el = document.getElementById("quoteEquip");
-  const current = el.value;
-  if(current.trim()){
-    el.value = formatEquipmentFieldValue(current);
-    autoGrow(el);
-    saveDraft();
-  }
+  if(el.value.trim()){ el.value = formatEquipmentFieldValue(el.value); autoGrow(el); saveDraft(); }
 }
 
 /* ---------- mode switching ---------- */
@@ -1704,92 +1401,46 @@ function applyMode(){
   const serviceSection = document.getElementById("serviceSection");
   const quoteSection = document.getElementById("quoteSection");
 
-  pmBtn.classList.remove("active"); 
-  serviceBtn.classList.remove("active");
-  quoteBtn.classList.remove("active");
-  historyBtn.classList.remove("active");
-  
-  entrySection.classList.add("hidden"); 
-  historySection.classList.add("hidden"); 
-  pmSection.classList.add("hidden");
-  serviceSection.classList.add("hidden");
-  quoteSection.classList.add("hidden");
+  pmBtn.classList.remove("active"); serviceBtn.classList.remove("active"); quoteBtn.classList.remove("active"); historyBtn.classList.remove("active");
+  entrySection.classList.add("hidden"); historySection.classList.add("hidden"); pmSection.classList.add("hidden"); serviceSection.classList.add("hidden"); quoteSection.classList.add("hidden");
 
   if(currentMode === "PM"){
-    pmBtn.classList.add("active"); 
-    entrySection.classList.remove("hidden");
-    pmSection.classList.remove("hidden"); 
+    pmBtn.classList.add("active"); entrySection.classList.remove("hidden"); pmSection.classList.remove("hidden"); 
   } else if(currentMode === "SERVICE"){
-    serviceBtn.classList.add("active"); 
-    entrySection.classList.remove("hidden");
-    serviceSection.classList.remove("hidden"); 
+    serviceBtn.classList.add("active"); entrySection.classList.remove("hidden"); serviceSection.classList.remove("hidden"); 
   } else if (currentMode === "QUOTE") {
-    quoteBtn.classList.add("active"); 
-    entrySection.classList.remove("hidden");
-    quoteSection.classList.remove("hidden");
+    quoteBtn.classList.add("active"); entrySection.classList.remove("hidden"); quoteSection.classList.remove("hidden");
   } else if (currentMode === "HISTORY") {
-    historyBtn.classList.add("active"); 
-    historySection.classList.remove("hidden");
-    populateHistoryCustomers();
+    historyBtn.classList.add("active"); historySection.classList.remove("hidden"); populateHistoryCustomers();
   }
 }
 
-document.getElementById("modePM").onclick = function(){
-  currentMode = "PM";
-  applyMode();
-  saveDraft();
-};
-
-document.getElementById("modeService").onclick = function(){
-  currentMode = "SERVICE";
-  applyMode();
-  saveDraft();
-};
-
-document.getElementById("modeQuote").onclick = function(){
-  currentMode = "QUOTE";
-  applyMode();
-  saveDraft();
-};
-
-document.getElementById("modeHistory").onclick = function(){
-  currentMode = "HISTORY";
-  applyMode();
-  saveDraft();
-};
+document.getElementById("modePM").onclick = function(){ currentMode = "PM"; applyMode(); saveDraft(); };
+document.getElementById("modeService").onclick = function(){ currentMode = "SERVICE"; applyMode(); saveDraft(); };
+document.getElementById("modeQuote").onclick = function(){ currentMode = "QUOTE"; applyMode(); saveDraft(); };
+document.getElementById("modeHistory").onclick = function(){ currentMode = "HISTORY"; applyMode(); saveDraft(); };
 
 /* ---------- history UI ---------- */
 document.getElementById("historyCustomer").addEventListener("change", (e) => {
-  currentHistoryCustomer = e.target.value;
-  currentHistoryLocation = "";
-  currentHistorySelectedIndex = 0;
-  populateHistoryLocations();
-  saveDraft();
+  currentHistoryCustomer = e.target.value; currentHistoryLocation = ""; currentHistorySelectedIndex = 0; populateHistoryLocations(); saveDraft();
 });
 
 document.getElementById("historyLocation").addEventListener("change", (e) => {
-  currentHistoryLocation = e.target.value;
-  currentHistorySelectedIndex = 0;
-  renderHistoryView();
-  saveDraft();
+  currentHistoryLocation = e.target.value; currentHistorySelectedIndex = 0; renderHistoryView(); saveDraft();
 });
 
-/* ---------- NEW: BACKGROUND CLOUD SYNC ---------- */
+/* ---------- BACKGROUND CLOUD SYNC ---------- */
 function uploadReportToCloud(visitData, fullReportText) {
     if (typeof firebase === 'undefined' || !firebase.apps.length) return;
     
     const db = firebase.firestore();
-    const techName = document.getElementById('techSelector').value || "Unknown Tech";
     const ticketId = document.getElementById('ticketSelector').value;
-    
-    // Grab the status the tech just selected from the dropdown
     const finalStatus = document.getElementById('finalJobStatus').value;
 
-    // 1. Build the payload
     const payload = {
         ...visitData,
         fullReportText: fullReportText,
-        techName: techName,
+        techName: currentTechProfile,
         linkedTicketId: ticketId || "None",
         status: finalStatus, 
         timestamp: firebase.firestore.FieldValue.serverTimestamp(),
@@ -1798,105 +1449,71 @@ function uploadReportToCloud(visitData, fullReportText) {
 
     const statusDisplay = document.getElementById("draftStatus");
 
-    // 2. TRUE FIRE & FORGET: Add to the 'completed_reports' collection
-    // Firebase instantly writes this locally and handles the upload invisibly in the background.
-    db.collection('completed_reports').add(payload)
-      .catch(e => console.error("Sync queued for when online."));
+    // TRUE FIRE & FORGET
+    db.collection('completed_reports').add(payload).catch(e => console.error("Sync queued."));
 
-    // 3. Auto-Update the Ticket on the Dispatch Board!
     if (ticketId) {
         db.collection('service_calls').doc(ticketId).set({
             status: finalStatus, 
             techNotes: fullReportText
-        }, { merge: true })
-        .catch(e => console.error("Ticket update queued for when online."));
+        }, { merge: true }).catch(e => console.error("Ticket update queued."));
     }
 
-    // 4. INSTANT UI FEEDBACK (Zero waiting)
+    // INSTANT UI FEEDBACK & SUCCESS CARD
     if (navigator.onLine) {
-        statusDisplay.innerHTML = `<span style="color:#27ae60; font-weight:bold;">✓ Saved & syncing in background! Status updated to: ${finalStatus}</span>`;
+        statusDisplay.innerHTML = `<span style="color:#27ae60; font-weight:bold;">✓ Synced in background!</span>`;
     } else {
-        statusDisplay.innerHTML = `<span style="color:#f39c12; font-weight:bold;">✓ Saved offline! Will sync invisibly when signal returns.</span>`;
+        statusDisplay.innerHTML = `<span style="color:#f39c12; font-weight:bold;">✓ Saved offline! Will sync invisibly.</span>`;
     }
+    
+    const successCard = document.getElementById('successCard');
+    successCard.classList.remove('hidden');
+    successCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
 }
 
 /* ---------- ui actions ---------- */
 document.getElementById("same").onclick = function(){
   document.getElementById("next").value = document.getElementById("used").value;
-  autoGrow(document.getElementById("next"));
-  formatNextField();
+  autoGrow(document.getElementById("next")); formatNextField();
 };
 
-document.getElementById("generate").onclick = async function(){ // Added async
+document.getElementById("generate").onclick = async function(){
   await autoParseLocation();
   const location = document.getElementById("location").value || "[Location]";
   const date = today();
 
-  // --- NEW: Check Firebase for a Parent Company ---
   document.getElementById("draftStatus").textContent = "Checking database for parent company...";
   const parentCompany = await getParentCompany(location);
   
-  const finalLocationDisplay = parentCompany 
-    ? `${parentCompany}\n${location}` 
-    : location;
-  
+  const finalLocationDisplay = parentCompany ? `${parentCompany}\n${location}` : location;
   document.getElementById("draftStatus").textContent = "Report Generated.";
-  // -------------------------------------------------
 
   let report = "";
   let visit = null;
 
   if(currentMode === "PM"){
-    formatEquipmentField();
-    formatUsedField();
-    formatNextField();
-
+    formatEquipmentField(); formatUsedField(); formatNextField();
     const equipRaw = document.getElementById("equipment").value || "";
     const equipCodes = parseEquipCodes(equipRaw);
     const equip = expandEquipment(equipRaw);
 
     const notesRaw = (document.getElementById("notes").value || "").trim();
     const extracted = extractRepairsFromNotes(notesRaw, equipCodes);
-
     let notesFinal = DEFAULT_PM_NOTES;
-    if(extracted.general){
-      notesFinal = extracted.general;
-    } else if(extracted.repairs.length){
-      notesFinal = extracted.repairs.join("\n");
-    }
+    if(extracted.general) notesFinal = extracted.general; else if(extracted.repairs.length) notesFinal = extracted.repairs.join("\n");
 
     const used = document.getElementById("used").value.trim() ? normalizeParts(document.getElementById("used").value) : "NONE";
     const next = document.getElementById("next").value.trim() ? normalizeParts(document.getElementById("next").value) : "NONE";
     const cost = document.getElementById("cost").value || "Unknown";
     const workdone = document.getElementById("workdone").value || DEFAULT_PM_WORKDONE;
 
-    // CHANGED ${location} to ${finalLocationDisplay} right below here
     report = `PM\n\nLocation:\n${finalLocationDisplay}\n\nDate:\n${date}\n\nEquipment on Site:\n${equip}\n\nNotes / Repairs:\n${notesFinal}\n\nWork done:\n${workdone}\n\nParts used:\n${used}\n\nCost of parts (if known):\n${cost}\n\nParts needed next PM:\n${next}\n\nPictures:\nNeeded photos are attached.\n`;
-
-    visit = {
-      date,
-      mode: "PM",
-      customer: getCustomerFromLocation(location),
-      location,
-      equipment: equip,
-      notesFinal,
-      workdone,
-      partsUsed: used,
-      partsNeeded: next,
-      cost,
-      report
-    };
+    visit = { date, mode: "PM", customer: getCustomerFromLocation(location), location, equipment: equip, notesFinal, workdone, partsUsed: used, partsNeeded: next, cost, report };
     
   } else if(currentMode === "SERVICE"){
-    formatServiceEquipmentField();
-    formatServiceUsedField();
-    formatQuotePartsField();
-
+    formatServiceEquipmentField(); formatServiceUsedField(); formatQuotePartsField();
     const serviceEquipRaw = document.getElementById("serviceEquipment").value || "";
-    const serviceEquipDisplay = parseEquipCodes(serviceEquipRaw).length
-      ? expandEquipment(serviceEquipRaw)
-      : (serviceEquipRaw || "Not listed");
-
+    const serviceEquipDisplay = parseEquipCodes(serviceEquipRaw).length ? expandEquipment(serviceEquipRaw) : (serviceEquipRaw || "Not listed");
     const reason = document.getElementById("reason").value.trim() || "Not listed.";
     const diagnosis = document.getElementById("diagnosis").value.trim() || "Not listed.";
     const repairsMade = document.getElementById("repairsMade").value.trim() || "None.";
@@ -1906,132 +1523,61 @@ document.getElementById("generate").onclick = async function(){ // Added async
     const quoteLabor = document.getElementById("quoteLabor").value.trim() || "NONE";
     const recommendations = document.getElementById("recommendations").value.trim() || "None.";
 
-    // CHANGED ${location} to ${finalLocationDisplay} right below here
- report = `SERVICE CALL\n\nLocation:\n${finalLocationDisplay}\n\nDate:\n${date}\n\nEquipment worked on:\n${serviceEquipDisplay}\n\nReason for call:\n${reason}\n\nFindings / Diagnosis:\n${diagnosis}\n\nRepairs made:\n${repairsMade}\n\nParts used:\n${used}\n\nCost of parts (if known):\n${cost}\n\nParts needed for repair quote:\n${quoteParts}\n\nLabor for repair quote:\n${quoteLabor}\n\nRecommendations / Next steps:\n${recommendations}\n\nPictures:\nRepair photos attached.\n`;
-
-    visit = {
-      date,
-      mode: "SERVICE CALL",
-      customer: getCustomerFromLocation(location),
-      location,
-      equipmentWorkedOn: serviceEquipDisplay,
-      reason,
-      diagnosis,
-      repairsMade,
-      partsUsed: used,
-      cost,
-      quoteParts,
-      quoteLabor,
-      recommendations,
-      report
-    };
+    report = `SERVICE CALL\n\nLocation:\n${finalLocationDisplay}\n\nDate:\n${date}\n\nEquipment worked on:\n${serviceEquipDisplay}\n\nReason for call:\n${reason}\n\nFindings / Diagnosis:\n${diagnosis}\n\nRepairs made:\n${repairsMade}\n\nParts used:\n${used}\n\nCost of parts (if known):\n${cost}\n\nParts needed for repair quote:\n${quoteParts}\n\nLabor for repair quote:\n${quoteLabor}\n\nRecommendations / Next steps:\n${recommendations}\n\nPictures:\nRepair photos attached.\n`;
+    visit = { date, mode: "SERVICE CALL", customer: getCustomerFromLocation(location), location, equipmentWorkedOn: serviceEquipDisplay, reason, diagnosis, repairsMade, partsUsed: used, cost, quoteParts, quoteLabor, recommendations, report };
     
-} else if(currentMode === "QUOTE") {
+  } else if(currentMode === "QUOTE") {
     formatQuoteEquipField();
-
     const quoteEquipRaw = document.getElementById("quoteEquip").value || "";
-    const quoteEquipDisplay = parseEquipCodes(quoteEquipRaw).length
-      ? expandEquipment(quoteEquipRaw)
-      : (quoteEquipRaw || "Not listed");
-
+    const quoteEquipDisplay = parseEquipCodes(quoteEquipRaw).length ? expandEquipment(quoteEquipRaw) : (quoteEquipRaw || "Not listed");
     const issue = document.getElementById("quoteIssue").value.trim() || "Not listed.";
     const repairsCompleted = document.getElementById("quoteRepairs").value.trim() || "None.";
-    
     const testing = document.getElementById("quoteTesting").value.trim() || "Tested and verified operations.";
-    
     const recs = document.getElementById("quoteRecs").value.trim() || "None.";
 
     report = `QUOTED REPAIR\n\nLocation:\n${finalLocationDisplay}\n\nDate:\n${date}\n\nEquipment Repaired:\n${quoteEquipDisplay}\n\nOriginal Issue Resolved:\n${issue}\n\nRepairs Completed:\n${repairsCompleted}\n\nSystem Testing & Verification:\n${testing}\n\nFurther Recommendations:\n${recs}\n\nPictures:\nRepair photos attached.\n`;
-
-    visit = {
-      date,
-      mode: "QUOTED REPAIR",
-      customer: getCustomerFromLocation(location),
-      location,
-      equipmentRepaired: quoteEquipDisplay,
-      originalIssue: issue,
-      repairsCompleted: repairsCompleted,
-      partsUsed: "NONE", 
-      testingVerification: testing,
-      recommendations: recs,
-      report
-    };
+    visit = { date, mode: "QUOTED REPAIR", customer: getCustomerFromLocation(location), location, equipmentRepaired: quoteEquipDisplay, originalIssue: issue, repairsCompleted: repairsCompleted, partsUsed: "NONE", testingVerification: testing, recommendations: recs, report };
   }
 
-if(report){
+  if(report){
     if(visit){
       saveVisitToHistory(visit);
       populateHistoryCustomers();
-      
-      // Send it to the cloud queue!
       uploadReportToCloud(visit, report);
     }
     saveDraft();
   }
 };
 
-
 document.getElementById("clear").onclick = function(){
   if(currentMode === "HISTORY"){
-    currentHistoryCustomer = "";
-    currentHistoryLocation = "";
-    currentHistorySelectedIndex = 0;
+    currentHistoryCustomer = ""; currentHistoryLocation = ""; currentHistorySelectedIndex = 0;
     document.getElementById("historyCustomer").value = "";
     document.getElementById("historyLocation").innerHTML = `<option value="">Select location</option>`;
-    renderHistoryView();
-    saveDraft();
-    return;
+    renderHistoryView(); saveDraft(); return;
   }
 
   if(!confirm("Clear current mode fields?")) return;
 
   document.getElementById("location").value = "";
-  document.getElementById("output").textContent = "";
+  const successCard = document.getElementById('successCard');
+  if (successCard) successCard.classList.add('hidden');
 
   if(currentMode === "PM"){
-    document.getElementById("equipment").value = "";
-    document.getElementById("notes").value = "";
-    document.getElementById("used").value = "";
-    document.getElementById("cost").value = "";
-    document.getElementById("next").value = "";
-    document.getElementById("workdone").value = DEFAULT_PM_WORKDONE;
-
-    autoGrow(document.getElementById("equipment"));
-    autoGrow(document.getElementById("notes"));
-    autoGrow(document.getElementById("used"));
-    autoGrow(document.getElementById("next"));
-    
+    document.getElementById("equipment").value = ""; document.getElementById("notes").value = ""; document.getElementById("used").value = "";
+    document.getElementById("cost").value = ""; document.getElementById("next").value = ""; document.getElementById("workdone").value = DEFAULT_PM_WORKDONE;
+    autoGrow(document.getElementById("equipment")); autoGrow(document.getElementById("notes")); autoGrow(document.getElementById("used")); autoGrow(document.getElementById("next"));
   } else if (currentMode === "SERVICE"){
-    document.getElementById("serviceEquipment").value = "";
-    document.getElementById("reason").value = "";
-    document.getElementById("diagnosis").value = "";
-    document.getElementById("repairsMade").value = "";
-    document.getElementById("serviceUsed").value = "";
-    document.getElementById("serviceCost").value = "";
-    document.getElementById("quoteParts").value = "";
-    document.getElementById("quoteLabor").value = "";
-    document.getElementById("recommendations").value = "";
-
-    autoGrow(document.getElementById("serviceEquipment"));
-    autoGrow(document.getElementById("reason"));
-    autoGrow(document.getElementById("diagnosis"));
-    autoGrow(document.getElementById("repairsMade"));
-    autoGrow(document.getElementById("serviceUsed"));
-    autoGrow(document.getElementById("quoteParts"));
-    autoGrow(document.getElementById("recommendations"));
-    
+    document.getElementById("serviceEquipment").value = ""; document.getElementById("reason").value = ""; document.getElementById("diagnosis").value = "";
+    document.getElementById("repairsMade").value = ""; document.getElementById("serviceUsed").value = ""; document.getElementById("serviceCost").value = "";
+    document.getElementById("quoteParts").value = ""; document.getElementById("quoteLabor").value = ""; document.getElementById("recommendations").value = "";
+    autoGrow(document.getElementById("serviceEquipment")); autoGrow(document.getElementById("reason")); autoGrow(document.getElementById("diagnosis"));
+    autoGrow(document.getElementById("repairsMade")); autoGrow(document.getElementById("serviceUsed")); autoGrow(document.getElementById("quoteParts")); autoGrow(document.getElementById("recommendations"));
   } else if (currentMode === "QUOTE"){
-    document.getElementById("quoteEquip").value = "";
-    document.getElementById("quoteIssue").value = "";
-    document.getElementById("quoteRepairs").value = "";
-    document.getElementById("quoteTesting").value = "";
-    document.getElementById("quoteRecs").value = "";
-
-    autoGrow(document.getElementById("quoteEquip"));
-    autoGrow(document.getElementById("quoteIssue"));
-    autoGrow(document.getElementById("quoteRepairs"));
-    autoGrow(document.getElementById("quoteTesting"));
-    autoGrow(document.getElementById("quoteRecs"));
+    document.getElementById("quoteEquip").value = ""; document.getElementById("quoteIssue").value = ""; document.getElementById("quoteRepairs").value = "";
+    document.getElementById("quoteTesting").value = ""; document.getElementById("quoteRecs").value = "";
+    autoGrow(document.getElementById("quoteEquip")); autoGrow(document.getElementById("quoteIssue")); autoGrow(document.getElementById("quoteRepairs"));
+    autoGrow(document.getElementById("quoteTesting")); autoGrow(document.getElementById("quoteRecs"));
   }
 
   document.getElementById("draftStatus").textContent = "Cleared.";
@@ -2044,20 +1590,14 @@ function addEquipmentCode(fieldId, prefix){
   const current = (el.value || "").trim();
   const codes = parseEquipCodes(current);
   let max = 0;
-
-  codes.forEach(c => {
-    const m = c.match(new RegExp("^" + prefix + "(\\d+)$"));
-    if(m) max = Math.max(max, parseInt(m[1], 10));
-  });
-
+  codes.forEach(c => { const m = c.match(new RegExp("^" + prefix + "(\\d+)$")); if(m) max = Math.max(max, parseInt(m[1], 10)); });
   const nextNum = max + 1;
   const appendText = current ? current + ", " + prefix + nextNum : prefix + nextNum;
   el.value = appendText;
-  autoGrow(el);
-  saveDraft();
+  autoGrow(el); saveDraft();
 }
 
-/* PM Pill Buttons */
+/* Pill Buttons */
 document.getElementById("addRTU").onclick = () => addEquipmentCode("equipment", "RTU");
 document.getElementById("addF").onclick = () => addEquipmentCode("equipment", "F");
 document.getElementById("addUH").onclick = () => addEquipmentCode("equipment", "UH");
@@ -2065,7 +1605,6 @@ document.getElementById("addRH").onclick = () => addEquipmentCode("equipment", "
 document.getElementById("addEF").onclick = () => addEquipmentCode("equipment", "EF");
 document.getElementById("addMUA").onclick = () => addEquipmentCode("equipment", "MUA");
 
-/* Service Pill Buttons */
 document.getElementById("addServiceRTU").onclick = () => addEquipmentCode("serviceEquipment", "RTU");
 document.getElementById("addServiceF").onclick = () => addEquipmentCode("serviceEquipment", "F");
 document.getElementById("addServiceUH").onclick = () => addEquipmentCode("serviceEquipment", "UH");
@@ -2073,7 +1612,6 @@ document.getElementById("addServiceRH").onclick = () => addEquipmentCode("servic
 document.getElementById("addServiceEF").onclick = () => addEquipmentCode("serviceEquipment", "EF");
 document.getElementById("addServiceMUA").onclick = () => addEquipmentCode("serviceEquipment", "MUA");
 
-/* Quote Pill Buttons */
 document.getElementById("addQuoteRTU").onclick = () => addEquipmentCode("quoteEquip", "RTU");
 document.getElementById("addQuoteF").onclick = () => addEquipmentCode("quoteEquip", "F");
 document.getElementById("addQuoteUH").onclick = () => addEquipmentCode("quoteEquip", "UH");
@@ -2085,44 +1623,27 @@ function addEnterFormatter(id, formatter){
   const el = document.getElementById(id);
   if(!el) return;
   el.addEventListener("keydown", (e) => {
-    if(
-      e.key === "Enter" &&
-      !["notes","reason","diagnosis","repairsMade","recommendations", "quoteIssue", "quoteRepairs", "quoteTesting", "quoteRecs"].includes(id)
-    ){
-      e.preventDefault();
-      formatter();
-      e.target.blur();
+    if( e.key === "Enter" && !["notes","reason","diagnosis","repairsMade","recommendations", "quoteIssue", "quoteRepairs", "quoteTesting", "quoteRecs"].includes(id) ){
+      e.preventDefault(); formatter(); e.target.blur();
     }
   });
 }
 
 function wireAutosave(){
-  [
-    "location","equipment","notes","used","cost","next","workdone",
-    "serviceEquipment","reason","diagnosis","repairsMade","serviceUsed","serviceCost","quoteParts","quoteLabor","recommendations",
-    "quoteEquip","quoteIssue","quoteRepairs","quoteTesting","quoteRecs"
+  [ "location","equipment","notes","used","cost","next","workdone", "serviceEquipment","reason","diagnosis","repairsMade","serviceUsed","serviceCost","quoteParts","quoteLabor","recommendations", "quoteEquip","quoteIssue","quoteRepairs","quoteTesting","quoteRecs"
   ].forEach(id => {
     const el = document.getElementById(id);
     if(!el) return;
-    el.addEventListener("input", () => {
-      saveDraft();
-      if(el.tagName.toLowerCase() === "textarea"){
-        autoGrow(el);
-      }
-    });
+    el.addEventListener("input", () => { saveDraft(); if(el.tagName.toLowerCase() === "textarea"){ autoGrow(el); } });
   });
 
-  // Attach the auto-parser to the location input box blur event
   document.getElementById("location").addEventListener("blur", autoParseLocation);
-
   document.getElementById("equipment").addEventListener("blur", formatEquipmentField);
   document.getElementById("used").addEventListener("blur", formatUsedField);
   document.getElementById("next").addEventListener("blur", formatNextField);
-  
   document.getElementById("serviceEquipment").addEventListener("blur", formatServiceEquipmentField);
   document.getElementById("serviceUsed").addEventListener("blur", formatServiceUsedField);
   document.getElementById("quoteParts").addEventListener("blur", formatQuotePartsField);
-
   document.getElementById("quoteEquip").addEventListener("blur", formatQuoteEquipField);
 
   addEnterFormatter("location", autoParseLocation);
@@ -2134,47 +1655,32 @@ function wireAutosave(){
   addEnterFormatter("quoteParts", formatQuotePartsField);
   addEnterFormatter("quoteEquip", formatQuoteEquipField);
 
-  document.addEventListener("visibilitychange", () => {
-    if(document.visibilityState === "hidden") saveDraft();
-  });
-
+  document.addEventListener("visibilitychange", () => { if(document.visibilityState === "hidden") saveDraft(); });
   window.addEventListener("pagehide", saveDraft);
 }
 
 /* ---------- init ---------- */
 (function init(){
-  // 1. Set the default value for the PM tab
   document.getElementById("workdone").value = DEFAULT_PM_WORKDONE;
   applyMode();
 
-  // 2. Wipe the location box and output block clean
   document.getElementById("location").value = "";
-  document.getElementById("output").textContent = "";
-
-  // 3. Silently clear all fields for all three tabs
+  
   const fieldsToClear = [
-    "equipment","notes","used","cost","next",
-    "serviceEquipment","reason","diagnosis","repairsMade","serviceUsed","serviceCost","quoteParts","quoteLabor","recommendations",
-    "quoteEquip","quoteIssue","quoteRepairs","quoteTesting","quoteRecs"
+    "equipment","notes","used","cost","next", "serviceEquipment","reason","diagnosis","repairsMade","serviceUsed","serviceCost","quoteParts","quoteLabor","recommendations", "quoteEquip","quoteIssue","quoteRepairs","quoteTesting","quoteRecs"
   ];
   
   fieldsToClear.forEach(id => {
       const el = document.getElementById(id);
-      if(el) {
-          el.value = "";
-          autoGrow(el); // Reset the height of textareas
-      }
+      if(el) { el.value = ""; autoGrow(el); }
   });
 
-  // 4. Overwrite the saved draft memory with this new, empty state
   saveDraft();
-  
   document.getElementById("draftStatus").textContent = "New blank form ready.";
   populateHistoryCustomers();
 
-// 5. Load user profile (prompts for setup if new)
+  // Load user profile (prompts for setup if new)
   loadUserProfile();
-
   wireAutosave();
 })();
   
