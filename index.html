@@ -246,6 +246,22 @@ hr.soft { border: none; border-top: 1px solid #e5e5e5; margin: 25px 0; }
   <button id="modeHistory" type="button">HISTORY</button>
 </div>
 
+  <div id="techPanel" style="background: #eaf2f8; padding: 15px; border-radius: 6px; margin-bottom: 20px; border: 1px solid #b9d5ec;">
+  <label style="margin-top: 0; color: #1e4b85;">1. Who are you?</label>
+  <select id="techSelector" onchange="fetchMyTickets()">
+    <option value="">Select Technician...</option>
+    <option value="Dave (Tech 1)">Dave (Tech 1)</option>
+    <option value="Sarah (Tech 2)">Sarah (Tech 2)</option>
+    <option value="Mike (Tech 3)">Mike (Tech 3)</option>
+    <option value="Tom (Tech 4)">Tom (Tech 4)</option>
+  </select>
+
+  <label style="color: #1e4b85;">2. Today's Dispatched Tickets</label>
+  <select id="ticketSelector" onchange="loadTicketData()">
+    <option value="">Select a ticket to auto-fill...</option>
+  </select>
+</div>
+
 <div id="entrySection">
   <label>Location</label>
   <input id="location" placeholder="Example: I'm at the Planet Fitness in Milwaukee on Main Street">
