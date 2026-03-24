@@ -1971,11 +1971,6 @@ if(report){
   }
 };
 
-document.getElementById("copy").onclick = function(){
-  const text = document.getElementById("output").textContent || "";
-  if(!text.trim()) return;
-  navigator.clipboard.writeText(text);
-};
 
 document.getElementById("clear").onclick = function(){
   if(currentMode === "HISTORY"){
