@@ -1169,37 +1169,37 @@ function loadTicketData() {
   saveDraft();
 }
 
-  /* ---------- firebase parent lookup ---------- */
+/* ---------- firebase parent lookup (FIXED) ---------- */
 async function getParentCompany(locationText) {
-  // If Firebase isn't loaded or configured, skip it safely
   if (typeof firebase === 'undefined' || !firebase.apps.length) return null;
 
   try {
     const db = firebase.firestore();
     const pieces = locationText.split(" - ");
     
-    // We need at least SubCompany, City, Street to do a safe lookup
-    if (pieces.length < 3) return null;
+    // We need at least SubCompany and Street
+    if (pieces.length < 2) return null;
 
     const subCompany = pieces[0].trim();
-    const street = pieces[2].trim();
+    // The second piece might be a street or city. We'll grab the street based on our auto-fill formatting
+    const street = pieces[pieces.length - 1].trim(); 
 
-    // Search the "Locations" collection
-    const locSnapshot = await db.collection("Locations")
+    // Search the correct "MappedLocations" collection
+    const locSnapshot = await db.collection("MappedLocations")
       .where("Sub_Company", "==", subCompany)
       .where("Street", "==", street)
       .get();
 
     if (locSnapshot.empty) return null;
 
-    // Grab the Parent ID from the location file
+    // Grab the Parent ID
     const parentId = locSnapshot.docs[0].data().Parent_ID;
 
-    // Look up the actual parent company name in "Customers"
-    const custDoc = await db.collection("Customers").doc(parentId).get();
+    // Look up the actual parent company name in "ParentCompanies"
+    const parentDoc = await db.collection("ParentCompanies").doc(parentId).get();
 
-    if (custDoc.exists) {
-      return custDoc.data().Name; // Returns "AMERICAN PLATINUM DOOR & GATE"
+    if (parentDoc.exists) {
+      return parentDoc.data().Name; 
     }
     
     return null;
