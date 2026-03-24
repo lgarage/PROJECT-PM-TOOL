@@ -1802,28 +1802,25 @@ function uploadReportToCloud(visitData, fullReportText) {
 
     const statusDisplay = document.getElementById("draftStatus");
 
-    // 2. INSTANT UI FEEDBACK: Check if they have a signal right now
-    if (navigator.onLine) {
-        statusDisplay.innerHTML = `<span style="color:#3498db; font-weight:bold;">⬆ Uploading report to cloud...</span>`;
-    } else {
-        statusDisplay.innerHTML = `<span style="color:#f39c12; font-weight:bold;">⏳ No signal. Saved to device queue. Will auto-upload when signal returns.</span>`;
-    }
-
-    // 3. Fire & Forget: Add to the 'completed_reports' collection
+    // 2. TRUE FIRE & FORGET: Add to the 'completed_reports' collection
+    // Firebase instantly writes this locally and handles the upload invisibly in the background.
     db.collection('completed_reports').add(payload)
-      .then(() => {
-          // This .then() ONLY runs when the Firebase Server actually receives the data!
-          statusDisplay.innerHTML = `<span style="color:#27ae60; font-weight:bold;">✓ Success! Report uploaded to cloud. Status updated to: ${finalStatus}</span>`;
-      })
       .catch(e => console.error("Sync queued for when online."));
 
-    // 4. Auto-Update the Ticket on the Dispatch Board!
+    // 3. Auto-Update the Ticket on the Dispatch Board!
     if (ticketId) {
         db.collection('service_calls').doc(ticketId).set({
             status: finalStatus, 
             techNotes: fullReportText
         }, { merge: true })
         .catch(e => console.error("Ticket update queued for when online."));
+    }
+
+    // 4. INSTANT UI FEEDBACK (Zero waiting)
+    if (navigator.onLine) {
+        statusDisplay.innerHTML = `<span style="color:#27ae60; font-weight:bold;">✓ Saved & syncing in background! Status updated to: ${finalStatus}</span>`;
+    } else {
+        statusDisplay.innerHTML = `<span style="color:#f39c12; font-weight:bold;">✓ Saved offline! Will sync invisibly when signal returns.</span>`;
     }
 }
 
