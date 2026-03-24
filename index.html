@@ -1764,6 +1764,43 @@ document.getElementById("historyLocation").addEventListener("change", (e) => {
   saveDraft();
 });
 
+  /* ---------- NEW: BACKGROUND CLOUD SYNC ---------- */
+function uploadReportToCloud(visitData, fullReportText) {
+    if (typeof firebase === 'undefined' || !firebase.apps.length) return;
+    
+    const db = firebase.firestore();
+    const techName = document.getElementById('techSelector').value || "Unknown Tech";
+    const ticketId = document.getElementById('ticketSelector').value;
+
+    // 1. Build the payload
+    const payload = {
+        ...visitData,
+        fullReportText: fullReportText,
+        techName: techName,
+        linkedTicketId: ticketId || "None",
+        timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+        deviceSavedAt: new Date().toISOString() // Logs exactly when they hit save, even if offline
+    };
+
+    // 2. Fire & Forget: Add to a new 'completed_reports' collection
+    // Because persistence is on, this resolves instantly locally and syncs when online!
+    db.collection('completed_reports').add(payload)
+      .then(() => console.log("Report synced to cloud!"))
+      .catch(e => console.error("Sync queued for when online."));
+
+    // 3. Auto-Complete the Ticket on the Dispatch Board!
+    if (ticketId) {
+        db.collection('service_calls').doc(ticketId).set({
+            status: 'Completed',
+            techNotes: fullReportText
+        }, { merge: true })
+        .catch(e => console.error("Ticket update queued for when online."));
+    }
+
+    // 4. Update the UI so the tech knows they are good to go
+    document.getElementById("draftStatus").innerHTML = `<span style="color:#27ae60; font-weight:bold;">✓ Report Generated & Saved to Cloud!</span>`;
+}
+
 /* ---------- ui actions ---------- */
 document.getElementById("same").onclick = function(){
   document.getElementById("next").value = document.getElementById("used").value;
