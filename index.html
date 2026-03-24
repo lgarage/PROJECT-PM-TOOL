@@ -1400,21 +1400,26 @@ function applyMode(){
   const pmSection = document.getElementById("pmSection");
   const serviceSection = document.getElementById("serviceSection");
   const quoteSection = document.getElementById("quoteSection");
+  const techPanel = document.getElementById("techPanel"); // <-- Added reference to the Tech Panel
 
   pmBtn.classList.remove("active"); serviceBtn.classList.remove("active"); quoteBtn.classList.remove("active"); historyBtn.classList.remove("active");
   entrySection.classList.add("hidden"); historySection.classList.add("hidden"); pmSection.classList.add("hidden"); serviceSection.classList.add("hidden"); quoteSection.classList.add("hidden");
 
   if(currentMode === "PM"){
     pmBtn.classList.add("active"); entrySection.classList.remove("hidden"); pmSection.classList.remove("hidden"); 
+    techPanel.classList.remove("hidden"); // Show on PM
   } else if(currentMode === "SERVICE"){
     serviceBtn.classList.add("active"); entrySection.classList.remove("hidden"); serviceSection.classList.remove("hidden"); 
+    techPanel.classList.remove("hidden"); // Show on Service
   } else if (currentMode === "QUOTE") {
     quoteBtn.classList.add("active"); entrySection.classList.remove("hidden"); quoteSection.classList.remove("hidden");
+    techPanel.classList.remove("hidden"); // Show on Quote
   } else if (currentMode === "HISTORY") {
     historyBtn.classList.add("active"); historySection.classList.remove("hidden"); populateHistoryCustomers();
+    techPanel.classList.add("hidden"); // Hide on History
   }
 }
-
+  
 document.getElementById("modePM").onclick = function(){ currentMode = "PM"; applyMode(); saveDraft(); };
 document.getElementById("modeService").onclick = function(){ currentMode = "SERVICE"; applyMode(); saveDraft(); };
 document.getElementById("modeQuote").onclick = function(){ currentMode = "QUOTE"; applyMode(); saveDraft(); };
