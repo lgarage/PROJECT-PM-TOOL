@@ -1086,6 +1086,89 @@ function parsePartItem(item){
   return [item.trim().toUpperCase()];
 }
 
+  /* ---------- NEW: CLOUD TICKET FETCHING ---------- */
+let myTickets = [];
+
+async function fetchMyTickets() {
+  const tech = document.getElementById('techSelector').value;
+  const ticketDropdown = document.getElementById('ticketSelector');
+  ticketDropdown.innerHTML = '<option value="">Select a ticket to auto-fill...</option>';
+  myTickets = [];
+
+  // Save tech preference so they don't have to pick their name every time
+  localStorage.setItem('tp_saved_tech', tech);
+
+  if (!tech || typeof firebase === 'undefined' || !firebase.apps.length) return;
+
+  try {
+    const db = firebase.firestore();
+    const todayStr = new Date().toISOString().split('T')[0]; // "YYYY-MM-DD"
+
+    ticketDropdown.innerHTML = '<option value="">Fetching cloud tickets...</option>';
+
+    // Query Firebase for tickets assigned to this tech TODAY
+    const snapshot = await db.collection('service_calls')
+      .where('assignedTech', '==', tech)
+      .where('date', '==', todayStr)
+      .get();
+
+    ticketDropdown.innerHTML = '<option value="">Select a ticket to auto-fill...</option>';
+
+    snapshot.forEach(doc => {
+      let data = doc.data();
+      // Skip completed or canceled jobs
+      if (data.status === 'Completed' || data.status === 'Canceled') return; 
+      
+      data.id = doc.id;
+      myTickets.push(data);
+      
+      const opt = document.createElement('option');
+      opt.value = data.id;
+      opt.textContent = `${data.ticketNum} - ${data.customerName} (${data.locationAddress})`;
+      ticketDropdown.appendChild(opt);
+    });
+
+    if(myTickets.length === 0) {
+      ticketDropdown.innerHTML = '<option value="">No open tickets scheduled for today.</option>';
+    }
+  } catch (error) {
+    console.error("Error fetching tickets:", error);
+    ticketDropdown.innerHTML = '<option value="">Error connecting to dispatch board.</option>';
+  }
+}
+
+function loadTicketData() {
+  const ticketId = document.getElementById('ticketSelector').value;
+  if (!ticketId) return;
+
+  const ticket = myTickets.find(t => t.id === ticketId);
+  if (!ticket) return;
+
+  // 1. Build location string and populate
+  const locString = `${ticket.customerName} - ${ticket.locationAddress}`;
+  document.getElementById('location').value = locString;
+
+  // 2. Auto-switch mode based on dispatcher's job type
+  if (ticket.jobType === 'Preventative Maintenance') {
+    document.getElementById('modePM').click();
+  } else if (ticket.jobType === 'Quoted Repair') {
+    document.getElementById('modeQuote').click();
+    document.getElementById('quoteIssue').value = "Original ticket: " + ticket.ticketNum + "\nIssue: " + ticket.issue;
+  } else {
+    document.getElementById('modeService').click();
+    document.getElementById('reason').value = ticket.issue;
+  }
+
+  // 3. Auto-fill equipment if the dispatcher noted it
+  if (ticket.equip && ticket.equip !== 'N/A') {
+    if (currentMode === 'PM') document.getElementById('equipment').value = ticket.equip;
+    if (currentMode === 'SERVICE') document.getElementById('serviceEquipment').value = ticket.equip;
+    if (currentMode === 'QUOTE') document.getElementById('quoteEquip').value = ticket.equip;
+  }
+
+  saveDraft();
+}
+
   /* ---------- firebase parent lookup ---------- */
 async function getParentCompany(locationText) {
   // If Firebase isn't loaded or configured, skip it safely
