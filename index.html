@@ -1549,40 +1549,6 @@ document.getElementById("generate").onclick = async function(){
   }
 };
 
-document.getElementById("clear").onclick = function(){
-  if(currentMode === "HISTORY"){
-    currentHistoryCustomer = ""; currentHistoryLocation = ""; currentHistorySelectedIndex = 0;
-    document.getElementById("historyCustomer").value = "";
-    document.getElementById("historyLocation").innerHTML = `<option value="">Select location</option>`;
-    renderHistoryView(); saveDraft(); return;
-  }
-
-  if(!confirm("Clear current mode fields?")) return;
-
-  document.getElementById("location").value = "";
-  const successCard = document.getElementById('successCard');
-  if (successCard) successCard.classList.add('hidden');
-
-  if(currentMode === "PM"){
-    document.getElementById("equipment").value = ""; document.getElementById("notes").value = ""; document.getElementById("used").value = "";
-    document.getElementById("cost").value = ""; document.getElementById("next").value = ""; document.getElementById("workdone").value = DEFAULT_PM_WORKDONE;
-    autoGrow(document.getElementById("equipment")); autoGrow(document.getElementById("notes")); autoGrow(document.getElementById("used")); autoGrow(document.getElementById("next"));
-  } else if (currentMode === "SERVICE"){
-    document.getElementById("serviceEquipment").value = ""; document.getElementById("reason").value = ""; document.getElementById("diagnosis").value = "";
-    document.getElementById("repairsMade").value = ""; document.getElementById("serviceUsed").value = ""; document.getElementById("serviceCost").value = "";
-    document.getElementById("quoteParts").value = ""; document.getElementById("quoteLabor").value = ""; document.getElementById("recommendations").value = "";
-    autoGrow(document.getElementById("serviceEquipment")); autoGrow(document.getElementById("reason")); autoGrow(document.getElementById("diagnosis"));
-    autoGrow(document.getElementById("repairsMade")); autoGrow(document.getElementById("serviceUsed")); autoGrow(document.getElementById("quoteParts")); autoGrow(document.getElementById("recommendations"));
-  } else if (currentMode === "QUOTE"){
-    document.getElementById("quoteEquip").value = ""; document.getElementById("quoteIssue").value = ""; document.getElementById("quoteRepairs").value = "";
-    document.getElementById("quoteTesting").value = ""; document.getElementById("quoteRecs").value = "";
-    autoGrow(document.getElementById("quoteEquip")); autoGrow(document.getElementById("quoteIssue")); autoGrow(document.getElementById("quoteRepairs"));
-    autoGrow(document.getElementById("quoteTesting")); autoGrow(document.getElementById("quoteRecs"));
-  }
-
-  document.getElementById("draftStatus").textContent = "Cleared.";
-  saveDraft();
-};
 
 /* Unified Add Equipment function */
 function addEquipmentCode(fieldId, prefix){
