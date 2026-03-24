@@ -412,6 +412,18 @@ hr.soft { border: none; border-top: 1px solid #e5e5e5; margin: 25px 0; }
 </div>
 
 <script>
+  // --- NEW: ENABLE FIREBASE OFFLINE QUEUE ---
+if (typeof firebase !== 'undefined' && firebase.apps.length) {
+    firebase.firestore().enablePersistence()
+      .catch(function(err) {
+          if (err.code == 'failed-precondition') {
+              console.warn("Multiple tabs open, persistence enabled in first tab.");
+          } else if (err.code == 'unimplemented') {
+              console.warn("Browser doesn't support offline persistence.");
+          }
+      });
+}
+  
 /* ---------- basics ---------- */
 function pad2(n){
   return String(n).padStart(2, "0");
