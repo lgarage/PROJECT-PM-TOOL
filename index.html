@@ -1,397 +1,371 @@
 <!doctype html>
-<html>
+<html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Tech Note Tool | Twin Pillars</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0">
+<title>Twin Pillars Field App</title>
 
-<script src="[https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js](https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js)"></script>
-<script src="[https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore-compat.js](https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore-compat.js)"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore-compat.js"></script>
 <script src="firebase-config.js"></script>
 
 <style>
-/* --- Twin Pillars Branding --- */
+/* --- BASE APP STYLES --- */
 body {
-  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-  margin: 20px;
-  background: #f7f9fb;
-  color: #333;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  margin: 0; padding: 0; background: #f4f7fa; color: #333; -webkit-font-smoothing: antialiased;
 }
-.card {
-  max-width: 900px;
-  margin: auto;
-  background: #fff;
-  padding: 30px;
-  border-radius: 8px;
-  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-  box-sizing: border-box;
-}
+* { box-sizing: border-box; }
 
-/* Header & Logo */
-.header-logo {
-  text-align: center;
-  margin-bottom: 10px;
+/* --- HEADER --- */
+.app-header {
+  background: #fff; padding: 15px 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+  display: flex; justify-content: center; align-items: center; position: sticky; top: 0; z-index: 100;
 }
-.header-logo img {
-  max-width: 180px;
-  height: auto;
-}
-h2 {
-  text-align: center;
-  color: #1e4b85; 
-  margin-top: 0;
-  margin-bottom: 5px;
-  font-weight: bold;
-}
-#draftStatus {
-  text-align: center;
-  color: #777;
-  margin-bottom: 20px;
-}
+.app-header img { max-height: 40px; }
 
-/* Form Elements */
-label {
-  font-weight: bold;
-  display: block;
-  margin-top: 18px;
-  color: #1e4b85;
-  font-size: 14px;
+/* --- SCREENS --- */
+.screen { display: none; padding: 20px; padding-bottom: 100px; /* Space for Bottom Nav */ }
+.screen.active { display: block; }
+
+/* --- JOB CARDS (SCHEDULE) --- */
+.job-card {
+  background: #ffffff; border: 1px solid #e1e8ed; border-radius: 12px; padding: 16px;
+  margin-bottom: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.03); border-left: 6px solid #1e4b85;
+  cursor: pointer; transition: transform 0.1s, box-shadow 0.1s;
 }
+.job-card:active { transform: scale(0.98); box-shadow: 0 2px 6px rgba(0,0,0,0.05); }
+.card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+.card-time { font-weight: 800; color: #1e4b85; font-size: 16px; }
+.card-badge { background: #e8f0fe; color: #1e4b85; padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: bold; text-transform: uppercase; }
+.badge-emergency { background: #fdedec; color: #e74c3c; border: 1px solid #fadbd8; }
+.card-customer { font-size: 18px; font-weight: 800; color: #2c3e50; margin-bottom: 4px; }
+.card-address { color: #7f8c8d; font-size: 13px; line-height: 1.4; }
+
+/* --- WORKSPACE (ACTIVE JOB) --- */
+.workspace-header {
+  background: #1e4b85; color: #fff; padding: 20px; border-radius: 12px; margin-bottom: 20px;
+  box-shadow: 0 4px 15px rgba(30,75,133,0.2);
+}
+.ws-customer { font-size: 22px; font-weight: 800; margin-bottom: 5px; }
+.ws-address { font-size: 14px; opacity: 0.9; margin-bottom: 15px; line-height: 1.4; }
+.ws-ticket { font-size: 12px; background: rgba(255,255,255,0.2); padding: 4px 8px; border-radius: 4px; display: inline-block; font-weight: bold; }
+
+/* --- ACCORDIONS --- */
+.accordion {
+  background: #fff; border: 1px solid #e1e8ed; border-radius: 10px; margin-bottom: 12px;
+  overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+}
+.accordion-header {
+  padding: 16px; background: #fff; font-weight: 700; color: #2c3e50; cursor: pointer;
+  display: flex; justify-content: space-between; align-items: center; font-size: 15px;
+}
+.accordion-header::after { content: '+'; color: #c89b53; font-size: 20px; font-weight: normal; }
+.accordion.open .accordion-header::after { content: '−'; }
+.accordion.open .accordion-header { border-bottom: 1px solid #f0f4f8; }
+.accordion-body { padding: 16px; display: none; background: #fafbfc; }
+.accordion.open .accordion-body { display: block; }
+
+/* --- FORM ELEMENTS --- */
+label { font-weight: 600; display: block; margin-top: 14px; color: #555; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px; }
+label:first-child { margin-top: 0; }
 input, textarea, select {
-  width: 100%;
-  padding: 12px;
-  font-size: 16px;
-  margin-top: 6px;
-  box-sizing: border-box;
-  border: 1px solid #ccc;
-  border-radius: 6px;
-  background: #fafbfc;
-  font-family: inherit;
-  transition: border-color 0.2s;
+  width: 100%; padding: 14px; font-size: 16px; margin-top: 6px; box-sizing: border-box;
+  border: 1px solid #d1d9e0; border-radius: 8px; background: #fff; font-family: inherit;
+  transition: all 0.2s; box-shadow: inset 0 1px 3px rgba(0,0,0,0.02);
 }
-input:focus, textarea:focus, select:focus {
-  outline: none;
-  border-color: #c89b53; 
-  box-shadow: 0 0 5px rgba(200, 155, 83, 0.3);
-  background: #fff;
-}
-textarea {
-  min-height: 90px;
-  white-space: pre-wrap;
-  overflow-wrap: break-word;
-  resize: vertical;
-}
+input:focus, textarea:focus, select:focus { outline: none; border-color: #c89b53; box-shadow: 0 0 0 3px rgba(200, 155, 83, 0.15); }
+textarea { min-height: 80px; resize: vertical; }
 
-/* Buttons */
-button {
-  padding: 12px;
-  margin-top: 14px;
-  font-size: 16px;
-  width: 100%;
-  border: 1px solid #dcdcdc;
-  border-radius: 6px;
-  background: #f2f4f6;
-  color: #333;
-  cursor: pointer;
-  font-family: inherit;
-  transition: all 0.2s ease;
-}
-button:hover { background: #e2e6ea; }
-button:active { transform: scale(.98); }
-
-/* Mode Bar (Tabs) */
-.modebar {
-  display: flex;
-  gap: 10px;
-  margin-top: 10px;
-  flex-wrap: wrap;
-  border-bottom: 2px solid #eaeaea;
-  padding-bottom: 15px;
-  margin-bottom: 20px;
-}
-.modebar button {
-  width: auto;
-  flex: 1;
-  margin-top: 0;
-  padding: 12px 16px;
-  font-weight: bold;
-  border-color: #ccc;
-}
-.modebar button.active {
-  background: #1e4b85; 
-  color: #fff;
-  border-color: #1e4b85;
-}
-
-/* Pill Bar (Quick Add Equipment) */
-.pillbar {
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
-  margin-top: 10px;
-}
+/* --- PILL BUTTONS & INLINE --- */
+.pillbar { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; margin-bottom: 5px; }
 .pillbar button {
-  width: auto;
-  margin-top: 0;
-  padding: 8px 12px;
-  font-size: 14px;
-  background: #fff;
-  border: 1px solid #1e4b85;
-  color: #1e4b85;
-  font-weight: bold;
+  width: auto; padding: 8px 14px; font-size: 13px; background: #f0f4f8;
+  border: 1px solid #d1d9e0; color: #1e4b85; font-weight: 700; border-radius: 20px; cursor: pointer; margin-top: 0;
 }
-.pillbar button:hover { background: #f0f4f8; }
-
-/* Primary Action Buttons */
-#clear { background: #fff; color: #e74c3c; border-color: #e74c3c; font-weight: bold; }
-#clear:hover { background: #fdf2f1; }
-
+.pillbar button:active { background: #e1e8ed; transform: scale(0.95); }
 .inline { display: flex; gap: 10px; flex-wrap: wrap; align-items: flex-start; }
-.inline .grow { flex: 1 1 320px; }
-.inline button { width: auto; background: #1e4b85; color: #fff; border: none; }
+.inline .grow { flex: 1 1 200px; }
+.inline button { width: auto; background: #1e4b85; color: #fff; border: none; padding: 14px; border-radius: 8px; margin-top: 6px; font-weight: bold;}
 
-.small { font-size: 13px; opacity: .75; margin-top: 6px; }
-.hidden { display: none !important; }
+/* --- FLOATING ACTION BUTTON --- */
+.fab-container {
+  position: fixed; bottom: 70px; left: 0; width: 100%; padding: 15px 20px;
+  background: linear-gradient(transparent, #f4f7fa 30%); box-sizing: border-box; z-index: 99;
+}
+.fab-btn {
+  width: 100%; padding: 18px; border-radius: 12px; background: #27ae60; color: white;
+  font-size: 18px; font-weight: 800; border: none; box-shadow: 0 4px 15px rgba(39, 174, 96, 0.3);
+  cursor: pointer; transition: transform 0.1s;
+}
+.fab-btn:active { transform: scale(0.98); }
 
-/* History Section */
-.history-box {
-  border: 1px solid #ddd;
-  border-radius: 10px;
-  padding: 20px;
-  margin-top: 14px;
-  background: #fafbfc;
+/* --- BOTTOM NAV --- */
+.bottom-nav {
+  position: fixed; bottom: 0; width: 100%; background: #fff; border-top: 1px solid #e1e8ed; 
+  display: flex; z-index: 100; padding-bottom: env(safe-area-inset-bottom);
 }
-.history-list {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  margin-top: 10px;
+.nav-item {
+  flex: 1; text-align: center; padding: 14px 0; color: #95a5a6; font-size: 11px;
+  font-weight: 700; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 4px;
 }
-.history-item {
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  background: #fff;
-  padding: 15px;
-  cursor: pointer;
-  transition: all 0.2s;
-}
+.nav-item.active { color: #1e4b85; }
+.nav-icon { font-size: 20px; }
+
+/* --- STATUS ALERTS --- */
+.alert-card { background: #e8f8f5; border: 1px solid #2ecc71; border-radius: 10px; padding: 15px; margin-bottom: 20px; text-align: center; display: none; }
+.alert-card h3 { color: #27ae60; margin: 0 0 5px 0; font-size: 18px; }
+.alert-card p { color: #555; font-size: 14px; margin: 0; }
+
+/* --- HISTORY UI --- */
+.history-box { border: 1px solid #e1e8ed; border-radius: 10px; padding: 20px; background: #fff; }
+.history-list { display: flex; flex-direction: column; gap: 10px; margin-top: 10px; }
+.history-item { border: 1px solid #e1e8ed; border-radius: 8px; background: #fafbfc; padding: 15px; cursor: pointer; transition: all 0.2s; }
 .history-item:hover { background: #f0f4f8; }
 .history-item.active { border-color: #c89b53; background: #fdfaf2; }
 .history-title { font-weight: 700; color: #1e4b85; }
 .history-sub { font-size: 14px; opacity: .8; margin-top: 6px; }
-.summary-card {
-  border: 1px solid #ddd;
-  border-radius: 10px;
-  background: #fff;
-  padding: 20px;
-  margin-top: 15px;
-}
-.summary-card h3 {
-  margin: 0 0 15px 0;
-  font-size: 18px;
-  color: #1e4b85;
-  border-bottom: 2px solid #f2f2f2;
-  padding-bottom: 10px;
-}
+.summary-card { border: 1px solid #e1e8ed; border-radius: 10px; background: #fafbfc; padding: 20px; margin-top: 15px; }
+.summary-card h3 { margin: 0 0 15px 0; font-size: 18px; color: #1e4b85; border-bottom: 2px solid #e1e8ed; padding-bottom: 10px; }
 .summary-row { margin-top: 10px; font-size: 15px; }
 .summary-label { font-weight: 700; color: #555; }
-hr.soft { border: none; border-top: 1px solid #e5e5e5; margin: 25px 0; }
+hr.soft { border: none; border-top: 1px solid #e1e8ed; margin: 25px 0; }
+pre { background: #fff; padding: 15px; white-space: pre-wrap; border-radius: 8px; border: 1px solid #e1e8ed; font-family: inherit; font-size: 14px; line-height: 1.5; color: #2c3e50; }
 
-@media print {
-    body { background: #fff; margin: 0; padding: 0; }
-    .card, .modebar, #entrySection, #historySection, button { display: none !important; }
-}
+.hidden { display: none !important; }
 </style>
 </head>
-
 <body>
-<div class="card">
 
-  <div class="header-logo">
-    <img src="tphc_logo.png" alt="Twin Pillars Logo">
+<div class="app-header">
+  <img src="tphc_logo.png" alt="Twin Pillars Logo" onerror="this.outerHTML='<h2 style=\'margin:0; color:#1e4b85;\'>TWIN PILLARS</h2>'">
+</div>
+
+<div id="screen-schedule" class="screen active">
+  <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 15px;">
+    <h2 style="margin: 0; color: #2c3e50; font-size: 24px;">Today's Jobs</h2>
+    <span id="techDisplayLabel" style="font-size: 12px; font-weight: bold; color: #c89b53; background: #fdfaf2; padding: 4px 8px; border-radius: 12px; border: 1px solid #fad7a1;">Loading...</span>
   </div>
-  <h2>Field Notes Tool</h2>
-  <div class="small" id="draftStatus"></div>
+  
+  <div id="draftStatus" style="text-align: center; font-size: 12px; font-weight: bold; color: #7f8c8d; margin-bottom: 15px;"></div>
 
-  <div class="modebar">
-    <button id="modePM" type="button" class="active">PM</button>
-    <button id="modeService" type="button">SERVICE CALL</button>
-    <button id="modeQuote" type="button">QUOTED REPAIR</button>
-    <button id="modeHistory" type="button">HISTORY</button>
+  <div id="jobListContainer">
+    <div style="text-align:center; padding: 40px 20px; color:#95a5a6;">Fetching schedule...</div>
   </div>
+</div>
 
-  <div id="techPanel" style="background: #eaf2f8; padding: 15px; border-radius: 6px; margin-bottom: 20px; border: 1px solid #b9d5ec;">
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-      <div style="font-weight: bold; color: #1e4b85;" id="loggedInTechDisplay">Loading user...</div>
-      <button onclick="switchUser()" style="width: auto; margin: 0; padding: 4px 8px; font-size: 11px; background: #fff; border: 1px solid #ccc; color: #555;">Switch User</button>
-    </div>
-
-    <label style="margin-top: 0; color: #1e4b85;">Today's Dispatched Tickets</label>
-    <select id="ticketSelector" onchange="loadTicketData()">
-      <option value="">Select a ticket to auto-fill...</option>
-    </select>
+<div id="screen-workspace" class="screen hidden">
+  <div id="successCard" class="alert-card">
+    <h3>✓ Ticket Synced</h3>
+    <p>Saved successfully. You can return to your schedule.</p>
   </div>
 
-  <div id="entrySection">
-    <label>Location</label>
+  <div class="workspace-header">
+    <div id="ws-customer" class="ws-customer">Select a Job</div>
+    <div id="ws-address" class="ws-address">Return to Schedule to pick a ticket</div>
+    <div id="ws-ticket" class="ws-ticket">NO TICKET</div>
+  </div>
+
+  <input type="hidden" id="ticketSelector">
+  <div id="entrySection" style="margin-bottom: 15px;">
+    <label>Location (Auto-Filled)</label>
     <input id="location" placeholder="Example: I'm at the Planet Fitness in Milwaukee on Main Street">
+  </div>
 
-    <div id="pmSection">
-      <label>Equipment on Site</label>
-      <textarea id="equipment" placeholder="Example: one RTU, one furnace, one unit heater, two radiant heaters"></textarea>
-
-      <div class="pillbar">
-        <button id="addRTU" type="button">+ RTU</button>
-        <button id="addF" type="button">+ Furnace</button>
-        <button id="addUH" type="button">+ Unit Heater</button>
-        <button id="addRH" type="button">+ Radiant Heater</button>
-        <button id="addEF" type="button">+ Exhaust Fan</button>
-        <button id="addMUA" type="button">+ MUA</button>
-      </div>
-
-      <label>Notes / Repairs</label>
-      <textarea id="notes" placeholder="Leave blank if everything is running good."></textarea>
-
-      <label>Parts used</label>
-      <textarea id="used" placeholder="Example: two 4l190 belts and two 20 by 24 by 2 filters"></textarea>
-
-      <label>Cost of parts</label>
-      <input id="cost" placeholder="Example: $23">
-
-      <label>Parts needed next PM</label>
-      <div class="inline">
-        <div class="grow">
-          <textarea id="next" placeholder="Tap Same if identical to Parts used"></textarea>
+  <div id="pmSection" class="hidden">
+    <div class="accordion open" id="acc-equip-pm">
+      <div class="accordion-header" onclick="toggleAccordion('acc-equip-pm')">1. Equipment on Site</div>
+      <div class="accordion-body">
+        <textarea id="equipment" placeholder="Example: one RTU, one furnace..."></textarea>
+        <div class="pillbar">
+          <button id="addRTU" type="button">+ RTU</button>
+          <button id="addF" type="button">+ Furnace</button>
+          <button id="addUH" type="button">+ Unit Heater</button>
+          <button id="addRH" type="button">+ Radiant</button>
+          <button id="addEF" type="button">+ Exhaust Fan</button>
+          <button id="addMUA" type="button">+ MUA</button>
         </div>
-        <button id="same" type="button">Same</button>
       </div>
-
-      <label>Work done</label>
-      <input id="workdone">
     </div>
-
-    <div id="serviceSection" class="hidden">
-      <label>Equipment worked on</label>
-      <textarea id="serviceEquipment" placeholder="Example: one RTU, one furnace..."></textarea>
-      
-      <div class="pillbar">
-        <button id="addServiceRTU" type="button">+ RTU</button>
-        <button id="addServiceF" type="button">+ Furnace</button>
-        <button id="addServiceUH" type="button">+ Unit Heater</button>
-        <button id="addServiceRH" type="button">+ Radiant Heater</button>
-        <button id="addServiceEF" type="button">+ Exhaust Fan</button>
-        <button id="addServiceMUA" type="button">+ MUA</button>
+    <div class="accordion open" id="acc-notes-pm">
+      <div class="accordion-header" onclick="toggleAccordion('acc-notes-pm')">2. Notes & Repairs</div>
+      <div class="accordion-body">
+        <label>Notes / Repairs</label>
+        <textarea id="notes" placeholder="Leave blank if everything is running good."></textarea>
+        <label>Work done</label>
+        <input id="workdone">
       </div>
-
-      <label>Reason for call</label>
-      <textarea id="reason" placeholder="Example: No heat in lobby."></textarea>
-
-      <label>Findings / Diagnosis</label>
-      <textarea id="diagnosis" placeholder="Example: RTU1 heat exchanger is cracked."></textarea>
-
-      <label>Repairs made</label>
-      <textarea id="repairsMade" placeholder="Example: Confirmed failure and shut unit down."></textarea>
-
-      <label>Parts used</label>
-      <textarea id="serviceUsed" placeholder="Example: two 4l190 belts and one 16 by 25 by one"></textarea>
-
-      <label>Cost of parts</label>
-      <input id="serviceCost" placeholder="Example: $23">
-
-      <label>Parts needed for repair quote</label>
-      <textarea id="quoteParts" placeholder="Example: 1 GAS VALVE and 1 IGNITER"></textarea>
-
-      <label>Labor for repair quote</label>
-      <input id="quoteLabor" placeholder="Example: 3 HOURS">
-
-      <label>Recommendations / Next steps</label>
-      <textarea id="recommendations" placeholder="Example: Replace RTU1 due to cracked heat exchanger."></textarea>
     </div>
-
-    <div id="quoteSection" class="hidden">
-      <label>Equipment Repaired</label>
-      <textarea id="quoteEquip" placeholder="Example: RTU1 on the roof..."></textarea>
-      
-      <div class="pillbar">
-        <button id="addQuoteRTU" type="button">+ RTU</button>
-        <button id="addQuoteF" type="button">+ Furnace</button>
-        <button id="addQuoteUH" type="button">+ Unit Heater</button>
-        <button id="addQuoteRH" type="button">+ Radiant Heater</button>
-        <button id="addQuoteEF" type="button">+ Exhaust Fan</button>
-        <button id="addQuoteMUA" type="button">+ MUA</button>
+    <div class="accordion" id="acc-parts-pm">
+      <div class="accordion-header" onclick="toggleAccordion('acc-parts-pm')">3. Parts & Materials</div>
+      <div class="accordion-body">
+        <label>Parts used</label>
+        <textarea id="used" placeholder="Example: two 4l190 belts and two 20 by 24 by 2 filters"></textarea>
+        <label>Cost of parts</label>
+        <input id="cost" placeholder="Example: $23">
+        <label>Parts needed next PM</label>
+        <div class="inline">
+          <div class="grow">
+            <textarea id="next" placeholder="Tap Same if identical to Parts used"></textarea>
+          </div>
+          <button id="same" type="button">Same</button>
+        </div>
       </div>
-
-      <label>Original Issue Resolved</label>
-      <textarea id="quoteIssue" placeholder="Example: Completing quoted repair for bad inducer motor."></textarea>
-
-      <label>Repairs Completed</label>
-      <textarea id="quoteRepairs" placeholder="Example: Removed old inducer motor and installed new OEM motor. Cleaned pressure switch tubing."></textarea>
-
-      <label>System Testing & Verification</label>
-      <textarea id="quoteTesting" placeholder="Example: Cycled heat multiple times, verified proper draft pressure and ignition sequence. Unit is running normally."></textarea>
-
-      <label>Further Recommendations</label>
-      <textarea id="quoteRecs" placeholder="Example: No further issues found at this time."></textarea>
     </div>
+  </div>
 
-    <div style="background: #fdfaf2; padding: 15px; border-radius: 6px; margin-bottom: 15px; border: 1px solid #c89b53;">
-      <label style="margin-top: 0; color: #b58945;">Final Job Status</label>
-      <select id="finalJobStatus">
+  <div id="serviceSection" class="hidden">
+    <div class="accordion open" id="acc-equip-svc">
+      <div class="accordion-header" onclick="toggleAccordion('acc-equip-svc')">1. Equipment Worked On</div>
+      <div class="accordion-body">
+        <textarea id="serviceEquipment" placeholder="Example: one RTU, one furnace..."></textarea>
+        <div class="pillbar">
+          <button id="addServiceRTU" type="button">+ RTU</button>
+          <button id="addServiceF" type="button">+ Furnace</button>
+          <button id="addServiceUH" type="button">+ Unit Heater</button>
+          <button id="addServiceRH" type="button">+ Radiant</button>
+          <button id="addServiceEF" type="button">+ Exhaust Fan</button>
+          <button id="addServiceMUA" type="button">+ MUA</button>
+        </div>
+      </div>
+    </div>
+    <div class="accordion open" id="acc-notes-svc">
+      <div class="accordion-header" onclick="toggleAccordion('acc-notes-svc')">2. Diagnostics & Repairs</div>
+      <div class="accordion-body">
+        <label>Reason for call</label>
+        <textarea id="reason" placeholder="Example: No heat in lobby."></textarea>
+        <label>Findings / Diagnosis</label>
+        <textarea id="diagnosis" placeholder="Example: RTU1 heat exchanger is cracked."></textarea>
+        <label>Repairs made</label>
+        <textarea id="repairsMade" placeholder="Example: Confirmed failure and shut unit down."></textarea>
+        <label>Recommendations / Next steps</label>
+        <textarea id="recommendations" placeholder="Example: Replace RTU1 due to cracked heat exchanger."></textarea>
+      </div>
+    </div>
+    <div class="accordion" id="acc-parts-svc">
+      <div class="accordion-header" onclick="toggleAccordion('acc-parts-svc')">3. Parts & Quote Info</div>
+      <div class="accordion-body">
+        <label>Parts used</label>
+        <textarea id="serviceUsed" placeholder="Example: two 4l190 belts and one 16 by 25 by one"></textarea>
+        <label>Cost of parts</label>
+        <input id="serviceCost" placeholder="Example: $23">
+        <hr style="border:none; border-top:1px solid #ddd; margin:15px 0;">
+        <label>Parts needed for repair quote</label>
+        <textarea id="quoteParts" placeholder="Example: 1 GAS VALVE and 1 IGNITER"></textarea>
+        <label>Labor for repair quote</label>
+        <input id="quoteLabor" placeholder="Example: 3 HOURS">
+      </div>
+    </div>
+  </div>
+
+  <div id="quoteSection" class="hidden">
+    <div class="accordion open" id="acc-equip-qt">
+      <div class="accordion-header" onclick="toggleAccordion('acc-equip-qt')">1. Equipment Repaired</div>
+      <div class="accordion-body">
+        <textarea id="quoteEquip" placeholder="Example: RTU1 on the roof..."></textarea>
+        <div class="pillbar">
+          <button id="addQuoteRTU" type="button">+ RTU</button>
+          <button id="addQuoteF" type="button">+ Furnace</button>
+          <button id="addQuoteUH" type="button">+ Unit Heater</button>
+          <button id="addQuoteRH" type="button">+ Radiant</button>
+          <button id="addQuoteEF" type="button">+ Exhaust Fan</button>
+          <button id="addQuoteMUA" type="button">+ MUA</button>
+        </div>
+      </div>
+    </div>
+    <div class="accordion open" id="acc-notes-qt">
+      <div class="accordion-header" onclick="toggleAccordion('acc-notes-qt')">2. Repairs Completed</div>
+      <div class="accordion-body">
+        <label>Original Issue Resolved</label>
+        <textarea id="quoteIssue" placeholder="Example: Completing quoted repair for bad inducer motor."></textarea>
+        <label>Repairs Completed</label>
+        <textarea id="quoteRepairs" placeholder="Example: Removed old inducer motor and installed new OEM motor."></textarea>
+        <label>System Testing & Verification</label>
+        <textarea id="quoteTesting" placeholder="Example: Cycled heat multiple times..."></textarea>
+        <label>Further Recommendations</label>
+        <textarea id="quoteRecs" placeholder="Example: No further issues found at this time."></textarea>
+      </div>
+    </div>
+  </div>
+
+  <div class="accordion" id="acc-status" style="margin-bottom: 80px;">
+    <div class="accordion-header" onclick="toggleAccordion('acc-status')">4. Job Status</div>
+    <div class="accordion-body">
+      <label style="margin-top:0;">Select Final Status</label>
+      <select id="finalJobStatus" style="font-weight: bold; border-color: #1e4b85;">
         <option value="Completed">Completed (Ready to Bill)</option>
         <option value="Needs Repair Quote">Needs Repair Quote</option>
         <option value="Parts on Order">Parts on Order / Return Trip Needed</option>
         <option value="Dispatched">Still In Progress (Coming back later)</option>
       </select>
     </div>
+  </div>
 
-    <button id="generate" type="button" style="background: #27ae60; color: #fff; border-color: #2ecc71; font-weight: bold; font-size: 1.1em;">Complete Ticket & Sync</button>
+  <div class="fab-container">
+    <button id="generate" class="fab-btn" type="button">Complete & Sync Ticket</button>
+  </div>
+</div>
 
+<div id="screen-history" class="screen hidden">
+  <h2 style="margin: 0 0 20px 0; color: #2c3e50; font-size: 24px;">Site History</h2>
+  <div class="history-box">
+    <label style="margin-top:0;">Customer</label>
+    <select id="historyCustomer"><option value="">Select customer</option></select>
+    <label>Location</label>
+    <select id="historyLocation"><option value="">Select location</option></select>
 
-    <div id="successCard" class="hidden" style="background: #e8f8f5; border: 1px solid #2ecc71; border-radius: 8px; padding: 20px; margin-top: 20px; text-align: center;">
-      <h3 style="color: #27ae60; margin-top: 0; font-size: 22px;">✓ Ticket Synced</h3>
-      <p style="color: #555; font-size: 15px; margin-bottom: 0;">The office has received your report and the dispatch board has been updated.</p>
+    <div id="historyLatestWrap" class="hidden">
+      <div class="summary-card">
+        <h3>Last Time We Were On Site</h3>
+        <div id="historyLatest"></div>
+      </div>
     </div>
 
-  </div> <div id="historySection" class="hidden">
-    <div class="history-box">
-      <label>Customer</label>
-      <select id="historyCustomer">
-        <option value="">Select customer</option>
-      </select>
-
-      <label>Location</label>
-      <select id="historyLocation">
-        <option value="">Select location</option>
-      </select>
-
-      <div id="historyLatestWrap" class="hidden">
-        <div class="summary-card">
-          <h3>Last Time We Were On Site</h3>
-          <div id="historyLatest"></div>
-        </div>
+    <div id="historyOlderWrap" class="hidden">
+      <hr class="soft">
+      <div class="summary-card">
+        <h3>Older Visits</h3>
+        <div id="historyOlderList" class="history-list"></div>
       </div>
+    </div>
 
-      <div id="historyOlderWrap" class="hidden">
-        <hr class="soft">
-        <div class="summary-card">
-          <h3>Older Visits</h3>
-          <div id="historyOlderList" class="history-list"></div>
-        </div>
-      </div>
-
-      <div id="historyFullWrap" class="hidden">
-        <hr class="soft">
-        <div class="summary-card">
-          <h3>Selected Visit</h3>
-          <pre id="historyFullReport"></pre>
-        </div>
+    <div id="historyFullWrap" class="hidden">
+      <hr class="soft">
+      <div class="summary-card">
+        <h3>Selected Visit</h3>
+        <pre id="historyFullReport"></pre>
       </div>
     </div>
   </div>
-
 </div>
 
-<script>
+<div id="screen-profile" class="screen hidden">
+  <h2 style="margin: 0 0 20px 0; color: #2c3e50; font-size: 24px;">Settings</h2>
+  <div style="background: #fff; padding: 20px; border-radius: 12px; border: 1px solid #e1e8ed;">
+    <label style="margin-top:0;">Logged In As</label>
+    <input type="text" id="profileNameInput" readonly style="background: #f4f7fa; font-weight: bold; color: #1e4b85;">
+    <button type="button" style="background: #e74c3c; color: #fff; border: none; margin-top: 20px; font-weight: bold;" onclick="switchUser()">Log Out / Switch User</button>
+  </div>
+</div>
+
+<nav class="bottom-nav">
+  <div class="nav-item active" id="nav-schedule" onclick="switchScreen('schedule')">
+    <span class="nav-icon">📋</span>
+    <span>Schedule</span>
+  </div>
+  <div class="nav-item" id="nav-history" onclick="switchScreen('history')">
+    <span class="nav-icon">🕰️</span>
+    <span>History</span>
+  </div>
+  <div class="nav-item" id="nav-profile" onclick="switchScreen('profile')">
+    <span class="nav-icon">👤</span>
+    <span>Profile</span>
+  </div>
+</nav>
+
+<pre id="output" class="hidden"></pre>
+  
+  <script>
 // --- ENABLE FIREBASE OFFLINE QUEUE ---
 if (typeof firebase !== 'undefined' && firebase.apps.length) {
     firebase.firestore().enablePersistence()
