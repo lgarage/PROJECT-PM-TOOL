@@ -25,7 +25,7 @@ body {
 .app-header img { max-height: 40px; }
 
 /* --- SCREENS --- */
-.screen { display: none; padding: 20px; padding-bottom: 100px; /* Space for Bottom Nav */ }
+.screen { display: none; padding: 20px; padding-bottom: 100px; }
 .screen.active { display: block; }
 
 /* --- JOB CARDS (SCHEDULE) --- */
@@ -90,11 +90,11 @@ textarea { min-height: 80px; resize: vertical; }
 
 /* --- FLOATING ACTION BUTTON --- */
 .fab-container {
-  position: fixed; bottom: 70px; left: 0; width: 100%; padding: 15px 20px;
-  background: linear-gradient(transparent, #f4f7fa 30%); box-sizing: border-box; z-index: 99;
+  position: fixed; bottom: 65px; left: 0; width: 100%; padding: 15px 20px;
+  background: linear-gradient(transparent, #f4f7fa 30%); box-sizing: border-box; z-index: 99; pointer-events: none;
 }
 .fab-btn {
-  width: 100%; padding: 18px; border-radius: 12px; background: #27ae60; color: white;
+  width: 100%; padding: 18px; border-radius: 12px; background: #27ae60; color: white; pointer-events: auto;
   font-size: 18px; font-weight: 800; border: none; box-shadow: 0 4px 15px rgba(39, 174, 96, 0.3);
   cursor: pointer; transition: transform 0.1s;
 }
@@ -103,14 +103,14 @@ textarea { min-height: 80px; resize: vertical; }
 /* --- BOTTOM NAV --- */
 .bottom-nav {
   position: fixed; bottom: 0; width: 100%; background: #fff; border-top: 1px solid #e1e8ed; 
-  display: flex; z-index: 100; padding-bottom: env(safe-area-inset-bottom);
+  display: flex; z-index: 100; padding-bottom: env(safe-area-inset-bottom); box-shadow: 0 -2px 10px rgba(0,0,0,0.03);
 }
 .nav-item {
-  flex: 1; text-align: center; padding: 14px 0; color: #95a5a6; font-size: 11px;
+  flex: 1; text-align: center; padding: 12px 0; color: #95a5a6; font-size: 11px;
   font-weight: 700; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 4px;
 }
 .nav-item.active { color: #1e4b85; }
-.nav-icon { font-size: 20px; }
+.nav-icon { font-size: 22px; }
 
 /* --- STATUS ALERTS --- */
 .alert-card { background: #e8f8f5; border: 1px solid #2ecc71; border-radius: 10px; padding: 15px; margin-bottom: 20px; text-align: center; display: none; }
@@ -167,9 +167,13 @@ pre { background: #fff; padding: 15px; white-space: pre-wrap; border-radius: 8px
   </div>
 
   <input type="hidden" id="ticketSelector">
-  <div id="entrySection" style="margin-bottom: 15px;">
-    <label>Location (Auto-Filled)</label>
-    <input id="location" placeholder="Example: I'm at the Planet Fitness in Milwaukee on Main Street">
+  
+  <div class="accordion open" id="acc-location" style="margin-bottom: 15px;">
+     <div class="accordion-header" onclick="toggleAccordion('acc-location')">Location Data</div>
+     <div class="accordion-body">
+       <label style="margin-top:0;">Location</label>
+       <input id="location" placeholder="Example: I'm at the Planet Fitness in Milwaukee on Main Street">
+     </div>
   </div>
 
   <div id="pmSection" class="hidden">
@@ -249,7 +253,7 @@ pre { background: #fff; padding: 15px; white-space: pre-wrap; border-radius: 8px
         <textarea id="serviceUsed" placeholder="Example: two 4l190 belts and one 16 by 25 by one"></textarea>
         <label>Cost of parts</label>
         <input id="serviceCost" placeholder="Example: $23">
-        <hr style="border:none; border-top:1px solid #ddd; margin:15px 0;">
+        <hr style="border:none; border-top:1px solid #e1e8ed; margin:15px 0;">
         <label>Parts needed for repair quote</label>
         <textarea id="quoteParts" placeholder="Example: 1 GAS VALVE and 1 IGNITER"></textarea>
         <label>Labor for repair quote</label>
@@ -288,7 +292,7 @@ pre { background: #fff; padding: 15px; white-space: pre-wrap; border-radius: 8px
     </div>
   </div>
 
-  <div class="accordion" id="acc-status" style="margin-bottom: 80px;">
+  <div class="accordion" id="acc-status" style="margin-bottom: 20px;">
     <div class="accordion-header" onclick="toggleAccordion('acc-status')">4. Job Status</div>
     <div class="accordion-body">
       <label style="margin-top:0;">Select Final Status</label>
@@ -363,9 +367,7 @@ pre { background: #fff; padding: 15px; white-space: pre-wrap; border-radius: 8px
   </div>
 </nav>
 
-<pre id="output" class="hidden"></pre>
-  
-  <script>
+<script>
 // --- ENABLE FIREBASE OFFLINE QUEUE ---
 if (typeof firebase !== 'undefined' && firebase.apps.length) {
     firebase.firestore().enablePersistence()
@@ -378,7 +380,7 @@ if (typeof firebase !== 'undefined' && firebase.apps.length) {
       });
 }
 
-/* ---------- basics ---------- */
+/* ---------- constants & arrays ---------- */
 function pad2(n){ return String(n).padStart(2, "0"); }
 function today(){ const d = new Date(); return d.getFullYear() + "-" + pad2(d.getMonth() + 1) + "-" + pad2(d.getDate()); }
 
@@ -437,10 +439,155 @@ const KNOWN_BELTS = [
 const NUM_MAP = { zero:"0", one:"1", two:"2", three:"3", four:"4", five:"5", six:"6", seven:"7", eight:"8", nine:"9", ten:"10", ones:"1", twos:"2", threes:"3", fours:"4", fives:"5", to:"2", too:"2" };
 const EQUIP_LABELS = { RTU:"Rooftop Unit", F:"Furnace", UH:"Unit Heater", RH:"Radiant Heater", EF:"Exhaust Fan", MUA:"Make-Up Air Unit" };
 
+/* ---------- app state ---------- */
 let currentMode = "PM";
 let currentHistoryCustomer = "";
 let currentHistoryLocation = "";
 let currentHistorySelectedIndex = 0;
+let currentTechProfile = "";
+let myTickets = [];
+let activeTicket = null;
+
+/* ---------- screen & UI logic ---------- */
+function switchScreen(screenName) {
+  document.querySelectorAll('.screen').forEach(s => { s.classList.add('hidden'); s.classList.remove('active'); });
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+
+  const targetScreen = document.getElementById('screen-' + screenName);
+  if(targetScreen) { targetScreen.classList.remove('hidden'); targetScreen.classList.add('active'); }
+
+  const targetNav = document.getElementById('nav-' + (screenName === 'workspace' ? 'schedule' : screenName));
+  if(targetNav) targetNav.classList.add('active');
+
+  if (screenName === 'schedule') fetchMyTickets();
+  if (screenName === 'history') populateHistoryCustomers();
+
+  window.scrollTo(0,0);
+}
+
+function toggleAccordion(id) {
+  const el = document.getElementById(id);
+  el.classList.toggle('open');
+}
+
+function applyMode(){
+  const pmSection = document.getElementById("pmSection");
+  const serviceSection = document.getElementById("serviceSection");
+  const quoteSection = document.getElementById("quoteSection");
+
+  pmSection.classList.add("hidden"); serviceSection.classList.add("hidden"); quoteSection.classList.add("hidden");
+
+  if(currentMode === "PM"){
+    pmSection.classList.remove("hidden"); 
+  } else if(currentMode === "SERVICE"){
+    serviceSection.classList.remove("hidden"); 
+  } else if (currentMode === "QUOTE") {
+    quoteSection.classList.remove("hidden");
+  }
+}
+
+/* ---------- user profile ---------- */
+function loadUserProfile() {
+  currentTechProfile = localStorage.getItem('tp_saved_tech');
+  if (!currentTechProfile) {
+      currentTechProfile = prompt("DEVICE SETUP\nPlease enter your Tech Name exactly as it appears on the dispatch board:");
+      if (!currentTechProfile) currentTechProfile = "Unknown Tech";
+      localStorage.setItem('tp_saved_tech', currentTechProfile);
+  }
+  document.getElementById('techDisplayLabel').innerText = "👤 " + currentTechProfile;
+  document.getElementById('profileNameInput').value = currentTechProfile;
+  fetchMyTickets();
+}
+
+function switchUser() {
+  localStorage.removeItem('tp_saved_tech');
+  loadUserProfile();
+  switchScreen('schedule');
+}
+
+/* ---------- cloud ticket fetching ---------- */
+async function fetchMyTickets() {
+  const container = document.getElementById('jobListContainer');
+  if (!currentTechProfile || typeof firebase === 'undefined' || !firebase.apps.length) return;
+
+  try {
+    const db = firebase.firestore();
+    const todayStr = new Date().toISOString().split('T')[0]; 
+
+    container.innerHTML = '<div style="text-align:center; padding: 40px; color:#95a5a6;">Syncing schedule...</div>';
+    myTickets = [];
+
+    const snapshot = await db.collection('service_calls')
+      .where('assignedTech', '==', currentTechProfile)
+      .where('date', '==', todayStr)
+      .get();
+
+    container.innerHTML = '';
+
+    snapshot.forEach(doc => {
+      let data = doc.data();
+      if (data.status === 'Completed' || data.status === 'Canceled') return; 
+      
+      data.id = doc.id;
+      myTickets.push(data);
+      
+      let badgeClass = "card-badge";
+      if (data.priority === 'Emergency') badgeClass += " badge-emergency";
+
+      let cardHTML = `
+        <div class="job-card" onclick="openWorkspace('${data.id}')">
+          <div class="card-header">
+            <span class="card-time">${data.startTime || '8:00 AM'}</span>
+            <span class="${badgeClass}">${data.jobType}</span>
+          </div>
+          <div class="card-customer">${data.customerName}</div>
+          <div class="card-address">📍 ${data.locationAddress}, ${data.custCity || ''}</div>
+        </div>
+      `;
+      container.innerHTML += cardHTML;
+    });
+
+    if(myTickets.length === 0) {
+      container.innerHTML = '<div style="text-align:center; padding: 40px; color:#95a5a6; background:#fff; border-radius:12px;">🎉 You have no open tickets left for today!</div>';
+    }
+  } catch (error) {
+    console.error("Error fetching tickets:", error);
+    container.innerHTML = '<div style="text-align:center; padding: 40px; color:#e74c3c;">Error connecting to dispatch board. Showing cached tickets.</div>';
+  }
+}
+
+function openWorkspace(ticketId) {
+  activeTicket = myTickets.find(t => t.id === ticketId);
+  if (!activeTicket) return;
+
+  document.getElementById('ws-customer').innerText = activeTicket.customerName;
+  document.getElementById('ws-address').innerText = `${activeTicket.locationAddress}, ${activeTicket.custCity || ''}`;
+  document.getElementById('ws-ticket').innerText = `${activeTicket.ticketNum} • ${activeTicket.jobType}`;
+
+  document.getElementById('ticketSelector').value = ticketId;
+  document.getElementById('location').value = `${activeTicket.customerName} - ${activeTicket.locationAddress}`;
+
+  if (activeTicket.jobType === 'Preventative Maintenance') {
+    currentMode = "PM";
+  } else if (activeTicket.jobType === 'Quoted Repair') {
+    currentMode = "QUOTE";
+    document.getElementById('quoteIssue').value = "Original ticket: " + activeTicket.ticketNum + "\nIssue: " + activeTicket.issue;
+  } else {
+    currentMode = "SERVICE";
+    document.getElementById('reason').value = activeTicket.issue;
+  }
+
+  if (activeTicket.equip && activeTicket.equip !== 'N/A') {
+    if (currentMode === 'PM') document.getElementById('equipment').value = activeTicket.equip;
+    if (currentMode === 'SERVICE') document.getElementById('serviceEquipment').value = activeTicket.equip;
+    if (currentMode === 'QUOTE') document.getElementById('quoteEquip').value = activeTicket.equip;
+  }
+
+  document.getElementById('successCard').style.display = 'none';
+  applyMode();
+  switchScreen('workspace');
+  saveDraft();
+}
 
 /* ---------- location local formatting fallback ---------- */
 function titleCaseWords(str){
@@ -681,8 +828,7 @@ function convertNumbers(text){
 }
 
 function levenshtein(a, b){
-  const m = a.length;
-  const n = b.length;
+  const m = a.length; const n = b.length;
   const dp = Array.from({length:m + 1}, () => Array(n + 1).fill(0));
   for(let i = 0; i <= m; i++) dp[i][0] = i;
   for(let j = 0; j <= n; j++) dp[0][j] = j;
@@ -696,8 +842,7 @@ function levenshtein(a, b){
 }
 
 function closestMatch(value, list, maxDistance){
-  let best = value;
-  let bestScore = Infinity;
+  let best = value; let bestScore = Infinity;
   list.forEach(item => {
     const d = levenshtein(value.toUpperCase(), item.toUpperCase());
     if(d < bestScore){ bestScore = d; best = item; }
@@ -723,47 +868,20 @@ function getCustomerFromLocation(location){
 /* ---------- equipment parsing ---------- */
 function normalizeEquipmentSpeech(text){
   let t = (text || "").toLowerCase();
-  t = t.replace(/\n/g, " ");
-  t = t.replace(/[–—]/g, "-");
-  t = t.replace(/\s+and\s+/g, ", ");
-  t = t.replace(/\s{2,}/g, " ").trim();
-
-  t = t.replace(/\bare\s*to\s*you\b/g, "rtu");
-  t = t.replace(/\bar\s*to\s*you\b/g, "rtu");
-  t = t.replace(/\br\s*to\s*you\b/g, "rtu");
-  t = t.replace(/\br\s*too\s*you\b/g, "rtu");
-  t = t.replace(/\br\s*two\s*you\b/g, "rtu");
-  t = t.replace(/\br\s*t\s*u\b/g, "rtu");
-  t = t.replace(/\brt\s*you\b/g, "rtu");
-  t = t.replace(/\brt\s*u\b/g, "rtu");
-  t = t.replace(/\brt\b/g, "rtu");
-  t = t.replace(/\bhour\s*to\s*you\b/g, "rtu");
-  t = t.replace(/\bone\s*hour\s*to\s*you\b/g, "1 rtu");
-  t = t.replace(/\b1\s*hour\s*to\s*you\b/g, "1 rtu");
-
-  t = t.replace(/\bfurnaces?\b/g, "furnace");
-  t = t.replace(/\bunit heaters?\b/g, "unit heater");
-  t = t.replace(/\bradiant heaters?\b/g, "radiant heater");
-  t = t.replace(/\bexhaust fans?\b/g, "exhaust fan");
-  t = t.replace(/\bmake[\s-]?up air(?: unit)?s?\b/g, "mua");
-  t = t.replace(/\brooftop units?\b/g, "rtu");
-
+  t = t.replace(/\n/g, " "); t = t.replace(/[–—]/g, "-"); t = t.replace(/\s+and\s+/g, ", "); t = t.replace(/\s{2,}/g, " ").trim();
+  t = t.replace(/\bare\s*to\s*you\b/g, "rtu"); t = t.replace(/\bar\s*to\s*you\b/g, "rtu"); t = t.replace(/\br\s*to\s*you\b/g, "rtu");
+  t = t.replace(/\br\s*too\s*you\b/g, "rtu"); t = t.replace(/\br\s*two\s*you\b/g, "rtu"); t = t.replace(/\br\s*t\s*u\b/g, "rtu");
+  t = t.replace(/\brt\s*you\b/g, "rtu"); t = t.replace(/\brt\s*u\b/g, "rtu"); t = t.replace(/\brt\b/g, "rtu");
+  t = t.replace(/\bhour\s*to\s*you\b/g, "rtu"); t = t.replace(/\bone\s*hour\s*to\s*you\b/g, "1 rtu"); t = t.replace(/\b1\s*hour\s*to\s*you\b/g, "1 rtu");
+  t = t.replace(/\bfurnaces?\b/g, "furnace"); t = t.replace(/\bunit heaters?\b/g, "unit heater"); t = t.replace(/\bradiant heaters?\b/g, "radiant heater");
+  t = t.replace(/\bexhaust fans?\b/g, "exhaust fan"); t = t.replace(/\bmake[\s-]?up air(?: unit)?s?\b/g, "mua"); t = t.replace(/\brooftop units?\b/g, "rtu");
   t = convertNumbers(t);
   return t;
 }
 
 function expandEquipmentCounts(text){
   let t = normalizeEquipmentSpeech(text);
-
-  const patterns = [
-    {re:/\b(\d+)\s*rtu\b/g, code:"RTU"},
-    {re:/\b(\d+)\s*furnace\b/g, code:"F"},
-    {re:/\b(\d+)\s*unit heater\b/g, code:"UH"},
-    {re:/\b(\d+)\s*radiant heater\b/g, code:"RH"},
-    {re:/\b(\d+)\s*exhaust fan\b/g, code:"EF"},
-    {re:/\b(\d+)\s*mua\b/g, code:"MUA"}
-  ];
-
+  const patterns = [ {re:/\b(\d+)\s*rtu\b/g, code:"RTU"}, {re:/\b(\d+)\s*furnace\b/g, code:"F"}, {re:/\b(\d+)\s*unit heater\b/g, code:"UH"}, {re:/\b(\d+)\s*radiant heater\b/g, code:"RH"}, {re:/\b(\d+)\s*exhaust fan\b/g, code:"EF"}, {re:/\b(\d+)\s*mua\b/g, code:"MUA"} ];
   const out = [];
   patterns.forEach(p => {
     let m;
@@ -774,10 +892,8 @@ function expandEquipmentCounts(text){
       }
     }
   });
-
   const directMatches = [...t.matchAll(/\b(RTU|RH|UH|F|EF|MUA)\s*-?\s*(\d+)\b/gi)];
   directMatches.forEach(m => out.push(m[1].toUpperCase() + m[2]));
-
   const unique = [];
   out.forEach(x => { if(!unique.includes(x)) unique.push(x); });
   return unique.join(", ");
@@ -806,13 +922,7 @@ function formatEquipmentFieldValue(raw){
 /* ---------- parts parsing ---------- */
 function normalizeFilterSize(rawSize){
   let s = (rawSize || "").toUpperCase().trim();
-  s = s.replace(/\bbuy\b/gi, "BY");
-  s = convertNumbers(s);
-  s = s.replace(/\s+BY\s+/gi, "X");
-  s = s.replace(/\s*X\s*/gi, "X");
-  s = s.replace(/\s+/g, "");
-  s = s.replace(/[^0-9X]/g, "");
-
+  s = s.replace(/\bbuy\b/gi, "BY"); s = convertNumbers(s); s = s.replace(/\s+BY\s+/gi, "X"); s = s.replace(/\s*X\s*/gi, "X"); s = s.replace(/\s+/g, ""); s = s.replace(/[^0-9X]/g, "");
   const nums = s.split("X").filter(Boolean);
   if(nums.length === 3) s = `${nums[0]}X${nums[1]}X${nums[2]}`;
   return closestMatch(s, KNOWN_FILTER_SIZES, 2).toUpperCase();
@@ -820,13 +930,9 @@ function normalizeFilterSize(rawSize){
 
 function normalizeBeltCode(rawCode){
   let s = (rawCode || "").toUpperCase().trim();
-  s = s.replace(/\s+/g, "");
-  s = s.replace(/[-_]/g, "");
+  s = s.replace(/\s+/g, ""); s = s.replace(/[-_]/g, "");
   const m = s.match(/^(AX|BX|A|B|4L)(\d+)$/);
-  if(m){
-    const code = m[1] + m[2];
-    return closestMatch(code, KNOWN_BELTS, 1).toUpperCase();
-  }
+  if(m){ const code = m[1] + m[2]; return closestMatch(code, KNOWN_BELTS, 1).toUpperCase(); }
   return closestMatch(s, KNOWN_BELTS, 1).toUpperCase();
 }
 
@@ -835,9 +941,7 @@ function formatPartOutput(qty, value){ return `${qty} - ${String(value).toUpperC
 function recoverConcatenatedFilter(firstNum, secondNum, thirdNum){
   const a = String(firstNum); const b = String(secondNum); const c = String(thirdNum);
   for(let i = 1; i < a.length; i++){
-    const qty = a.slice(0, i);
-    const firstDim = a.slice(i);
-    const candidate = `${firstDim}X${b}X${c}`;
+    const qty = a.slice(0, i); const firstDim = a.slice(i); const candidate = `${firstDim}X${b}X${c}`;
     const matched = closestMatch(candidate, KNOWN_FILTER_SIZES, 2);
     if(KNOWN_FILTER_SIZES.includes(matched)) return `${parseInt(qty, 10)} - ${matched}`;
   }
@@ -848,175 +952,37 @@ function parsePartItem(item){
   let t = item.toLowerCase().trim();
   if(!t) return [];
 
-  t = t.replace(/\bbuy\b/g, "by");
-  t = convertNumbers(t);
-  t = t.replace(/\s{2,}/g, " ").trim();
-  t = t.replace(/\bfilters?\b/g, "").trim();
-  t = t.replace(/\bbelts?\b/g, "").trim();
+  t = t.replace(/\bbuy\b/g, "by"); t = convertNumbers(t); t = t.replace(/\s{2,}/g, " ").trim(); t = t.replace(/\bfilters?\b/g, "").trim(); t = t.replace(/\bbelts?\b/g, "").trim();
 
   let beltMatch = t.match(/^(\d+)\s+(ax|bx|a|b|4l)\s*-?\s*(\d+)$/i);
   if(beltMatch) return [formatPartOutput(parseInt(beltMatch[1], 10), normalizeBeltCode(beltMatch[2] + beltMatch[3]))];
-
   beltMatch = t.match(/^(\d+)(ax|bx|a|b|4l)\s*-?\s*(\d+)$/i);
   if(beltMatch) return [formatPartOutput(parseInt(beltMatch[1], 10), normalizeBeltCode(beltMatch[2] + beltMatch[3]))];
-
   beltMatch = t.match(/^(\d+)\s+(4)\s*l\s*(\d+)$/i);
   if(beltMatch) return [formatPartOutput(parseInt(beltMatch[1], 10), normalizeBeltCode(`4L${beltMatch[3]}`))];
 
   let f = t;
-  f = f.replace(/\s+by\s+/g, " x ");
-  f = f.replace(/\s*x\s*/g, " x ");
-  f = f.replace(/\s{2,}/g, " ").trim();
+  f = f.replace(/\s+by\s+/g, " x "); f = f.replace(/\s*x\s*/g, " x "); f = f.replace(/\s{2,}/g, " ").trim();
 
   let m = f.match(/^(\d+)\s+(\d+)\s+(\d+)\s*x\s*(\d+)$/i);
   if(m) return [formatPartOutput(parseInt(m[1], 10), normalizeFilterSize(`${m[2]}x${m[3]}x${m[4]}`))];
-
   m = f.match(/^(\d+)\s+(\d+)\s*x\s*(\d+)\s*x\s*(\d+)$/i);
   if(m) return [formatPartOutput(parseInt(m[1], 10), normalizeFilterSize(`${m[2]}x${m[3]}x${m[4]}`))];
-
   m = f.match(/^(\d+)x(\d+)x(\d+)x(\d+)$/i);
   if(m) return [formatPartOutput(parseInt(m[1], 10), normalizeFilterSize(`${m[2]}x${m[3]}x${m[4]}`))];
-
   m = f.match(/^(\d+)\s+(\d+x\d+x\d+)$/i);
   if(m) return [formatPartOutput(parseInt(m[1], 10), normalizeFilterSize(m[2]))];
-
   m = f.match(/^(\d+)\s+(\d+)\s*x\s*(\d+)$/i);
-  if(m){
-    const recovered = recoverConcatenatedFilter(m[1], m[2], m[3]);
-    if(recovered) return [recovered];
-  }
+  if(m){ const recovered = recoverConcatenatedFilter(m[1], m[2], m[3]); if(recovered) return [recovered]; }
 
   const nums = f.match(/\d+/g);
   if(nums && nums.length === 4) return [formatPartOutput(parseInt(nums[0], 10), normalizeFilterSize(`${nums[1]}x${nums[2]}x${nums[3]}`))];
-
-  if(nums && nums.length === 3){
-    const recovered = recoverConcatenatedFilter(nums[0], nums[1], nums[2]);
-    if(recovered) return [recovered];
-  }
+  if(nums && nums.length === 3){ const recovered = recoverConcatenatedFilter(nums[0], nums[1], nums[2]); if(recovered) return [recovered]; }
 
   const beltNums = f.match(/^(\d+)\s*(ax|bx|a|b|4l)\s*(\d+)$/i);
   if(beltNums) return [formatPartOutput(parseInt(beltNums[1], 10), normalizeBeltCode(beltNums[2] + beltNums[3]))];
 
   return [item.trim().toUpperCase()];
-}
-
-/* ---------- NEW: CLOUD TICKET FETCHING & USER PROFILE ---------- */
-let myTickets = [];
-let currentTechProfile = "";
-
-function loadUserProfile() {
-  currentTechProfile = localStorage.getItem('tp_saved_tech');
-  if (!currentTechProfile) {
-      currentTechProfile = prompt("DEVICE SETUP\nPlease enter your Tech Name (e.g., 'Dave (Tech 1)') exactly as it appears on the dispatch board:");
-      if (!currentTechProfile) currentTechProfile = "Unknown Tech";
-      localStorage.setItem('tp_saved_tech', currentTechProfile);
-  }
-  document.getElementById('loggedInTechDisplay').innerText = "👤 " + currentTechProfile;
-  fetchMyTickets();
-}
-
-function switchUser() {
-  localStorage.removeItem('tp_saved_tech');
-  loadUserProfile();
-}
-
-async function fetchMyTickets() {
-  const ticketDropdown = document.getElementById('ticketSelector');
-  ticketDropdown.innerHTML = '<option value="">Select a ticket to auto-fill...</option>';
-  myTickets = [];
-
-  if (!currentTechProfile || typeof firebase === 'undefined' || !firebase.apps.length) return;
-
-  try {
-    const db = firebase.firestore();
-    const todayStr = new Date().toISOString().split('T')[0]; 
-
-    ticketDropdown.innerHTML = '<option value="">Fetching cloud tickets...</option>';
-
-    const snapshot = await db.collection('service_calls')
-      .where('assignedTech', '==', currentTechProfile)
-      .where('date', '==', todayStr)
-      .get();
-
-    ticketDropdown.innerHTML = '<option value="">Select a ticket to auto-fill...</option>';
-
-    snapshot.forEach(doc => {
-      let data = doc.data();
-      if (data.status === 'Completed' || data.status === 'Canceled') return; 
-      
-      data.id = doc.id;
-      myTickets.push(data);
-      
-      const opt = document.createElement('option');
-      opt.value = data.id;
-      opt.textContent = `${data.ticketNum} - ${data.customerName} (${data.locationAddress})`;
-      ticketDropdown.appendChild(opt);
-    });
-
-    if(myTickets.length === 0) {
-      ticketDropdown.innerHTML = '<option value="">No open tickets scheduled for today.</option>';
-    }
-  } catch (error) {
-    console.error("Error fetching tickets:", error);
-    ticketDropdown.innerHTML = '<option value="">Error connecting to dispatch board.</option>';
-  }
-}
-
-function loadTicketData() {
-  const ticketId = document.getElementById('ticketSelector').value;
-  if (!ticketId) return;
-
-  const ticket = myTickets.find(t => t.id === ticketId);
-  if (!ticket) return;
-
-  const locString = `${ticket.customerName} - ${ticket.locationAddress}`;
-  document.getElementById('location').value = locString;
-
-  if (ticket.jobType === 'Preventative Maintenance') {
-    document.getElementById('modePM').click();
-  } else if (ticket.jobType === 'Quoted Repair') {
-    document.getElementById('modeQuote').click();
-    document.getElementById('quoteIssue').value = "Original ticket: " + ticket.ticketNum + "\nIssue: " + ticket.issue;
-  } else {
-    document.getElementById('modeService').click();
-    document.getElementById('reason').value = ticket.issue;
-  }
-
-  if (ticket.equip && ticket.equip !== 'N/A') {
-    if (currentMode === 'PM') document.getElementById('equipment').value = ticket.equip;
-    if (currentMode === 'SERVICE') document.getElementById('serviceEquipment').value = ticket.equip;
-    if (currentMode === 'QUOTE') document.getElementById('quoteEquip').value = ticket.equip;
-  }
-  saveDraft();
-}
-
-/* ---------- firebase parent lookup (FIXED) ---------- */
-async function getParentCompany(locationText) {
-  if (typeof firebase === 'undefined' || !firebase.apps.length) return null;
-  try {
-    const db = firebase.firestore();
-    const pieces = locationText.split(" - ");
-    if (pieces.length < 2) return null;
-
-    const subCompany = pieces[0].trim();
-    const street = pieces[pieces.length - 1].trim(); 
-
-    const locSnapshot = await db.collection("MappedLocations")
-      .where("Sub_Company", "==", subCompany)
-      .where("Street", "==", street)
-      .get();
-
-    if (locSnapshot.empty) return null;
-
-    const parentId = locSnapshot.docs[0].data().Parent_ID;
-    const parentDoc = await db.collection("ParentCompanies").doc(parentId).get();
-
-    if (parentDoc.exists) return parentDoc.data().Name; 
-    return null;
-  } catch (error) {
-    console.error("Firebase Lookup Error:", error);
-    return null;
-  }
 }
 
 // ---------------------------------------------------------
@@ -1047,19 +1013,14 @@ function normalizeParts(text){
   let t = (text || "").trim();
   if(!t) return "";
 
-  t = t.replace(/\s+and\s+/gi, ", ");
-  t = t.replace(/\s{2,}/g, " ").trim();
+  t = t.replace(/\s+and\s+/gi, ", "); t = t.replace(/\s{2,}/g, " ").trim();
 
   const items = t.split(/[,;\n]+/).map(s => s.trim()).filter(Boolean);
   const out = [];
 
   items.forEach(item => {
     parsePartItem(item).forEach(x => {
-      const cleaned = String(x)
-        .replace(/\bFILTERS?\b/gi, "")
-        .replace(/\bBELTS?\b/gi, "")
-        .replace(/\s{2,}/g, " ")
-        .trim().toUpperCase();
+      const cleaned = String(x).replace(/\bFILTERS?\b/gi, "").replace(/\bBELTS?\b/gi, "").replace(/\s{2,}/g, " ").trim().toUpperCase();
       if(cleaned) out.push(cleaned);
     });
   });
@@ -1070,27 +1031,13 @@ function normalizeParts(text){
 /* ---------- notes ---------- */
 function normalizeNotesForParsing(text){
   let t = (text || "").trim().toLowerCase();
-  t = t.replace(/\n/g, " ");
-  t = t.replace(/\s{2,}/g, " ").trim();
-
-  t = t.replace(/\bare\s*to\s*you\b/g,"rtu");
-  t = t.replace(/\bar\s*to\s*you\b/g,"rtu");
-  t = t.replace(/\br\s*to\s*you\b/g,"rtu");
-  t = t.replace(/\br\s*too\s*you\b/g,"rtu");
-  t = t.replace(/\br\s*two\s*you\b/g,"rtu");
-  t = t.replace(/\br\s*t\s*u\b/g,"rtu");
-  t = t.replace(/\brt\s*you\b/g,"rtu");
-  t = t.replace(/\brt\s*u\b/g,"rtu");
-  t = t.replace(/\brt\b/g,"rtu");
+  t = t.replace(/\n/g, " "); t = t.replace(/\s{2,}/g, " ").trim();
+  t = t.replace(/\bare\s*to\s*you\b/g,"rtu"); t = t.replace(/\bar\s*to\s*you\b/g,"rtu"); t = t.replace(/\br\s*to\s*you\b/g,"rtu");
+  t = t.replace(/\br\s*too\s*you\b/g,"rtu"); t = t.replace(/\br\s*two\s*you\b/g,"rtu"); t = t.replace(/\br\s*t\s*u\b/g,"rtu");
+  t = t.replace(/\brt\s*you\b/g,"rtu"); t = t.replace(/\brt\s*u\b/g,"rtu"); t = t.replace(/\brt\b/g,"rtu");
   t = t.replace(/\bhour\s*to\s*you\b/g,"rtu");
-
-  t = t.replace(/\bfurnaces?\b/g,"furnace");
-  t = t.replace(/\bunit heaters?\b/g,"unit heater");
-  t = t.replace(/\bradiant heaters?\b/g,"radiant heater");
-  t = t.replace(/\bexhaust fans?\b/g,"exhaust fan");
-  t = t.replace(/\bmake[\s-]?up air(?: unit)?s?\b/g,"mua");
-  t = t.replace(/\brooftop units?\b/g,"rtu");
-
+  t = t.replace(/\bfurnaces?\b/g,"furnace"); t = t.replace(/\bunit heaters?\b/g,"unit heater"); t = t.replace(/\bradiant heaters?\b/g,"radiant heater");
+  t = t.replace(/\bexhaust fans?\b/g,"exhaust fan"); t = t.replace(/\bmake[\s-]?up air(?: unit)?s?\b/g,"mua"); t = t.replace(/\brooftop units?\b/g,"rtu");
   t = convertNumbers(t);
   t = t.replace(/\b(rtu|rh|uh|f|ef|mua)\s*(\d+)\b/gi, (_, a, n) => `${a.toUpperCase()}${n}`);
   return t;
@@ -1101,13 +1048,9 @@ function extractRepairsFromNotes(notesText, equipCodes){
   if(!text) return {general:"", repairs:[]};
 
   const pieces = text.replace(/\r/g,"").split(/\n+|(?<=[.?!])\s+/).map(s => s.trim()).filter(Boolean);
+  const repairs = []; const general = [];
 
-  const repairs = [];
-  const general = [];
-
-  function looksLikeRepair(s){
-    return /\b(needs?|need|replace|replaced|failed|bad|broken|repair|recommend|suggest|not working|no heat|no cooling|leaking|motor|belt|capacitor|blower|fan|heat exchanger|cracked)\b/i.test(s);
-  }
+  function looksLikeRepair(s){ return /\b(needs?|need|replace|replaced|failed|bad|broken|repair|recommend|suggest|not working|no heat|no cooling|leaking|motor|belt|capacitor|blower|fan|heat exchanger|cracked)\b/i.test(s); }
 
   pieces.forEach(piece => {
     const norm = normalizeNotesForParsing(piece);
@@ -1133,23 +1076,16 @@ function extractRepairsFromNotes(notesText, equipCodes){
       general.push(piece);
     }
   });
-
   return { general: general.join(" ").trim(), repairs };
 }
 
 /* ---------- history storage ---------- */
-function getHistoryData(){
-  try{ return JSON.parse(localStorage.getItem(HISTORY_KEY) || "{}"); }catch(e){ return {}; }
-}
-
+function getHistoryData(){ try{ return JSON.parse(localStorage.getItem(HISTORY_KEY) || "{}"); }catch(e){ return {}; } }
 function saveHistoryData(data){ localStorage.setItem(HISTORY_KEY, JSON.stringify(data)); }
 
 function buildVisitSummary(visit){
-  if(visit.mode === "PM"){
-    return { date: visit.date, type: "PM", primary: visit.location, details: visit.notesFinal || "No notes.", parts: visit.partsUsed || "NONE" };
-  } else if(visit.mode === "QUOTED REPAIR"){
-    return { date: visit.date, type: "QUOTED REPAIR", primary: visit.location, details: visit.repairsCompleted || "No repairs recorded.", parts: visit.partsUsed || "NONE" };
-  }
+  if(visit.mode === "PM"){ return { date: visit.date, type: "PM", primary: visit.location, details: visit.notesFinal || "No notes.", parts: visit.partsUsed || "NONE" }; } 
+  else if(visit.mode === "QUOTED REPAIR"){ return { date: visit.date, type: "QUOTED REPAIR", primary: visit.location, details: visit.repairsCompleted || "No repairs recorded.", parts: visit.partsUsed || "NONE" }; }
   return { date: visit.date, type: "SERVICE CALL", primary: visit.location, details: visit.diagnosis || "No diagnosis.", parts: visit.partsUsed || "NONE" };
 }
 
@@ -1157,10 +1093,8 @@ function saveVisitToHistory(visit){
   if(!visit.location) return;
   const customer = getCustomerFromLocation(visit.location);
   const data = getHistoryData();
-
   if(!data[customer]) data[customer] = {};
   if(!data[customer][visit.location]) data[customer][visit.location] = [];
-
   data[customer][visit.location].unshift(visit);
   saveHistoryData(data);
 }
@@ -1169,14 +1103,8 @@ function populateHistoryCustomers(){
   const select = document.getElementById("historyCustomer");
   const data = getHistoryData();
   const customers = Object.keys(data).sort();
-
   select.innerHTML = `<option value="">Select customer</option>`;
-  customers.forEach(customer => {
-    const opt = document.createElement("option");
-    opt.value = customer; opt.textContent = customer;
-    select.appendChild(opt);
-  });
-
+  customers.forEach(customer => { const opt = document.createElement("option"); opt.value = customer; opt.textContent = customer; select.appendChild(opt); });
   if(customers.includes(currentHistoryCustomer)){ select.value = currentHistoryCustomer; } else { currentHistoryCustomer = ""; }
   populateHistoryLocations();
 }
@@ -1184,20 +1112,10 @@ function populateHistoryCustomers(){
 function populateHistoryLocations(){
   const locationSelect = document.getElementById("historyLocation");
   const data = getHistoryData();
-
   locationSelect.innerHTML = `<option value="">Select location</option>`;
-
-  if(!currentHistoryCustomer || !data[currentHistoryCustomer]){
-    currentHistoryLocation = ""; renderHistoryView(); return;
-  }
-
+  if(!currentHistoryCustomer || !data[currentHistoryCustomer]){ currentHistoryLocation = ""; renderHistoryView(); return; }
   const locations = Object.keys(data[currentHistoryCustomer]).sort();
-  locations.forEach(location => {
-    const opt = document.createElement("option");
-    opt.value = location; opt.textContent = location;
-    locationSelect.appendChild(opt);
-  });
-
+  locations.forEach(location => { const opt = document.createElement("option"); opt.value = location; opt.textContent = location; locationSelect.appendChild(opt); });
   if(locations.includes(currentHistoryLocation)){ locationSelect.value = currentHistoryLocation; } else { currentHistoryLocation = ""; }
   renderHistoryView();
 }
@@ -1260,212 +1178,106 @@ function renderHistoryView(){
 /* ---------- draft ---------- */
 function getFields(){
   return {
-    currentMode,
-    location: document.getElementById("location").value || "",
-    equipment: document.getElementById("equipment").value || "",
-    notes: document.getElementById("notes").value || "",
-    used: document.getElementById("used").value || "",
-    cost: document.getElementById("cost").value || "",
-    next: document.getElementById("next").value || "",
-    workdone: document.getElementById("workdone").value || "",
-
-    serviceEquipment: document.getElementById("serviceEquipment").value || "",
-    reason: document.getElementById("reason").value || "",
-    diagnosis: document.getElementById("diagnosis").value || "",
-    repairsMade: document.getElementById("repairsMade").value || "",
-    serviceUsed: document.getElementById("serviceUsed").value || "",
-    serviceCost: document.getElementById("serviceCost").value || "",
-    quoteParts: document.getElementById("quoteParts").value || "",
-    quoteLabor: document.getElementById("quoteLabor").value || "",
-    recommendations: document.getElementById("recommendations").value || "",
-
-    quoteEquip: document.getElementById("quoteEquip").value || "",
-    quoteIssue: document.getElementById("quoteIssue").value || "",
-    quoteRepairs: document.getElementById("quoteRepairs").value || "",
-    quoteTesting: document.getElementById("quoteTesting").value || "",
-    quoteRecs: document.getElementById("quoteRecs").value || "",
-
-    historyCustomer: currentHistoryCustomer,
-    historyLocation: currentHistoryLocation,
-    historySelectedIndex: currentHistorySelectedIndex,
+    currentMode, location: document.getElementById("location").value || "",
+    equipment: document.getElementById("equipment").value || "", notes: document.getElementById("notes").value || "",
+    used: document.getElementById("used").value || "", cost: document.getElementById("cost").value || "",
+    next: document.getElementById("next").value || "", workdone: document.getElementById("workdone").value || "",
+    serviceEquipment: document.getElementById("serviceEquipment").value || "", reason: document.getElementById("reason").value || "",
+    diagnosis: document.getElementById("diagnosis").value || "", repairsMade: document.getElementById("repairsMade").value || "",
+    serviceUsed: document.getElementById("serviceUsed").value || "", serviceCost: document.getElementById("serviceCost").value || "",
+    quoteParts: document.getElementById("quoteParts").value || "", quoteLabor: document.getElementById("quoteLabor").value || "",
+    recommendations: document.getElementById("recommendations").value || "", quoteEquip: document.getElementById("quoteEquip").value || "",
+    quoteIssue: document.getElementById("quoteIssue").value || "", quoteRepairs: document.getElementById("quoteRepairs").value || "",
+    quoteTesting: document.getElementById("quoteTesting").value || "", quoteRecs: document.getElementById("quoteRecs").value || "",
+    historyCustomer: currentHistoryCustomer, historyLocation: currentHistoryLocation, historySelectedIndex: currentHistorySelectedIndex,
     savedAt: new Date().toISOString()
   };
 }
 
 function setFields(d){
   currentMode = d.currentMode || "PM";
-  currentHistoryCustomer = d.historyCustomer || "";
-  currentHistoryLocation = d.historyLocation || "";
-  currentHistorySelectedIndex = typeof d.historySelectedIndex === "number" ? d.historySelectedIndex : 0;
-
+  currentHistoryCustomer = d.historyCustomer || ""; currentHistoryLocation = d.historyLocation || ""; currentHistorySelectedIndex = typeof d.historySelectedIndex === "number" ? d.historySelectedIndex : 0;
   applyMode();
-
   document.getElementById("location").value = d.location || "";
-  document.getElementById("equipment").value = d.equipment || "";
-  document.getElementById("notes").value = d.notes || "";
-  document.getElementById("used").value = d.used || "";
-  document.getElementById("cost").value = d.cost || "";
-  document.getElementById("next").value = d.next || "";
-  document.getElementById("workdone").value = d.workdone || DEFAULT_PM_WORKDONE;
-
-  document.getElementById("serviceEquipment").value = d.serviceEquipment || "";
-  document.getElementById("reason").value = d.reason || "";
-  document.getElementById("diagnosis").value = d.diagnosis || "";
-  document.getElementById("repairsMade").value = d.repairsMade || "";
-  document.getElementById("serviceUsed").value = d.serviceUsed || "";
-  document.getElementById("serviceCost").value = d.serviceCost || "";
-  document.getElementById("quoteParts").value = d.quoteParts || "";
-  document.getElementById("quoteLabor").value = d.quoteLabor || "";
-  document.getElementById("recommendations").value = d.recommendations || "";
-
-  document.getElementById("quoteEquip").value = d.quoteEquip || "";
-  document.getElementById("quoteIssue").value = d.quoteIssue || "";
-  document.getElementById("quoteRepairs").value = d.quoteRepairs || "";
-  document.getElementById("quoteTesting").value = d.quoteTesting || "";
-  document.getElementById("quoteRecs").value = d.quoteRecs || "";
-
+  document.getElementById("equipment").value = d.equipment || ""; document.getElementById("notes").value = d.notes || "";
+  document.getElementById("used").value = d.used || ""; document.getElementById("cost").value = d.cost || "";
+  document.getElementById("next").value = d.next || ""; document.getElementById("workdone").value = d.workdone || DEFAULT_PM_WORKDONE;
+  document.getElementById("serviceEquipment").value = d.serviceEquipment || ""; document.getElementById("reason").value = d.reason || "";
+  document.getElementById("diagnosis").value = d.diagnosis || ""; document.getElementById("repairsMade").value = d.repairsMade || "";
+  document.getElementById("serviceUsed").value = d.serviceUsed || ""; document.getElementById("serviceCost").value = d.serviceCost || "";
+  document.getElementById("quoteParts").value = d.quoteParts || ""; document.getElementById("quoteLabor").value = d.quoteLabor || "";
+  document.getElementById("recommendations").value = d.recommendations || ""; document.getElementById("quoteEquip").value = d.quoteEquip || "";
+  document.getElementById("quoteIssue").value = d.quoteIssue || ""; document.getElementById("quoteRepairs").value = d.quoteRepairs || "";
+  document.getElementById("quoteTesting").value = d.quoteTesting || ""; document.getElementById("quoteRecs").value = d.quoteRecs || "";
   [ "equipment","notes","used","next", "serviceEquipment","reason","diagnosis","repairsMade","serviceUsed","quoteParts","recommendations", "quoteEquip","quoteIssue","quoteRepairs","quoteTesting","quoteRecs"
   ].forEach(id => autoGrow(document.getElementById(id)));
-
   populateHistoryCustomers();
 }
 
 function saveDraft(){ try{ localStorage.setItem(DRAFT_KEY, JSON.stringify(getFields())); }catch(e){} }
-
-function loadDraft(){
-  const raw = localStorage.getItem(DRAFT_KEY);
-  if(!raw) return false;
-  try{
-    const d = JSON.parse(raw);
-    setFields(d);
-    return true;
-  }catch(e){ return false; }
-}
+function loadDraft(){ const raw = localStorage.getItem(DRAFT_KEY); if(!raw) return false; try{ const d = JSON.parse(raw); setFields(d); return true; }catch(e){ return false; } }
 
 /* ---------- immediate field formatting ---------- */
-function formatEquipmentField(){
-  const el = document.getElementById("equipment");
-  if(el.value.trim()){ el.value = formatEquipmentFieldValue(el.value); autoGrow(el); saveDraft(); }
-}
+function formatEquipmentField(){ const el = document.getElementById("equipment"); if(el.value.trim()){ el.value = formatEquipmentFieldValue(el.value); autoGrow(el); saveDraft(); } }
 function formatUsedField(){ autoParseParts("used"); }
 function formatNextField(){ autoParseParts("next"); }
-
-function formatServiceEquipmentField(){
-  const el = document.getElementById("serviceEquipment");
-  if(el.value.trim()){ el.value = formatEquipmentFieldValue(el.value); autoGrow(el); saveDraft(); }
-}
+function formatServiceEquipmentField(){ const el = document.getElementById("serviceEquipment"); if(el.value.trim()){ el.value = formatEquipmentFieldValue(el.value); autoGrow(el); saveDraft(); } }
 function formatServiceUsedField(){ autoParseParts("serviceUsed"); }
 function formatQuotePartsField(){ autoParseParts("quoteParts"); }
-
-function formatQuoteEquipField(){
-  const el = document.getElementById("quoteEquip");
-  if(el.value.trim()){ el.value = formatEquipmentFieldValue(el.value); autoGrow(el); saveDraft(); }
-}
-
-/* ---------- mode switching ---------- */
-function applyMode(){
-  const pmBtn = document.getElementById("modePM");
-  const serviceBtn = document.getElementById("modeService");
-  const quoteBtn = document.getElementById("modeQuote");
-  const historyBtn = document.getElementById("modeHistory");
-  
-  const entrySection = document.getElementById("entrySection");
-  const historySection = document.getElementById("historySection");
-  const pmSection = document.getElementById("pmSection");
-  const serviceSection = document.getElementById("serviceSection");
-  const quoteSection = document.getElementById("quoteSection");
-  const techPanel = document.getElementById("techPanel"); // <-- Added reference to the Tech Panel
-
-  pmBtn.classList.remove("active"); serviceBtn.classList.remove("active"); quoteBtn.classList.remove("active"); historyBtn.classList.remove("active");
-  entrySection.classList.add("hidden"); historySection.classList.add("hidden"); pmSection.classList.add("hidden"); serviceSection.classList.add("hidden"); quoteSection.classList.add("hidden");
-
-  if(currentMode === "PM"){
-    pmBtn.classList.add("active"); entrySection.classList.remove("hidden"); pmSection.classList.remove("hidden"); 
-    techPanel.classList.remove("hidden"); // Show on PM
-  } else if(currentMode === "SERVICE"){
-    serviceBtn.classList.add("active"); entrySection.classList.remove("hidden"); serviceSection.classList.remove("hidden"); 
-    techPanel.classList.remove("hidden"); // Show on Service
-  } else if (currentMode === "QUOTE") {
-    quoteBtn.classList.add("active"); entrySection.classList.remove("hidden"); quoteSection.classList.remove("hidden");
-    techPanel.classList.remove("hidden"); // Show on Quote
-  } else if (currentMode === "HISTORY") {
-    historyBtn.classList.add("active"); historySection.classList.remove("hidden"); populateHistoryCustomers();
-    techPanel.classList.add("hidden"); // Hide on History
-  }
-}
-  
-document.getElementById("modePM").onclick = function(){ currentMode = "PM"; applyMode(); saveDraft(); };
-document.getElementById("modeService").onclick = function(){ currentMode = "SERVICE"; applyMode(); saveDraft(); };
-document.getElementById("modeQuote").onclick = function(){ currentMode = "QUOTE"; applyMode(); saveDraft(); };
-document.getElementById("modeHistory").onclick = function(){ currentMode = "HISTORY"; applyMode(); saveDraft(); };
-
-/* ---------- history UI ---------- */
-document.getElementById("historyCustomer").addEventListener("change", (e) => {
-  currentHistoryCustomer = e.target.value; currentHistoryLocation = ""; currentHistorySelectedIndex = 0; populateHistoryLocations(); saveDraft();
-});
-
-document.getElementById("historyLocation").addEventListener("change", (e) => {
-  currentHistoryLocation = e.target.value; currentHistorySelectedIndex = 0; renderHistoryView(); saveDraft();
-});
+function formatQuoteEquipField(){ const el = document.getElementById("quoteEquip"); if(el.value.trim()){ el.value = formatEquipmentFieldValue(el.value); autoGrow(el); saveDraft(); } }
 
 /* ---------- BACKGROUND CLOUD SYNC ---------- */
 function uploadReportToCloud(visitData, fullReportText) {
     if (typeof firebase === 'undefined' || !firebase.apps.length) return;
-    
     const db = firebase.firestore();
     const ticketId = document.getElementById('ticketSelector').value;
     const finalStatus = document.getElementById('finalJobStatus').value;
 
     const payload = {
-        ...visitData,
-        fullReportText: fullReportText,
-        techName: currentTechProfile,
-        linkedTicketId: ticketId || "None",
-        status: finalStatus, 
-        timestamp: firebase.firestore.FieldValue.serverTimestamp(),
-        deviceSavedAt: new Date().toISOString() 
+        ...visitData, fullReportText: fullReportText, techName: currentTechProfile,
+        linkedTicketId: ticketId || "None", status: finalStatus, 
+        timestamp: firebase.firestore.FieldValue.serverTimestamp(), deviceSavedAt: new Date().toISOString() 
     };
 
-    const statusDisplay = document.getElementById("draftStatus");
-
-    // TRUE FIRE & FORGET
     db.collection('completed_reports').add(payload).catch(e => console.error("Sync queued."));
+    if (ticketId) { db.collection('service_calls').doc(ticketId).set({ status: finalStatus, techNotes: fullReportText }, { merge: true }).catch(e => console.error("Ticket update queued.")); }
 
-    if (ticketId) {
-        db.collection('service_calls').doc(ticketId).set({
-            status: finalStatus, 
-            techNotes: fullReportText
-        }, { merge: true }).catch(e => console.error("Ticket update queued."));
-    }
-
-    // INSTANT UI FEEDBACK & SUCCESS CARD
-    if (navigator.onLine) {
-        statusDisplay.innerHTML = `<span style="color:#27ae60; font-weight:bold;">✓ Synced in background!</span>`;
-    } else {
-        statusDisplay.innerHTML = `<span style="color:#f39c12; font-weight:bold;">✓ Saved offline! Will sync invisibly.</span>`;
-    }
+    document.querySelectorAll('.accordion').forEach(a => a.classList.remove('open'));
+    const sc = document.getElementById('successCard');
+    sc.style.display = 'block';
     
-    const successCard = document.getElementById('successCard');
-    successCard.classList.remove('hidden');
-    successCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    if (navigator.onLine) { sc.innerHTML = `<h3>✓ Ticket Synced</h3><p>Report uploaded. Status changed to <strong>${finalStatus}</strong>.</p>`; } 
+    else { sc.innerHTML = `<h3 style="color:#f39c12;">✓ Saved Offline</h3><p>Will sync in background when signal returns.</p>`; }
+    window.scrollTo(0,0);
+}
+
+/* ---------- firebase parent lookup ---------- */
+async function getParentCompany(locationText) {
+  if (typeof firebase === 'undefined' || !firebase.apps.length) return null;
+  try {
+    const db = firebase.firestore();
+    const pieces = locationText.split(" - ");
+    if (pieces.length < 2) return null;
+    const subCompany = pieces[0].trim();
+    const street = pieces[pieces.length - 1].trim(); 
+    const locSnapshot = await db.collection("MappedLocations").where("Sub_Company", "==", subCompany).where("Street", "==", street).get();
+    if (locSnapshot.empty) return null;
+    const parentId = locSnapshot.docs[0].data().Parent_ID;
+    const parentDoc = await db.collection("ParentCompanies").doc(parentId).get();
+    if (parentDoc.exists) return parentDoc.data().Name; 
+    return null;
+  } catch (error) { return null; }
 }
 
 /* ---------- ui actions ---------- */
-document.getElementById("same").onclick = function(){
-  document.getElementById("next").value = document.getElementById("used").value;
-  autoGrow(document.getElementById("next")); formatNextField();
-};
+document.getElementById("same").onclick = function(){ document.getElementById("next").value = document.getElementById("used").value; autoGrow(document.getElementById("next")); formatNextField(); };
 
 document.getElementById("generate").onclick = async function(){
   await autoParseLocation();
   const location = document.getElementById("location").value || "[Location]";
   const date = today();
-
-  document.getElementById("draftStatus").textContent = "Checking database for parent company...";
   const parentCompany = await getParentCompany(location);
-  
   const finalLocationDisplay = parentCompany ? `${parentCompany}\n${location}` : location;
-  document.getElementById("draftStatus").textContent = "Report Generated.";
 
   let report = "";
   let visit = null;
@@ -1475,12 +1287,10 @@ document.getElementById("generate").onclick = async function(){
     const equipRaw = document.getElementById("equipment").value || "";
     const equipCodes = parseEquipCodes(equipRaw);
     const equip = expandEquipment(equipRaw);
-
     const notesRaw = (document.getElementById("notes").value || "").trim();
     const extracted = extractRepairsFromNotes(notesRaw, equipCodes);
     let notesFinal = DEFAULT_PM_NOTES;
     if(extracted.general) notesFinal = extracted.general; else if(extracted.repairs.length) notesFinal = extracted.repairs.join("\n");
-
     const used = document.getElementById("used").value.trim() ? normalizeParts(document.getElementById("used").value) : "NONE";
     const next = document.getElementById("next").value.trim() ? normalizeParts(document.getElementById("next").value) : "NONE";
     const cost = document.getElementById("cost").value || "Unknown";
@@ -1527,7 +1337,6 @@ document.getElementById("generate").onclick = async function(){
     saveDraft();
   }
 };
-
 
 /* Unified Add Equipment function */
 function addEquipmentCode(fieldId, prefix){
@@ -1605,29 +1414,25 @@ function wireAutosave(){
 }
 
 /* ---------- init ---------- */
-(function init(){
+window.onload = function(){
   document.getElementById("workdone").value = DEFAULT_PM_WORKDONE;
   applyMode();
 
   document.getElementById("location").value = "";
-  
   const fieldsToClear = [
     "equipment","notes","used","cost","next", "serviceEquipment","reason","diagnosis","repairsMade","serviceUsed","serviceCost","quoteParts","quoteLabor","recommendations", "quoteEquip","quoteIssue","quoteRepairs","quoteTesting","quoteRecs"
   ];
-  
-  fieldsToClear.forEach(id => {
-      const el = document.getElementById(id);
-      if(el) { el.value = ""; autoGrow(el); }
-  });
+  fieldsToClear.forEach(id => { const el = document.getElementById(id); if(el) { el.value = ""; autoGrow(el); } });
 
   saveDraft();
-  document.getElementById("draftStatus").textContent = "New blank form ready.";
   populateHistoryCustomers();
-
-  // Load user profile (prompts for setup if new)
+  
+  // Prompt for profile & load schedule screen
   loadUserProfile();
+  switchScreen('schedule');
+  
   wireAutosave();
-})();
+};
   
 </script>
 </body>
