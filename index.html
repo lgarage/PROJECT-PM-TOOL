@@ -364,6 +364,20 @@ hr.soft { border: none; border-top: 1px solid #e5e5e5; margin: 25px 0; }
     <textarea id="quoteRecs" placeholder="Example: No further issues found at this time."></textarea>
   </div>
 
+  <div style="background: #fdfaf2; padding: 15px; border-radius: 6px; margin-bottom: 15px; border: 1px solid #c89b53;">
+    <label style="margin-top: 0; color: #b58945;">Final Job Status</label>
+    <select id="finalJobStatus">
+      <option value="Completed">Completed (Ready to Bill)</option>
+      <option value="Needs Repair Quote">Needs Repair Quote</option>
+      <option value="Parts on Order">Parts on Order / Return Trip Needed</option>
+      <option value="Dispatched">Still In Progress (Coming back later)</option>
+    </select>
+  </div>
+
+  <button id="generate" type="button">Generate Report</button>
+  <button id="copy" type="button">Copy Report</button>
+  <button id="clear" type="button">Clear Current Mode</button>
+
   <button id="generate" type="button">Generate Report</button>
   <button id="copy" type="button">Copy Report</button>
   <button id="clear" type="button">Clear Current Mode</button>
