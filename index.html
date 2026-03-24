@@ -369,16 +369,15 @@ pre { background: #fff; padding: 15px; white-space: pre-wrap; border-radius: 8px
 </nav>
 
 <script>
-// --- ENABLE FIREBASE OFFLINE QUEUE ---
+// --- ENABLE FIREBASE OFFLINE QUEUE (Modern Standard) ---
 if (typeof firebase !== 'undefined' && firebase.apps.length) {
-    firebase.firestore().enablePersistence()
-      .catch(function(err) {
-          if (err.code == 'failed-precondition') {
-              console.warn("Multiple tabs open, persistence enabled in first tab.");
-          } else if (err.code == 'unimplemented') {
-              console.warn("Browser doesn't support offline persistence.");
-          }
-      });
+    try {
+        firebase.firestore().settings({
+            localCache: firebase.firestore.persistentLocalCache()
+        });
+    } catch (err) {
+        console.warn("Offline persistence issue or already configured: ", err);
+    }
 }
 
 /* ---------- constants & arrays ---------- */
