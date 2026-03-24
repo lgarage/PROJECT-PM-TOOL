@@ -246,141 +246,141 @@ hr.soft { border: none; border-top: 1px solid #e5e5e5; margin: 25px 0; }
   <button id="modeHistory" type="button">HISTORY</button>
 </div>
 
-  <div id="techPanel" style="background: #eaf2f8; padding: 15px; border-radius: 6px; margin-bottom: 20px; border: 1px solid #b9d5ec;">
-  <label style="margin-top: 0; color: #1e4b85;">1. Who are you?</label>
-  <select id="techSelector" onchange="fetchMyTickets()">
-    <option value="">Select Technician...</option>
-    <option value="Dave (Tech 1)">Dave (Tech 1)</option>
-    <option value="Sarah (Tech 2)">Sarah (Tech 2)</option>
-    <option value="Mike (Tech 3)">Mike (Tech 3)</option>
-    <option value="Tom (Tech 4)">Tom (Tech 4)</option>
-  </select>
-
-  <label style="color: #1e4b85;">2. Today's Dispatched Tickets</label>
-  <select id="ticketSelector" onchange="loadTicketData()">
-    <option value="">Select a ticket to auto-fill...</option>
-  </select>
-</div>
-
-<div id="entrySection">
-  <label>Location</label>
-  <input id="location" placeholder="Example: I'm at the Planet Fitness in Milwaukee on Main Street">
-
-  <div id="pmSection">
-    <label>Equipment on Site</label>
-    <textarea id="equipment" placeholder="Example: one RTU, one furnace, one unit heater, two radiant heaters"></textarea>
-
-    <div class="pillbar">
-      <button id="addRTU" type="button">+ RTU</button>
-      <button id="addF" type="button">+ Furnace</button>
-      <button id="addUH" type="button">+ Unit Heater</button>
-      <button id="addRH" type="button">+ Radiant Heater</button>
-      <button id="addEF" type="button">+ Exhaust Fan</button>
-      <button id="addMUA" type="button">+ MUA</button>
+ <div id="techPanel" style="background: #eaf2f8; padding: 15px; border-radius: 6px; margin-bottom: 20px; border: 1px solid #b9d5ec;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+      <div style="font-weight: bold; color: #1e4b85;" id="loggedInTechDisplay">Loading user...</div>
+      <button onclick="switchUser()" style="width: auto; margin: 0; padding: 4px 8px; font-size: 11px; background: #fff; border: 1px solid #ccc; color: #555;">Switch User</button>
     </div>
 
-    <label>Notes / Repairs</label>
-    <textarea id="notes" placeholder="Leave blank if everything is running good."></textarea>
-
-    <label>Parts used</label>
-    <textarea id="used" placeholder="Example: two 4l190 belts and two 20 by 24 by 2 filters"></textarea>
-
-    <label>Cost of parts</label>
-    <input id="cost" placeholder="Example: $23">
-
-    <label>Parts needed next PM</label>
-    <div class="inline">
-      <div class="grow">
-        <textarea id="next" placeholder="Tap Same if identical to Parts used"></textarea>
-      </div>
-      <button id="same" type="button">Same</button>
-    </div>
-
-    <label>Work done</label>
-    <input id="workdone">
-  </div>
-
-  <div id="serviceSection" class="hidden">
-    <label>Equipment worked on</label>
-    <textarea id="serviceEquipment" placeholder="Example: one RTU, one furnace..."></textarea>
-    
-    <div class="pillbar">
-      <button id="addServiceRTU" type="button">+ RTU</button>
-      <button id="addServiceF" type="button">+ Furnace</button>
-      <button id="addServiceUH" type="button">+ Unit Heater</button>
-      <button id="addServiceRH" type="button">+ Radiant Heater</button>
-      <button id="addServiceEF" type="button">+ Exhaust Fan</button>
-      <button id="addServiceMUA" type="button">+ MUA</button>
-    </div>
-
-    <label>Reason for call</label>
-    <textarea id="reason" placeholder="Example: No heat in lobby."></textarea>
-
-    <label>Findings / Diagnosis</label>
-    <textarea id="diagnosis" placeholder="Example: RTU1 heat exchanger is cracked."></textarea>
-
-    <label>Repairs made</label>
-    <textarea id="repairsMade" placeholder="Example: Confirmed failure and shut unit down."></textarea>
-
-    <label>Parts used</label>
-    <textarea id="serviceUsed" placeholder="Example: two 4l190 belts and one 16 by 25 by one"></textarea>
-
-    <label>Cost of parts</label>
-    <input id="serviceCost" placeholder="Example: $23">
-
-    <label>Parts needed for repair quote</label>
-    <textarea id="quoteParts" placeholder="Example: 1 GAS VALVE and 1 IGNITER"></textarea>
-
-    <label>Labor for repair quote</label>
-    <input id="quoteLabor" placeholder="Example: 3 HOURS">
-
-    <label>Recommendations / Next steps</label>
-    <textarea id="recommendations" placeholder="Example: Replace RTU1 due to cracked heat exchanger."></textarea>
-  </div>
-
-  <div id="quoteSection" class="hidden">
-    <label>Equipment Repaired</label>
-    <textarea id="quoteEquip" placeholder="Example: RTU1 on the roof..."></textarea>
-    
-    <div class="pillbar">
-      <button id="addQuoteRTU" type="button">+ RTU</button>
-      <button id="addQuoteF" type="button">+ Furnace</button>
-      <button id="addQuoteUH" type="button">+ Unit Heater</button>
-      <button id="addQuoteRH" type="button">+ Radiant Heater</button>
-      <button id="addQuoteEF" type="button">+ Exhaust Fan</button>
-      <button id="addQuoteMUA" type="button">+ MUA</button>
-    </div>
-
-    <label>Original Issue Resolved</label>
-    <textarea id="quoteIssue" placeholder="Example: Completing quoted repair for bad inducer motor."></textarea>
-
-    <label>Repairs Completed</label>
-    <textarea id="quoteRepairs" placeholder="Example: Removed old inducer motor and installed new OEM motor. Cleaned pressure switch tubing."></textarea>
-
-    <label>System Testing & Verification</label>
-    <textarea id="quoteTesting" placeholder="Example: Cycled heat multiple times, verified proper draft pressure and ignition sequence. Unit is running normally."></textarea>
-
-    <label>Further Recommendations</label>
-    <textarea id="quoteRecs" placeholder="Example: No further issues found at this time."></textarea>
-  </div>
-
-  <div style="background: #fdfaf2; padding: 15px; border-radius: 6px; margin-bottom: 15px; border: 1px solid #c89b53;">
-    <label style="margin-top: 0; color: #b58945;">Final Job Status</label>
-    <select id="finalJobStatus">
-      <option value="Completed">Completed (Ready to Bill)</option>
-      <option value="Needs Repair Quote">Needs Repair Quote</option>
-      <option value="Parts on Order">Parts on Order / Return Trip Needed</option>
-      <option value="Dispatched">Still In Progress (Coming back later)</option>
+    <label style="margin-top: 0; color: #1e4b85;">Today's Dispatched Tickets</label>
+    <select id="ticketSelector" onchange="loadTicketData()">
+      <option value="">Select a ticket to auto-fill...</option>
     </select>
   </div>
 
-  <button id="generate" type="button">Generate Report</button>
-  <button id="copy" type="button">Copy Report</button>
-  <button id="clear" type="button">Clear Current Mode</button>
+  <div id="entrySection">
+    <label>Location</label>
+    <input id="location" placeholder="Example: I'm at the Planet Fitness in Milwaukee on Main Street">
 
-  <label>Output</label>
-  <pre id="output"></pre>
-</div>
+    <div id="pmSection">
+      <label>Equipment on Site</label>
+      <textarea id="equipment" placeholder="Example: one RTU, one furnace, one unit heater, two radiant heaters"></textarea>
+
+      <div class="pillbar">
+        <button id="addRTU" type="button">+ RTU</button>
+        <button id="addF" type="button">+ Furnace</button>
+        <button id="addUH" type="button">+ Unit Heater</button>
+        <button id="addRH" type="button">+ Radiant Heater</button>
+        <button id="addEF" type="button">+ Exhaust Fan</button>
+        <button id="addMUA" type="button">+ MUA</button>
+      </div>
+
+      <label>Notes / Repairs</label>
+      <textarea id="notes" placeholder="Leave blank if everything is running good."></textarea>
+
+      <label>Parts used</label>
+      <textarea id="used" placeholder="Example: two 4l190 belts and two 20 by 24 by 2 filters"></textarea>
+
+      <label>Cost of parts</label>
+      <input id="cost" placeholder="Example: $23">
+
+      <label>Parts needed next PM</label>
+      <div class="inline">
+        <div class="grow">
+          <textarea id="next" placeholder="Tap Same if identical to Parts used"></textarea>
+        </div>
+        <button id="same" type="button">Same</button>
+      </div>
+
+      <label>Work done</label>
+      <input id="workdone">
+    </div>
+
+    <div id="serviceSection" class="hidden">
+      <label>Equipment worked on</label>
+      <textarea id="serviceEquipment" placeholder="Example: one RTU, one furnace..."></textarea>
+      
+      <div class="pillbar">
+        <button id="addServiceRTU" type="button">+ RTU</button>
+        <button id="addServiceF" type="button">+ Furnace</button>
+        <button id="addServiceUH" type="button">+ Unit Heater</button>
+        <button id="addServiceRH" type="button">+ Radiant Heater</button>
+        <button id="addServiceEF" type="button">+ Exhaust Fan</button>
+        <button id="addServiceMUA" type="button">+ MUA</button>
+      </div>
+
+      <label>Reason for call</label>
+      <textarea id="reason" placeholder="Example: No heat in lobby."></textarea>
+
+      <label>Findings / Diagnosis</label>
+      <textarea id="diagnosis" placeholder="Example: RTU1 heat exchanger is cracked."></textarea>
+
+      <label>Repairs made</label>
+      <textarea id="repairsMade" placeholder="Example: Confirmed failure and shut unit down."></textarea>
+
+      <label>Parts used</label>
+      <textarea id="serviceUsed" placeholder="Example: two 4l190 belts and one 16 by 25 by one"></textarea>
+
+      <label>Cost of parts</label>
+      <input id="serviceCost" placeholder="Example: $23">
+
+      <label>Parts needed for repair quote</label>
+      <textarea id="quoteParts" placeholder="Example: 1 GAS VALVE and 1 IGNITER"></textarea>
+
+      <label>Labor for repair quote</label>
+      <input id="quoteLabor" placeholder="Example: 3 HOURS">
+
+      <label>Recommendations / Next steps</label>
+      <textarea id="recommendations" placeholder="Example: Replace RTU1 due to cracked heat exchanger."></textarea>
+    </div>
+
+    <div id="quoteSection" class="hidden">
+      <label>Equipment Repaired</label>
+      <textarea id="quoteEquip" placeholder="Example: RTU1 on the roof..."></textarea>
+      
+      <div class="pillbar">
+        <button id="addQuoteRTU" type="button">+ RTU</button>
+        <button id="addQuoteF" type="button">+ Furnace</button>
+        <button id="addQuoteUH" type="button">+ Unit Heater</button>
+        <button id="addQuoteRH" type="button">+ Radiant Heater</button>
+        <button id="addQuoteEF" type="button">+ Exhaust Fan</button>
+        <button id="addQuoteMUA" type="button">+ MUA</button>
+      </div>
+
+      <label>Original Issue Resolved</label>
+      <textarea id="quoteIssue" placeholder="Example: Completing quoted repair for bad inducer motor."></textarea>
+
+      <label>Repairs Completed</label>
+      <textarea id="quoteRepairs" placeholder="Example: Removed old inducer motor and installed new OEM motor. Cleaned pressure switch tubing."></textarea>
+
+      <label>System Testing & Verification</label>
+      <textarea id="quoteTesting" placeholder="Example: Cycled heat multiple times, verified proper draft pressure and ignition sequence. Unit is running normally."></textarea>
+
+      <label>Further Recommendations</label>
+      <textarea id="quoteRecs" placeholder="Example: No further issues found at this time."></textarea>
+    </div>
+
+    <div style="background: #fdfaf2; padding: 15px; border-radius: 6px; margin-bottom: 15px; border: 1px solid #c89b53;">
+      <label style="margin-top: 0; color: #b58945;">Final Job Status</label>
+      <select id="finalJobStatus">
+        <option value="Completed">Completed (Ready to Bill)</option>
+        <option value="Needs Repair Quote">Needs Repair Quote</option>
+        <option value="Parts on Order">Parts on Order / Return Trip Needed</option>
+        <option value="Dispatched">Still In Progress (Coming back later)</option>
+      </select>
+    </div>
+
+    <button id="generate" type="button" style="background: #27ae60; color: #fff; border-color: #2ecc71; font-weight: bold; font-size: 1.1em;">Complete Ticket & Sync</button>
+    <button id="clear" type="button">Clear Form</button>
+
+    <div id="successCard" class="hidden" style="background: #e8f8f5; border: 1px solid #2ecc71; border-radius: 8px; padding: 20px; margin-top: 20px; text-align: center;">
+      <h3 style="color: #27ae60; margin-top: 0; font-size: 22px;">✓ Ticket Synced</h3>
+      <p style="color: #555; font-size: 15px; margin-bottom: 0;">The office has received your report and the dispatch board has been updated.</p>
+    </div>
+
+  </div> ```
+
+Make sure you follow up with the JavaScript changes from my previous message so the buttons and success cards actually work!
 
 <div id="historySection" class="hidden">
   <div class="history-box">
